@@ -1,0 +1,1809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1018" />
+<link rel="manifest" href="./manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="owlplanner" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>owlplanner — EDC Vegas 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1018;
+    --surface: #181a28;
+    --surface-2: #21243a;
+    --border: #2d3050;
+    --text: #f5f3ee;
+    --muted: #8a8ca8;
+    --accent: #ff2e8a;
+    --accent-2: #00d4ff;
+    --warn: #ffd166;
+    --kineticFIELD: #ff5aa0;
+    --circuitGROUNDS: #2cc8ff;
+    --neonGARDEN: #5cff3a;
+    --cosmicMEADOW: #d39bff;
+    --bassPOD: #2dd4c0;
+    --wasteLAND: #ff5560;
+    --quantumVALLEY: #8b8dff;
+    --stereoBLOOM: #ff95dd;
+    --bionicJUNGLE: #a3e635;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  header {
+    padding: 18px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sub {
+    color: var(--text);
+    opacity: 0.75;
+    font-size: 14.5px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    letter-spacing: 0.1px;
+  }
+  .year-tag {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .row {
+    display: flex; gap: 8px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .nights {
+    display: flex; gap: 6px;
+  }
+  .night-btn, .mode-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .night-btn.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    color: white;
+    font-weight: 600;
+  }
+  .help-btn {
+    margin-left: auto;
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .help-btn:hover { color: var(--text); border-color: var(--paper-dim, var(--muted)); }
+
+  .mode-toggle {
+    margin-left: auto;
+    display: flex; gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .mode-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .mode-btn.active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  main {
+    padding: 16px;
+    padding-bottom: 100px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .bucket {
+    margin-bottom: 18px;
+  }
+  .bucket-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+  .bucket-name {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text);
+  }
+  .bucket-time {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .picks {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .pick {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: background 0.15s ease;
+    cursor: pointer;
+  }
+  .pick:hover { background: var(--surface-2); }
+  .pick-artist {
+    flex: 1;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .pick-stage {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 600;
+    opacity: 0.85;
+    white-space: nowrap;
+  }
+  .pick-stage .stage-part { font-weight: 700; }
+  .pick-stage .sep { opacity: 0.4; margin: 0 4px; }
+  .pick-stage .time-part { font-weight: 500; opacity: 0.75; font-variant-numeric: tabular-nums; }
+  .pick-del {
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    padding: 4px 6px; font-size: 16px;
+    line-height: 1;
+    border-radius: 4px;
+  }
+  .pick-del:hover { color: var(--accent); background: rgba(255,122,89,0.12); }
+  .empty {
+    color: var(--muted);
+    font-size: 13px;
+    padding: 12px 4px;
+    font-style: italic;
+  }
+  .conflict {
+    color: var(--warn);
+    font-size: 11px;
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+  .welcome-banner {
+    background: linear-gradient(135deg, rgba(255,46,138,0.12), rgba(0,212,255,0.10));
+    border: 1px solid rgba(255,46,138,0.25);
+    padding: 14px 36px 14px 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text);
+    position: relative;
+  }
+  .welcome-banner b { color: var(--accent); }
+  .welcome-banner-close {
+    position: absolute;
+    top: 6px; right: 8px;
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-family: inherit;
+  }
+  .welcome-banner-close:hover { color: var(--text); }
+
+  /* tab nav */
+  nav.tabs {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(14, 16, 24, 0.78);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    z-index: 15;
+  }
+  .tab {
+    background: none; border: none;
+    color: var(--muted);
+    padding: 9px 22px;
+    font-size: 13.5px;
+    letter-spacing: 0.6px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: color 180ms ease, background 180ms ease;
+  }
+  .tab.active {
+    color: var(--text);
+    background: rgba(255, 46, 138, 0.12);
+  }
+  .tab .ico { display: none; }
+
+  /* stages view */
+  .stage-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .stage-card h3 { margin: 0 0 4px; font-size: 15px; }
+  .stage-card .genre { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .stage-card .desc { font-size: 13px; line-height: 1.5; color: var(--text); opacity: 0.9; }
+
+  /* map view */
+  .map-wrap { text-align: center; }
+  .map-wrap img {
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .map-empty {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .map-empty p { margin: 0 0 12px; font-size: 13px; }
+  .upload-btn {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .upload-btn input { display: none; }
+  .map-actions {
+    margin-top: 10px;
+    display: flex; gap: 8px; justify-content: center;
+  }
+  .link-btn {
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px 8px;
+    font-family: inherit;
+  }
+  .link-btn:hover { color: var(--accent); }
+
+  .fab {
+    position: fixed;
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    right: 18px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    border: none;
+    font-size: 22px;
+    font-weight: 300;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(255, 46, 138, 0.28);
+    z-index: 20;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding-bottom: 2px;
+  }
+  .fab:active { transform: scale(0.93); }
+
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: flex-end; justify-content: center;
+    z-index: 30;
+    backdrop-filter: blur(4px);
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 480px;
+    border-top: 1px solid var(--border);
+  }
+  @media (min-width: 600px) {
+    .modal-bg { align-items: center; }
+    .modal { border-radius: 18px; }
+  }
+  .modal { position: relative; }
+  .modal h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding-right: 28px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-weight: 300;
+    border-radius: 50%;
+  }
+  .modal-close:hover { color: var(--text); background: var(--surface-2); }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 16px;        /* 16px+ prevents iOS auto-zoom on focus */
+    font-family: inherit;
+  }
+  .input-wrap { position: relative; }
+  .input-wrap input { padding-right: 32px; }
+  .input-clear {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 10px;
+    font-family: inherit;
+    display: none;
+  }
+  .input-clear.show { display: block; }
+  .input-clear:hover { color: var(--text); }
+  .input-clear:active { color: var(--accent); }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent-2);
+  }
+  /* day chips */
+  .day-chips {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  /* shared chip with stacked label — unified spacing across day, time, stage */
+  .day-chip, .time-chip, .stage-opt {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 6px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    line-height: 1;
+    box-sizing: border-box;
+  }
+  .day-chip .name, .time-chip .name, .stage-opt .so-name {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1.05;
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    text-transform: none;
+    flex: 0 0 auto;
+  }
+  .day-chip .sub, .time-chip .range, .stage-opt .so-genre {
+    display: block;
+    font-size: 9.5px;
+    opacity: 0.6;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    text-transform: lowercase;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+    flex: 0 0 auto;
+  }
+  .day-chip.active, .time-chip.active {
+    border-color: var(--accent);
+    background: rgba(255, 46, 138, 0.14);
+    color: var(--text);
+  }
+  .day-chip.active .sub, .time-chip.active .range {
+    opacity: 0.85;
+    color: var(--accent);
+  }
+  .time-chips {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+  }
+
+  /* searchable artist results */
+  .artist-results {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    display: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .artist-results.show { display: block; }
+  .artist-result {
+    padding: 7px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    line-height: 1.25;
+  }
+  .artist-result:last-child { border-bottom: none; }
+  .artist-result:hover, .artist-result.active {
+    background: var(--surface-2);
+  }
+  .artist-result .name { flex: 1; font-weight: 500; }
+  .artist-result .name mark {
+    background: rgba(255,180,84,0.25);
+    color: var(--text);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .artist-result .stage-tag {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    opacity: 0.85;
+  }
+  .artist-result .stage-tag .day-part { opacity: 0.6; font-weight: 500; }
+  .artist-result .stage-tag .time-part { opacity: 0.85; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .artist-result .stage-tag .sep { opacity: 0.4; margin: 0 4px; }
+  .artist-result .stage-tag .stage-part { font-weight: 600; }
+
+  /* Timeline grid view */
+  .timeline {
+    position: relative;
+    margin: 6px 0;
+  }
+  .timeline-hour {
+    position: absolute;
+    left: 0;
+    width: 44px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    padding-right: 8px;
+    line-height: 1;
+    transform: translateY(-50%);
+    opacity: 0.75;
+  }
+  .timeline-line {
+    position: absolute;
+    left: 52px;
+    right: 0;
+    height: 1px;
+    background: var(--border);
+    opacity: 0.25;
+  }
+  .timeline-blocks {
+    position: absolute;
+    left: 52px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+  .timeline-block {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 4px;
+    padding: 2px 5px;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-height: 16px;
+  }
+  .timeline-block .b-artist {
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+  .timeline-block .b-meta {
+    font-size: 11px;
+    opacity: 0.75;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .timeline-block .b-stage { font-weight: 700; }
+  .timeline-block .b-del {
+    position: absolute;
+    top: 0px; right: 1px;
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0.45;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+  .timeline-block .b-del:hover { opacity: 1; color: var(--accent); }
+
+  /* Help page — full content sections */
+  .help-page { padding: 4px 0 16px; }
+  .help-page h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .help-page .tagline {
+    color: var(--muted);
+    font-size: 13.5px;
+    margin: 0 0 22px;
+  }
+  .help-page h2 {
+    margin: 22px 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+    opacity: 0.9;
+  }
+  .help-page h2:first-child { margin-top: 4px; }
+  .help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .help-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .help-list .help-ico {
+    font-size: 17px;
+    flex-shrink: 0;
+    width: 26px;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .help-list b {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .help-list p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .help-list p b {
+    display: inline;
+    font-weight: 600;
+    color: var(--text);
+    opacity: 0.95;
+  }
+  .connect-intro {
+    margin: 0 0 26px;
+    padding: 16px 16px 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,46,138,0.10), rgba(0,212,255,0.08));
+    border: 1px solid rgba(255,46,138,0.18);
+    text-align: center;
+  }
+  .connect-intro p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text);
+    opacity: 0.95;
+  }
+  .connect-intro .ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.2px;
+  }
+
+  .signoff {
+    margin-top: 32px;
+    text-align: center;
+  }
+  .signoff .brand {
+    font-size: 14px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.3px;
+  }
+  .plur-line {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--text);
+    opacity: 0.7;
+  }
+  .plur-line .dot {
+    margin: 0 6px;
+    color: var(--muted);
+    background: none;
+    -webkit-text-fill-color: var(--muted);
+    opacity: 0.5;
+    font-weight: 400;
+  }
+  .plur-tag {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 8px 0 0;
+    font-style: italic;
+  }
+  .byline {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 30px 0 8px;
+    letter-spacing: 0.2px;
+  }
+  .copyright-bottom {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+    opacity: 0.8;
+    margin: 0;
+    line-height: 1.45;
+  }
+  .help-credit {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .credit-top {
+    margin: 0 0 18px;
+  }
+  .credit-top .line1 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+    opacity: 0.9;
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .ig-heading .ig-text {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .ig-text {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .credit-top .line2 {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+  .connect-note {
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.55;
+    font-style: italic;
+    max-width: 38ch;
+  }
+  .help-credit .by {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .help-credit .author {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .help-credit .ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .help-credit .copyright {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 14px;
+    opacity: 0.7;
+  }
+
+  /* Undo toast for accidental deletes */
+  .undo-toast {
+    position: fixed;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 6px 9px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    max-width: calc(100vw - 32px);
+  }
+  .undo-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .undo-toast b {
+    font-weight: 700;
+    margin: 0 4px;
+    max-width: 14ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  .undo-toast .undo-btn {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+    margin-left: 6px;
+  }
+
+  .pick-overlap-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--warn);
+    background: rgba(255, 209, 102, 0.10);
+    border: 1px solid rgba(255, 209, 102, 0.25);
+    border-radius: 999px;
+    padding: 2px 7px 2px 6px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    margin-left: 4px;
+  }
+  .artist-result-empty {
+    padding: 14px 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+  }
+
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+  /* stage-specific overrides on top of the shared chip base */
+  .stage-opt {
+    text-shadow: 0 0 10px color-mix(in oklab, currentColor 35%, transparent);
+  }
+  .stage-opt .so-genre {
+    text-shadow: none;
+  }
+  .stage-opt input { display: none; }
+  .stage-opt.selected .so-genre { opacity: 0.85; }
+  .modal-actions {
+    display: flex; gap: 8px;
+    margin-top: 16px;
+    justify-content: center;
+  }
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.2px;
+  }
+  .btn-primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    color: white;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>owlplanner</h1>
+  <div class="sub">EDC Las Vegas <span class="year-tag">2026</span> · May 15–17</div>
+  <div class="row" id="planControls">
+    <div class="nights">
+      <button class="night-btn active" data-night="1">Fri</button>
+      <button class="night-btn" data-night="2">Sat</button>
+      <button class="night-btn" data-night="3">Sun</button>
+    </div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<button class="fab" id="addBtn" aria-label="Add artist">+</button>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="plan">Plan</button>
+  <button class="tab" data-tab="map">Map</button>
+  <button class="tab" data-tab="help">Help</button>
+</nav>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="cancelBtn" aria-label="Close">×</button>
+    <h2 id="modalTitle" style="display:none">Add artist</h2>
+    <div class="field" style="margin-top:6px">
+      <label for="artistInput">Artist</label>
+      <div class="input-wrap">
+        <input id="artistInput" type="text" placeholder="search or type a name…" autocomplete="off" />
+        <button type="button" id="clearArtistBtn" class="input-clear" aria-label="Clear">×</button>
+      </div>
+      <div class="artist-results" id="artistResults"></div>
+    </div>
+    <div class="field">
+      <label>Day</label>
+      <div class="day-chips" id="dayChips"></div>
+    </div>
+    <div class="field">
+      <label>Stage</label>
+      <div class="stage-grid" id="stageGrid"></div>
+    </div>
+    <div class="field">
+      <label>Set time</label>
+      <div class="time-chips" id="timeChips"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveBtn">Add to schedule</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STAGES = [
+    { id: 'kineticFIELD',    color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners',      short: 'mainstage / edm' },
+    { id: 'circuitGROUNDS',  color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',           short: 'techno / house / bass' },
+    { id: 'cosmicMEADOW',    color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',             short: 'bass / mixed / alt' },
+    { id: 'neonGARDEN',      color: '#5cff3a', genre: 'Techno (some house early)',                       short: 'techno / house' },
+    { id: 'stereoBLOOM',     color: '#ff95dd', genre: 'House + tech house, groove-leaning',              short: 'house / tech house' },
+    { id: 'bionicJUNGLE',    color: '#a3e635', genre: 'House + techno + disco / funk',                   short: 'house / techno / disco' },
+    { id: 'quantumVALLEY',   color: '#8b8dff', genre: 'Trance + progressive + melodic',                  short: 'trance / prog / melodic' },
+    { id: 'bassPOD',         color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',              short: 'dubstep / d&b / riddim' },
+    { id: 'wasteLAND',       color: '#ff5560', genre: 'Hardstyle / hardcore',                            short: 'hardstyle / hardcore' },
+  ];
+  const BUCKETS = [
+    { id: 'opener',  name: 'Opener',  time: '7–9pm' },
+    { id: 'mid',     name: 'Mid',     time: '9–11pm' },
+    { id: 'peak',    name: 'Peak',    time: '11pm–2am' },
+    { id: 'late',    name: 'Late',    time: '2–4am' },
+    { id: 'sunrise', name: 'Sunrise', time: '4–5:30am' },
+  ];
+
+  // Flat lineup: each entry { name, day, stage }. Loaded from assets/artists.json.
+  let ARTISTS = [];
+  function loadArtists() {
+    return fetch('assets/artists.json')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { ARTISTS = Array.isArray(data) ? data : []; })
+      .catch(() => { ARTISTS = []; });
+  }
+  function findStageForArtist(night, artistName) {
+    const target = artistName.trim().toLowerCase();
+    const hit = ARTISTS.find(a => a.day === night && a.name.toLowerCase() === target);
+    return hit ? hit.stage : null;
+  }
+  function artistsForNight(night, stageId) {
+    return ARTISTS
+      .filter(a => a.day === night && (!stageId || a.stage === stageId))
+      .map(a => a.name);
+  }
+
+  const KEY = 'edcplanner-v1';
+  const state = Object.assign({
+    night: 1,
+    mode: 'assumed',
+    picks: { 1: [], 2: [], 3: [] },
+    tab: 'plan',
+    map: null,
+    welcomeDismissed: false,
+  }, load() || {});
+  let editingId = null;
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true; // iOS
+  }
+  function isMobile() {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  }
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }
+  }
+  function save() {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+  function stage(id) { return STAGES.find(s => s.id === id) || STAGES[0]; }
+
+  // Time helpers — minutes counted from 7pm (festival start). 0 = 7pm, 630 = 5:30am.
+  function formatMins(m) {
+    const h24 = Math.floor((m / 60 + 19) % 24);
+    const min = m % 60;
+    let h12 = h24 % 12;
+    if (h12 === 0) h12 = 12;
+    const ampm = h24 < 12 ? 'am' : 'pm';
+    return `${h12}:${String(min).padStart(2, '0')}${ampm}`;
+  }
+  // Parse "23:30" / "11:30pm" / "1:00am" → minutes from 7pm. null if invalid/placeholder.
+  function timeStrToMins(str) {
+    if (!str) return null;
+    const s = String(str).trim().toLowerCase();
+    let h = null, min = 0;
+    let m = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (m) { h = parseInt(m[1], 10); min = parseInt(m[2], 10); }
+    else {
+      m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+      if (!m) return null;
+      h = parseInt(m[1], 10);
+      min = m[2] ? parseInt(m[2], 10) : 0;
+      if (m[3] === 'pm' && h !== 12) h += 12;
+      if (m[3] === 'am' && h === 12) h = 0;
+    }
+    if (h >= 19) return (h - 19) * 60 + min;     // 7pm–11:59pm
+    if (h < 7)   return (h + 5) * 60 + min;      // 12am–6:59am
+    return null;
+  }
+  function bucketFromMinutes(mins) {
+    if (mins == null) return 'peak';
+    if (mins < 120) return 'opener';   // 7–9pm
+    if (mins < 240) return 'mid';      // 9–11pm
+    if (mins < 420) return 'peak';     // 11pm–2am
+    if (mins < 540) return 'late';     // 2–4am
+    return 'sunrise';                  // 4–5:30am
+  }
+  const TIME_OPTIONS = (() => {
+    const opts = [];
+    for (let m = 0; m <= 630; m += 15) opts.push({ mins: m, label: formatMins(m) });
+    return opts;
+  })();
+  function escape(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  const main = document.getElementById('main');
+  const planControls = document.getElementById('planControls');
+  const addBtn = document.getElementById('addBtn');
+
+  function render() {
+    document.querySelectorAll('.tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === state.tab);
+    });
+
+    if (state.tab === 'map') {
+      planControls.style.display = 'none';
+      addBtn.classList.add('hidden');
+      renderMap();
+      return;
+    }
+    if (state.tab === 'help') {
+      planControls.style.display = 'none';
+      addBtn.classList.add('hidden');
+      renderHelp();
+      return;
+    }
+    planControls.style.display = '';
+    addBtn.classList.remove('hidden');
+    renderPlan();
+  }
+
+  function renderHelp() {
+    main.innerHTML = `
+      <div class="help-page">
+
+        <h2>how to use</h2>
+        <ul class="help-list">
+          <li><span class="help-ico">📱</span><div><b>Best on phone</b><p>Share → <b>Add to Home Screen</b> for offline use at the festival.</p></div></li>
+          <li><span class="help-ico">＋</span><div><b>Build your night</b><p>Tap + to search a DJ. Stage and time auto-fill.</p></div></li>
+          <li><span class="help-ico">⌖</span><div><b>Filter chips</b><p>Tap day, stage, or time slot. Tap again to clear.</p></div></li>
+          <li><span class="help-ico">🗺</span><div><b>Map tab</b><p>Full Speedway grounds. Pinch to zoom.</p></div></li>
+          <li><span class="help-ico">💾</span><div><b>On this device</b><p>Picks live in your browser. Not synced across devices.</p></div></li>
+        </ul>
+
+        <h2>first-timer tips</h2>
+        <ul class="help-list">
+          <li><span class="help-ico">🎯</span><div><b>Anchor 2 must-sees per night</b><p>Plan around 2 picks. The rest by feel.</p></div></li>
+          <li><span class="help-ico">🚶</span><div><b>10–15 min between stages</b><p>The Speedway is huge. Buffer for walks, water, bathroom.</p></div></li>
+          <li><span class="help-ico">🌅</span><div><b>Arrive ~9pm, not 7pm</b><p>Lineup heats up at 9–10. Save your legs.</p></div></li>
+          <li><span class="help-ico">🍔</span><div><b>Sit + eat 1–2am</b><p>Non-negotiable. Skip and you crash by 3.</p></div></li>
+        </ul>
+
+        <div class="byline">
+          <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a> made this 🦉  ·  catch me at EDC
+        </div>
+        <p class="copyright-bottom">© 2026 · Hung Pham · Personal project, not affiliated with Insomniac or EDC</p>
+      </div>
+    `;
+  }
+
+  function renderMap() {
+    main.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'map-wrap';
+    const mapSrc = state.map || './assets/map.png';
+    const img = document.createElement('img');
+    img.src = mapSrc;
+    img.alt = 'EDC map';
+    img.onerror = () => {
+      wrap.innerHTML = '';
+      renderMapEmpty(wrap);
+    };
+    wrap.appendChild(img);
+    main.appendChild(wrap);
+  }
+  function renderMapEmpty(wrap) {
+    const empty = document.createElement('div');
+    empty.className = 'map-empty';
+    empty.innerHTML = `
+      <p>Upload the EDC map (image). It saves on this device — works offline after.</p>
+      <label class="upload-btn">
+        Choose image
+        <input type="file" accept="image/*" />
+      </label>
+    `;
+    empty.querySelector('input').onchange = handleMapUpload;
+    wrap.appendChild(empty);
+  }
+
+  function handleMapUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const prev = state.map;
+      state.map = reader.result;
+      try { save(); render(); }
+      catch (err) {
+        state.map = prev;
+        alert('Image too large to store. Try a smaller image (under ~4 MB).');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderPlan() {
+    document.querySelectorAll('.night-btn').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.night) === state.night);
+    });
+
+    const picks = state.picks[state.night] || [];
+    main.innerHTML = '';
+    main.appendChild(renderTimeline(picks));
+  }
+
+  // Pixels per minute on the timeline. 1.7 = ~102px/hour, full night ~1080px.
+  const TIMELINE_PPM = 1.7;
+  const HOUR_LABELS = [
+    { mins: 0,   label: '7 pm' },
+    { mins: 60,  label: '8 pm' },
+    { mins: 120, label: '9 pm' },
+    { mins: 180, label: '10 pm' },
+    { mins: 240, label: '11 pm' },
+    { mins: 300, label: '12 am' },
+    { mins: 360, label: '1 am' },
+    { mins: 420, label: '2 am' },
+    { mins: 480, label: '3 am' },
+    { mins: 540, label: '4 am' },
+    { mins: 600, label: '5 am' },
+    { mins: 660, label: '6 am' },
+  ];
+
+  // Assign each pick a lane (column) within its overlap cluster so blocks split horizontally.
+  function layoutLanes(picks) {
+    const valid = picks.filter(p =>
+      typeof p.startMins === 'number' && typeof p.endMins === 'number'
+    ).slice().sort((a, b) => a.startMins - b.startMins);
+
+    const layouts = []; // { pick, lane, totalLanes }
+    let i = 0;
+    while (i < valid.length) {
+      // Build cluster of overlapping picks starting at i
+      const cluster = [valid[i]];
+      let clusterEnd = valid[i].endMins;
+      let j = i + 1;
+      while (j < valid.length && valid[j].startMins < clusterEnd) {
+        cluster.push(valid[j]);
+        clusterEnd = Math.max(clusterEnd, valid[j].endMins);
+        j++;
+      }
+      // Within cluster, greedy lane assignment
+      const lanes = []; // lane index → latest endMins occupying that lane
+      const clusterLayout = [];
+      for (const p of cluster) {
+        let lane = lanes.findIndex(end => end <= p.startMins);
+        if (lane === -1) { lane = lanes.length; lanes.push(p.endMins); }
+        else { lanes[lane] = p.endMins; }
+        clusterLayout.push({ pick: p, lane });
+      }
+      const total = lanes.length;
+      for (const c of clusterLayout) layouts.push({ ...c, totalLanes: total });
+      i = j;
+    }
+    return layouts;
+  }
+
+  function renderTimeline(picks) {
+    const wrap = document.createElement('div');
+    wrap.className = 'timeline';
+    const totalHeight = 660 * TIMELINE_PPM + 12;
+    wrap.style.height = totalHeight + 'px';
+
+    // Hour labels + grid lines
+    HOUR_LABELS.forEach(h => {
+      const top = h.mins * TIMELINE_PPM;
+      const lbl = document.createElement('div');
+      lbl.className = 'timeline-hour';
+      lbl.style.top = top + 'px';
+      lbl.textContent = h.label;
+      wrap.appendChild(lbl);
+      const line = document.createElement('div');
+      line.className = 'timeline-line';
+      line.style.top = top + 'px';
+      wrap.appendChild(line);
+    });
+
+    // Blocks live in a wrapper that starts after the hour gutter
+    const blocksArea = document.createElement('div');
+    blocksArea.className = 'timeline-blocks';
+    wrap.appendChild(blocksArea);
+
+    // Pick blocks with lane layout
+    const layouts = layoutLanes(picks);
+    layouts.forEach(({ pick, lane, totalLanes }) => {
+      const s = stage(pick.stage);
+      const top = pick.startMins * TIMELINE_PPM;
+      const height = Math.max(28, (pick.endMins - pick.startMins) * TIMELINE_PPM - 2);
+      const widthPct = 100 / totalLanes;
+      const leftPct = lane * widthPct;
+
+      const block = document.createElement('div');
+      block.className = 'timeline-block';
+      block.style.top = top + 'px';
+      block.style.height = height + 'px';
+      block.style.left = `calc(${leftPct}% + ${leftPct > 0 ? 1 : 0}px)`;
+      block.style.width = `calc(${widthPct}% - 3px)`;
+      block.style.borderLeftColor = s.color;
+
+      const timeText = `${formatMins(pick.startMins)}–${formatMins(pick.endMins)}`;
+      block.innerHTML = `
+        <div class="b-artist">${escape(pick.artist)}</div>
+        <div class="b-meta"><span class="b-stage" style="color:${s.color}">${s.id}</span> · ${escape(timeText)}</div>
+        <button class="b-del" aria-label="Remove">×</button>
+      `;
+      block.querySelector('.b-del').onclick = () => deletePick(pick.id);
+      blocksArea.appendChild(block);
+    });
+    return wrap;
+  }
+
+  // Returns {pickId: [otherArtistName, ...]} of picks whose times overlap on different stages.
+  function computeOverlaps(picks) {
+    const out = {};
+    const valid = picks.filter(p =>
+      typeof p.startMins === 'number' && typeof p.endMins === 'number'
+    );
+    for (let i = 0; i < valid.length; i++) {
+      for (let j = i + 1; j < valid.length; j++) {
+        const a = valid[i], b = valid[j];
+        if (a.stage === b.stage) continue;
+        if (a.startMins < b.endMins && a.endMins > b.startMins) {
+          (out[a.id] = out[a.id] || []).push(b.artist);
+          (out[b.id] = out[b.id] || []).push(a.artist);
+        }
+      }
+    }
+    return out;
+  }
+
+  function renderPick(p, overlapCount = 0) {
+    const s = stage(p.stage);
+    let timeText;
+    if (typeof p.startMins === 'number' && typeof p.endMins === 'number') {
+      timeText = `${formatMins(p.startMins)} — ${formatMins(p.endMins)}`;
+    } else {
+      const bucket = BUCKETS.find(b => b.id === p.bucket) || BUCKETS[2];
+      timeText = bucket.time;
+    }
+    const el = document.createElement('div');
+    el.className = 'pick';
+    el.style.borderLeftColor = s.color;
+    const overlapBadge = overlapCount > 0
+      ? `<span class="pick-overlap-badge" title="overlaps with ${overlapCount} other pick${overlapCount === 1 ? '' : 's'}">↻${overlapCount}</span>`
+      : '';
+    el.innerHTML = `
+      <div class="pick-artist">${escape(p.artist)}</div>
+      <div class="pick-stage">
+        <span class="stage-part" style="color:${s.color}">${s.id}</span><span class="sep">·</span><span class="time-part">${escape(timeText)}</span>${overlapBadge}
+      </div>
+      <button class="pick-del" aria-label="Remove">×</button>
+    `;
+    el.querySelector('.pick-del').onclick = (e) => {
+      e.stopPropagation();
+      state.picks[state.night] = state.picks[state.night].filter(x => x.id !== p.id);
+      save(); render();
+    };
+    el.onclick = (e) => {
+      if (e.target.closest('.pick-del')) return;
+      openModal(p);
+    };
+    return el;
+  }
+
+  // modal
+  const modal = document.getElementById('modal');
+  const artistInput = document.getElementById('artistInput');
+  const stageGrid = document.getElementById('stageGrid');
+  const timeChips = document.getElementById('timeChips');
+  let pickedStage = null;
+  let selectedTimeBucket = 'any'; // 'any' | bucket id
+  let selectedDay = null;          // null = any day, 1|2|3 = specific night
+
+  const DAY_LABELS = [
+    { id: 1, name: 'Friday',   sub: 'May 15' },
+    { id: 2, name: 'Saturday', sub: 'May 16' },
+    { id: 3, name: 'Sunday',   sub: 'May 17' },
+  ];
+
+  const dayChips = document.getElementById('dayChips');
+  // If the typed artist doesn't fit the current filters, clear the input so
+  // the search list isn't stale. (Day, stage, or time changed under them.)
+  function clearArtistIfConflicting() {
+    const v = artistInput.value.trim().toLowerCase();
+    if (!v) return;
+    const win = getTimeWindowFilter();
+    const stillFits = ARTISTS.some(a =>
+      a.name.toLowerCase() === v &&
+      (selectedDay == null || a.day === selectedDay) &&
+      (!pickedStage || a.stage === pickedStage) &&
+      (!win || (() => {
+        const sm = timeStrToMins(a.start), em = timeStrToMins(a.end);
+        return sm == null || em == null || (sm < win.end && em > win.start);
+      })())
+    );
+    if (!stillFits) {
+      artistInput.value = '';
+      selectedArtistTime = null;
+      selectedArtistDay = null;
+      syncClearBtn();
+    }
+  }
+
+  function renderDayChips() {
+    dayChips.innerHTML = '';
+    DAY_LABELS.forEach(d => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'day-chip' + (d.id === selectedDay ? ' active' : '');
+      btn.innerHTML = `<span class="name">${d.name}</span><span class="sub">${d.sub}</span>`;
+      btn.onclick = () => {
+        selectedDay = (selectedDay === d.id && d.id !== null) ? null : d.id;
+        renderDayChips();
+        clearArtistIfConflicting();
+        renderArtistResults(artistInput.value, pickedStage);
+      };
+      dayChips.appendChild(btn);
+    });
+  }
+
+  // Bucket → minute window from 7pm
+  const BUCKET_RANGE = {
+    opener:  [0,   120],
+    mid:     [120, 240],
+    peak:    [240, 420],
+    late:    [420, 540],
+    sunrise: [540, 630],
+  };
+
+  function renderTimeChips() {
+    timeChips.innerHTML = '';
+    BUCKETS.forEach(b => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'time-chip' + (b.id === selectedTimeBucket ? ' active' : '');
+      btn.innerHTML = `<span class="name">${b.name}</span><span class="range">${b.time}</span>`;
+      btn.onclick = () => {
+        selectedTimeBucket = (selectedTimeBucket === b.id) ? 'any' : b.id;
+        renderTimeChips();
+        clearArtistIfConflicting();
+        renderArtistResults(artistInput.value, pickedStage);
+      };
+      timeChips.appendChild(btn);
+    });
+  }
+
+  function renderStageGrid() {
+    stageGrid.innerHTML = '';
+    STAGES.forEach(s => {
+      const lbl = document.createElement('label');
+      const isSel = s.id === pickedStage;
+      lbl.className = 'stage-opt' + (isSel ? ' selected' : '');
+      lbl.style.color = s.color;
+      lbl.title = `${s.id} · ${s.genre}`;
+      if (isSel) {
+        lbl.style.borderColor = s.color;
+        lbl.style.background = s.color + '1f';
+      }
+      lbl.innerHTML = `
+        <span class="so-name">${escape(s.id)}</span>
+        <span class="so-genre">${escape(s.short)}</span>
+        <input type="radio" name="stage" value="${s.id}" ${isSel ? 'checked' : ''} />
+      `;
+      lbl.onclick = (e) => {
+        e.preventDefault();
+        pickedStage = (pickedStage === s.id) ? null : s.id;
+        renderStageGrid();
+        clearArtistIfConflicting();
+        renderArtistResults(artistInput.value, pickedStage);
+      };
+      stageGrid.appendChild(lbl);
+    });
+  }
+
+  const clearArtistBtn = document.getElementById('clearArtistBtn');
+  function syncClearBtn() {
+    clearArtistBtn.classList.toggle('show', artistInput.value.trim().length > 0);
+  }
+
+  // Live search as user types
+  artistInput.addEventListener('input', (e) => {
+    syncClearBtn();
+    renderArtistResults(e.target.value, pickedStage);
+  });
+  artistInput.addEventListener('focus', () => {
+    syncClearBtn();
+    renderArtistResults(artistInput.value, pickedStage);
+  });
+  clearArtistBtn.addEventListener('click', () => {
+    artistInput.value = '';
+    selectedArtistTime = null;
+    syncClearBtn();
+    renderArtistResults('', pickedStage);
+    artistInput.focus();
+  });
+
+  const artistResults = document.getElementById('artistResults');
+
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function highlight(name, query) {
+    if (!query) return escape(name);
+    const q = escRe(query.trim());
+    if (!q) return escape(name);
+    const re = new RegExp(`(${q})`, 'ig');
+    return escape(name).replace(re, '<mark>$1</mark>');
+  }
+
+  function getTimeWindowFilter() {
+    if (selectedTimeBucket === 'any') return null;
+    const r = BUCKET_RANGE[selectedTimeBucket];
+    return r ? { start: r[0], end: r[1] } : null;
+  }
+
+  function renderArtistResults(query, stageFilter) {
+    const q = (query || '').trim().toLowerCase();
+    const win = q ? null : getTimeWindowFilter(); // search-by-name bypasses time filter
+    const all = ARTISTS
+      .filter(a => selectedDay == null || a.day === selectedDay)
+      .filter(a => !stageFilter || a.stage === stageFilter)
+      .filter(a => {
+        if (!win) return true;
+        const aStart = timeStrToMins(a.start);
+        const aEnd = timeStrToMins(a.end);
+        if (aStart == null || aEnd == null) return true;
+        return aStart < win.end && aEnd > win.start;
+      })
+      .slice()
+      .sort((a, b) => {
+        const sa = timeStrToMins(a.start) ?? 0;
+        const sb = timeStrToMins(b.start) ?? 0;
+        return sa - sb || a.name.localeCompare(b.name);
+      });
+    const filtered = q
+      ? all.filter(a => a.name.toLowerCase().includes(q))
+      : all;
+
+    artistResults.innerHTML = '';
+    if (filtered.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'artist-result-empty';
+      if (q) {
+        e.textContent = `No DJ found — Save adds "${query.trim()}" as a custom pick.`;
+      } else if (win || stageFilter) {
+        const bits = [];
+        if (stageFilter) bits.push(`stage ${stageFilter}`);
+        if (win) bits.push('that time window');
+        e.textContent = `No DJs in ${bits.join(' + ')} on this night. Clear filters to see more.`;
+      } else {
+        e.textContent = 'No DJs in the lineup yet for this night.';
+      }
+      artistResults.appendChild(e);
+    } else {
+      const dayShort = { 1: 'Friday', 2: 'Saturday', 3: 'Sunday' };
+      filtered.slice(0, 60).forEach(a => {
+        const s = stage(a.stage);
+        const sm = timeStrToMins(a.start);
+        const startLabel = sm != null ? formatMins(sm) : '';
+        const row = document.createElement('div');
+        row.className = 'artist-result';
+        row.innerHTML = `
+          <span class="name">${highlight(a.name, query)}</span>
+          <span class="stage-tag">
+            ${startLabel ? `<span class="time-part">${startLabel}</span><span class="sep">·</span>` : ''}<span class="day-part">${dayShort[a.day] || ''}</span><span class="sep">·</span><span class="stage-part" style="color:${s.color}">${s.id}</span>
+          </span>
+        `;
+        row.onclick = () => selectArtist(a);
+        artistResults.appendChild(row);
+      });
+    }
+    artistResults.classList.add('show');
+  }
+
+  // Time of the DJ chosen from the lineup — used on save. Decoupled from the filter dropdowns.
+  let selectedArtistTime = null;
+
+  let selectedArtistDay = null;
+
+  function selectArtist(a) {
+    artistInput.value = a.name;
+    syncClearBtn();
+    artistResults.classList.remove('show');
+    if (a.stage && a.stage !== pickedStage) {
+      pickedStage = a.stage;
+      renderStageGrid();
+    }
+    if (a.day != null && a.day !== selectedDay) {
+      selectedDay = a.day;
+      renderDayChips();
+    }
+    selectedArtistDay = a.day;
+    const startMins = timeStrToMins(a.start);
+    const endMins = timeStrToMins(a.end);
+    if (startMins != null && endMins != null && endMins > startMins) {
+      const snap = (m) => Math.max(0, Math.min(630, Math.round(m / 15) * 15));
+      const snapStart = snap(startMins);
+      selectedArtistTime = { startMins: snapStart, endMins: snap(endMins) };
+      const newBucket = bucketFromMinutes(snapStart);
+      if (newBucket !== selectedTimeBucket) {
+        selectedTimeBucket = newBucket;
+        renderTimeChips();
+      }
+    } else {
+      selectedArtistTime = null;
+    }
+  }
+
+  function openModal(pick) {
+    editingId = pick ? pick.id : null;
+    document.getElementById('modalTitle').textContent = pick ? 'Edit pick' : 'Add artist';
+    artistInput.value = pick ? pick.artist : '';
+    syncClearBtn();
+    if (pick) {
+      // Editing: snap filters to this pick's context
+      pickedStage = pick.stage;
+      selectedDay = state.night;
+      selectedTimeBucket = 'any';
+      selectedArtistDay = state.night;
+      selectedArtistTime = (typeof pick.startMins === 'number' && typeof pick.endMins === 'number')
+        ? { startMins: pick.startMins, endMins: pick.endMins } : null;
+    } else {
+      // Adding: keep filter context from previous session for batch-add convenience
+      selectedArtistTime = null;
+      selectedArtistDay = null;
+    }
+    renderDayChips();
+    renderTimeChips();
+    renderStageGrid();
+    modal.classList.add('open');
+    renderArtistResults('', pickedStage);
+    setTimeout(() => artistInput.focus(), 50);
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    editingId = null;
+  }
+  function savePick() {
+    const artist = artistInput.value.trim();
+    if (!artist) { artistInput.focus(); return; }
+    // Find the artist in the lineup (across all days unless a day is filtered)
+    const lineupHit = ARTISTS.find(a =>
+      a.name.toLowerCase() === artist.toLowerCase() &&
+      (selectedDay == null || a.day === selectedDay)
+    );
+    // Where the pick lands: artist's day if known → else the day chip if set → else current night
+    const targetDay = selectedArtistDay
+      || (lineupHit ? lineupHit.day : null)
+      || selectedDay
+      || state.night;
+    const finalStage = pickedStage
+      || (lineupHit ? lineupHit.stage : null)
+      || STAGES[0].id;
+    let timeData = selectedArtistTime;
+    if (!timeData && lineupHit) {
+      const sm = timeStrToMins(lineupHit.start);
+      const em = timeStrToMins(lineupHit.end);
+      if (sm != null && em != null && em > sm) timeData = { startMins: sm, endMins: em };
+    }
+    const data = {
+      id: editingId || uid(),
+      artist,
+      stage: finalStage,
+      bucket: timeData ? bucketFromMinutes(timeData.startMins) : 'peak',
+      startMins: timeData ? timeData.startMins : null,
+      endMins: timeData ? timeData.endMins : null,
+    };
+    if (!state.picks[targetDay]) state.picks[targetDay] = [];
+    const list = state.picks[targetDay];
+    if (editingId) {
+      // editing might move the pick to a different day
+      Object.values(state.picks).forEach(arr => {
+        const i = arr.findIndex(x => x.id === editingId);
+        if (i >= 0) arr.splice(i, 1);
+      });
+      list.push(data);
+    } else {
+      list.push(data);
+    }
+    // Auto-switch the visible night to where the pick landed
+    if (state.night !== targetDay) state.night = targetDay;
+    save(); render(); closeModal();
+  }
+
+  // events
+  addBtn.onclick = () => openModal(null);
+  document.getElementById('cancelBtn').onclick = closeModal;
+  document.getElementById('saveBtn').onclick = savePick;
+  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+  artistInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') savePick();
+    if (e.key === 'Escape') closeModal();
+  });
+
+  document.querySelectorAll('.night-btn').forEach(b => {
+    b.onclick = () => { state.night = Number(b.dataset.night); save(); render(); };
+  });
+
+  // Delete a pick + show undo toast for 5s
+  let undoData = null;
+  let undoTimer = null;
+  function deletePick(pickId) {
+    let removed = null, removedFrom = null;
+    Object.entries(state.picks).forEach(([day, arr]) => {
+      const i = arr.findIndex(x => x.id === pickId);
+      if (i >= 0) { removed = arr[i]; removedFrom = +day; arr.splice(i, 1); }
+    });
+    if (!removed) return;
+    save(); render();
+    showUndoToast(removed, removedFrom);
+  }
+  function showUndoToast(pick, day) {
+    if (undoTimer) clearTimeout(undoTimer);
+    let toast = document.getElementById('undoToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'undoToast';
+      toast.className = 'undo-toast';
+      document.body.appendChild(toast);
+    }
+    undoData = { pick, day };
+    toast.innerHTML = `Removed <b>${escape(pick.artist)}</b><button class="undo-btn">Undo</button>`;
+    toast.classList.add('show');
+    toast.querySelector('.undo-btn').onclick = () => {
+      if (!undoData) return;
+      if (!state.picks[undoData.day]) state.picks[undoData.day] = [];
+      state.picks[undoData.day].push(undoData.pick);
+      undoData = null;
+      if (undoTimer) clearTimeout(undoTimer);
+      toast.classList.remove('show');
+      save(); render();
+    };
+    undoTimer = setTimeout(() => {
+      toast.classList.remove('show');
+      undoData = null;
+    }, 5000);
+  }
+
+  document.querySelectorAll('.tab').forEach(b => {
+    if (!b.dataset.tab) return; // skip helpTab and any non-navigation tabs
+    b.onclick = () => { state.tab = b.dataset.tab; save(); render(); };
+  });
+
+  loadArtists().then(render);
+
+  // Service worker for offline support. New versions install in the background
+  // and apply on the user's next app open.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(err => console.warn('Service worker registration failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

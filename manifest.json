@@ -1,0 +1,12 @@
+{
+  "name": "owlplanner — EDC Vegas 2026",
+  "short_name": "owlplanner",
+  "description": "Personal schedule planner for Electric Daisy Carnival Las Vegas 2026",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1018",
+  "theme_color": "#0e1018",
+  "icons": []
+}
