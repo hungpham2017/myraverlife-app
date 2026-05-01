@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1018" />
+<script src="./festival.config.js"></script>
 <link rel="manifest" href="./manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="My Raver Life" />
@@ -453,7 +454,7 @@
   /* day chips */
   .day-chips {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 5px;
   }
 
@@ -517,7 +518,7 @@
   }
   .time-chips {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 5px;
   }
 
@@ -955,7 +956,7 @@
 
   .stage-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 5px;
   }
   /* stage-specific overrides on top of the shared chip base */
@@ -995,8 +996,8 @@
 <body>
 
 <header>
-  <h1>My Raver Life</h1>
-  <div class="sub">EDC Las Vegas <span class="year-tag">2026</span> · May 15–17</div>
+  <h1 id="appTitle">My Raver Life</h1>
+  <div class="sub" id="appSub">EDC Las Vegas <span class="year-tag">2026</span> · May 15–17</div>
   <div class="row" id="planControls">
     <div class="nights">
       <button class="night-btn active" data-night="1">Fri</button>
@@ -1047,24 +1048,14 @@
 </div>
 
 <script>
-  const STAGES = [
-    { id: 'kineticFIELD',    color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners',      short: 'mainstage / edm' },
-    { id: 'circuitGROUNDS',  color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',           short: 'techno / house / bass' },
-    { id: 'cosmicMEADOW',    color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',             short: 'bass / mixed / alt' },
-    { id: 'neonGARDEN',      color: '#5cff3a', genre: 'Techno (some house early)',                       short: 'techno / house' },
-    { id: 'stereoBLOOM',     color: '#ff95dd', genre: 'House + tech house, groove-leaning',              short: 'house / tech house' },
-    { id: 'bionicJUNGLE',    color: '#a3e635', genre: 'House + techno + disco / funk',                   short: 'house / techno / disco' },
-    { id: 'quantumVALLEY',   color: '#8b8dff', genre: 'Trance + progressive + melodic',                  short: 'trance / prog / melodic' },
-    { id: 'bassPOD',         color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',              short: 'dubstep / d&b / riddim' },
-    { id: 'wasteLAND',       color: '#ff5560', genre: 'Hardstyle / hardcore',                            short: 'hardstyle / hardcore' },
-  ];
-  const BUCKETS = [
-    { id: 'opener',  name: 'Opener',  time: '7–9pm' },
-    { id: 'mid',     name: 'Mid',     time: '9–11pm' },
-    { id: 'peak',    name: 'Peak',    time: '11pm–2am' },
-    { id: 'late',    name: 'Late',    time: '2–4am' },
-    { id: 'sunrise', name: 'Sunrise', time: '4–5:30am' },
-  ];
+  // Festival-specific data is loaded from festival.config.js (window.FESTIVAL).
+  // The rest of this script is festival-agnostic.
+  const STAGES = window.FESTIVAL.stages;
+  const BUCKETS = window.FESTIVAL.buckets;
+
+  // Inject festival branding into the static header (HTML allowed in subtitle).
+  document.getElementById('appTitle').textContent = window.FESTIVAL.appName;
+  document.getElementById('appSub').innerHTML = window.FESTIVAL.subtitle;
 
   // Flat lineup: each entry { name, day, stage }. Loaded from assets/artists.json.
   let ARTISTS = [];
@@ -1113,16 +1104,19 @@
   function uid() { return Math.random().toString(36).slice(2, 9); }
   function stage(id) { return STAGES.find(s => s.id === id) || STAGES[0]; }
 
-  // Time helpers — minutes counted from 7pm (festival start). 0 = 7pm, 630 = 5:30am.
+  // Time helpers — minutes counted from festival start (FESTIVAL.dayStartHour).
+  const DAY_START_HOUR = window.FESTIVAL.dayStartHour;
+  const DAY_END_HOUR_24 = (DAY_START_HOUR + Math.ceil(window.FESTIVAL.dayLengthMins / 60)) % 24;
+
   function formatMins(m) {
-    const h24 = Math.floor((m / 60 + 19) % 24);
+    const h24 = Math.floor((m / 60 + DAY_START_HOUR) % 24);
     const min = m % 60;
     let h12 = h24 % 12;
     if (h12 === 0) h12 = 12;
     const ampm = h24 < 12 ? 'am' : 'pm';
     return `${h12}:${String(min).padStart(2, '0')}${ampm}`;
   }
-  // Parse "23:30" / "11:30pm" / "1:00am" → minutes from 7pm. null if invalid/placeholder.
+  // Parse "23:30" / "11:30pm" / "1:00am" → minutes from festival start. null if outside window.
   function timeStrToMins(str) {
     if (!str) return null;
     const s = String(str).trim().toLowerCase();
@@ -1137,17 +1131,19 @@
       if (m[3] === 'pm' && h !== 12) h += 12;
       if (m[3] === 'am' && h === 12) h = 0;
     }
-    if (h >= 19) return (h - 19) * 60 + min;     // 7pm–11:59pm
-    if (h < 7)   return (h + 5) * 60 + min;      // 12am–6:59am
+    // Festival window: from DAY_START_HOUR ... wraps around midnight if overnight
+    if (h >= DAY_START_HOUR) return (h - DAY_START_HOUR) * 60 + min;
+    if (h < DAY_END_HOUR_24) return (h + (24 - DAY_START_HOUR)) * 60 + min;
     return null;
   }
+  // Map a time (mins from festival start) to one of the configured buckets
+  // by checking each bucket's [start, end] range. Default: middle bucket.
   function bucketFromMinutes(mins) {
-    if (mins == null) return 'peak';
-    if (mins < 120) return 'opener';   // 7–9pm
-    if (mins < 240) return 'mid';      // 9–11pm
-    if (mins < 420) return 'peak';     // 11pm–2am
-    if (mins < 540) return 'late';     // 2–4am
-    return 'sunrise';                  // 4–5:30am
+    if (mins == null) return BUCKETS[Math.floor(BUCKETS.length / 2)].id;
+    for (const b of BUCKETS) {
+      if (mins >= b.range[0] && mins < b.range[1]) return b.id;
+    }
+    return BUCKETS[BUCKETS.length - 1].id; // past last bucket → final bucket
   }
   const TIME_OPTIONS = (() => {
     const opts = [];
@@ -1201,10 +1197,9 @@
 
         <h2>first-timer tips</h2>
         <ul class="help-list">
-          <li><span class="help-ico">🎯</span><div><b>Anchor 2 must-sees per night</b><p>Plan around 2 picks. The rest by feel.</p></div></li>
-          <li><span class="help-ico">🚶</span><div><b>10–15 min between stages</b><p>The Speedway is huge. Buffer for walks, water, bathroom.</p></div></li>
-          <li><span class="help-ico">🌅</span><div><b>Arrive ~9pm, not 7pm</b><p>Lineup heats up at 9–10. Save your legs.</p></div></li>
-          <li><span class="help-ico">🍔</span><div><b>Sit + eat 1–2am</b><p>Non-negotiable. Skip and you crash by 3.</p></div></li>
+          ${(window.FESTIVAL.firstTimerTips || []).map(t =>
+            `<li><span class="help-ico">${t.ico}</span><div><b>${escape(t.title)}</b><p>${escape(t.body)}</p></div></li>`
+          ).join('')}
         </ul>
 
         <div class="byline">
@@ -1270,22 +1265,10 @@
     main.appendChild(renderTimeline(picks));
   }
 
-  // Pixels per minute on the timeline. 1.7 = ~102px/hour, full night ~1080px.
+  // Pixels per minute on the timeline. 1.7 = ~102px/hour.
   const TIMELINE_PPM = 1.7;
-  const HOUR_LABELS = [
-    { mins: 0,   label: '7 pm' },
-    { mins: 60,  label: '8 pm' },
-    { mins: 120, label: '9 pm' },
-    { mins: 180, label: '10 pm' },
-    { mins: 240, label: '11 pm' },
-    { mins: 300, label: '12 am' },
-    { mins: 360, label: '1 am' },
-    { mins: 420, label: '2 am' },
-    { mins: 480, label: '3 am' },
-    { mins: 540, label: '4 am' },
-    { mins: 600, label: '5 am' },
-    { mins: 660, label: '6 am' },
-  ];
+  const HOUR_LABELS = window.FESTIVAL.hourLabels;
+  const FESTIVAL_LENGTH_MINS = window.FESTIVAL.dayLengthMins;
 
   // Assign each pick a lane (column) within its overlap cluster so blocks split horizontally.
   function layoutLanes(picks) {
@@ -1324,7 +1307,7 @@
   function renderTimeline(picks) {
     const wrap = document.createElement('div');
     wrap.className = 'timeline';
-    const totalHeight = 660 * TIMELINE_PPM + 12;
+    const totalHeight = FESTIVAL_LENGTH_MINS * TIMELINE_PPM + 12;
     wrap.style.height = totalHeight + 'px';
 
     // Hour labels + grid lines
@@ -1437,11 +1420,7 @@
   let selectedTimeBucket = 'any'; // 'any' | bucket id
   let selectedDay = null;          // null = any day, 1|2|3 = specific night
 
-  const DAY_LABELS = [
-    { id: 1, name: 'Friday',   sub: 'May 15' },
-    { id: 2, name: 'Saturday', sub: 'May 16' },
-    { id: 3, name: 'Sunday',   sub: 'May 17' },
-  ];
+  const DAY_LABELS = window.FESTIVAL.days;
 
   const dayChips = document.getElementById('dayChips');
   // If the typed artist doesn't fit the current filters, clear the input so
@@ -1484,14 +1463,8 @@
     });
   }
 
-  // Bucket → minute window from 7pm
-  const BUCKET_RANGE = {
-    opener:  [0,   120],
-    mid:     [120, 240],
-    peak:    [240, 420],
-    late:    [420, 540],
-    sunrise: [540, 630],
-  };
+  // Bucket id → [startMins, endMins] derived from FESTIVAL.buckets
+  const BUCKET_RANGE = Object.fromEntries(BUCKETS.map(b => [b.id, b.range]));
 
   function renderTimeChips() {
     timeChips.innerHTML = '';
