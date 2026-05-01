@@ -1,9 +1,9 @@
-// edcplanner service worker
+// Plan it! service worker
 // Cache-first strategy: works fully offline after first load.
 // Bump CACHE_VERSION whenever index.html or artists.json changes
 // so old caches get evicted on next visit.
 
-const CACHE_VERSION = 'owlplanner-v50';
+const CACHE_VERSION = 'planit-v1';
 const APP_SHELL = [
   './',
   './index.html',

@@ -1,4 +1,4 @@
-# owlplanner
+# Plan it!
 
 Personal schedule planner for **EDC Las Vegas 2026** (May 15–17).
 Mobile-first, offline-capable, runs as a PWA.
