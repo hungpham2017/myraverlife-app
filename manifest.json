@@ -1,6 +1,6 @@
 {
-  "name": "Plan it! — EDC Vegas 2026",
-  "short_name": "Plan it!",
+  "name": "My Raver Life — EDC Vegas 2026",
+  "short_name": "My Raver Life",
   "description": "Personal schedule planner for Electric Daisy Carnival Las Vegas 2026",
   "start_url": "./index.html",
   "scope": "./",
@@ -8,5 +8,18 @@
   "orientation": "portrait",
   "background_color": "#0e1018",
   "theme_color": "#0e1018",
-  "icons": []
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

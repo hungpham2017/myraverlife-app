@@ -1,14 +1,17 @@
-// Plan it! service worker
+// My Raver Life service worker
 // Cache-first strategy: works fully offline after first load.
 // Bump CACHE_VERSION whenever index.html or artists.json changes
 // so old caches get evicted on next visit.
 
-const CACHE_VERSION = 'planit-v1';
+const CACHE_VERSION = 'myraverlife-v1';
 const APP_SHELL = [
   './',
   './index.html',
   './assets/artists.json',
   './assets/map.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,7 +1,7 @@
-# Plan it!
+# My Raver Life
 
 Personal schedule planner for **EDC Las Vegas 2026** (May 15–17).
-Mobile-first, offline-capable, runs as a PWA.
+Mobile-first, offline-capable, runs as a PWA. Live at **https://myraver.life**.
 
 ## Stages (Vegas, 9 total)
 
