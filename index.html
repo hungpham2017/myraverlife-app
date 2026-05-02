@@ -975,6 +975,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
   }
+  .stage-group-grid.secondary { grid-template-columns: repeat(4, 1fr); }
   /* Secondary stages render slightly dimmer to communicate hierarchy */
   .stage-opt.secondary { opacity: 0.78; }
   .stage-opt.secondary:hover, .stage-opt.secondary.selected { opacity: 1; }
@@ -1516,7 +1517,7 @@
       heading.textContent = group.label;
       stageGrid.appendChild(heading);
       const groupGrid = document.createElement('div');
-      groupGrid.className = 'stage-group-grid';
+      groupGrid.className = 'stage-group-grid' + (group.tier === 'secondary' ? ' secondary' : '');
       stagesInGroup.forEach(s => {
         const lbl = document.createElement('label');
         const isSel = s.id === pickedStage;
