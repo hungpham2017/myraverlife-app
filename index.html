@@ -976,9 +976,15 @@
     gap: 4px;
   }
   .stage-group-grid.secondary { grid-template-columns: repeat(4, 1fr); }
-  /* Secondary stages render slightly dimmer to communicate hierarchy */
-  .stage-opt.secondary { opacity: 0.78; }
-  .stage-opt.secondary:hover, .stage-opt.secondary.selected { opacity: 1; }
+  /* Secondary stages: desaturate + slight dim to communicate hierarchy.
+     Selected/hover restores full vibrance. */
+  .stage-opt.secondary {
+    filter: saturate(0.55) brightness(0.92);
+  }
+  .stage-opt.secondary:hover,
+  .stage-opt.secondary.selected {
+    filter: none;
+  }
   /* stage-specific overrides on top of the shared chip base */
   .stage-opt {
     text-shadow: 0 0 10px color-mix(in oklab, currentColor 35%, transparent);

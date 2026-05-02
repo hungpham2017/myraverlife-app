@@ -3,7 +3,7 @@
 // Bump CACHE_VERSION whenever index.html or artists.json changes
 // so old caches get evicted on next visit.
 
-const CACHE_VERSION = 'myraverlife-v10';
+const CACHE_VERSION = 'myraverlife-v11';
 const APP_SHELL = [
   './',
   './index.html',
