@@ -1,1696 +1,3402 @@
 [
   {
-    "name": "Argy",
+    "name": "CC Love",
     "day": 1,
-    "stage": "kineticFIELD",
-    "start": "7:00pm",
-    "end": "8:15pm"
-  },
-  {
-    "name": "The Chainsmokers",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "Charlotte de Witte",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Chris Lorenzo",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Fisher",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "Korolova",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Laidback Luke B2B Chuckie",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "Porter Robinson (DJ Set)",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "3:45am",
-    "end": "5:00am"
-  },
-  {
-    "name": "Sofi Tukker",
-    "day": 1,
-    "stage": "kineticFIELD",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "1991",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "7:00pm",
-    "end": "8:15pm"
-  },
-  {
-    "name": "Bou",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "I Hate Models",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Level Up",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Levity",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "Nico Moreno",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Ray Volpe",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "The Outlaw",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "3:45am",
-    "end": "5:00am"
-  },
-  {
-    "name": "Wooli",
-    "day": 1,
-    "stage": "circuitGROUNDS",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Adriatique",
-    "day": 1,
-    "stage": "neonGARDEN",
-    "start": "7:00pm",
-    "end": "8:30pm"
-  },
-  {
-    "name": "Anastazja",
-    "day": 1,
-    "stage": "neonGARDEN",
-    "start": "8:30pm",
-    "end": "10:00pm"
+    "stage": "casaBACARDI",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5226/57343817-43ba-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
     "name": "DJ Tennis B2B Chloé Caillet",
     "day": 1,
     "stage": "neonGARDEN",
     "start": "10:00pm",
-    "end": "11:30pm"
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/xv0usgPQDnaRbahvAs3tALfZYi5Z30f667GNHASV.jpg"
   },
   {
-    "name": "Eli Brown",
+    "name": "I Hate Models",
     "day": 1,
-    "stage": "neonGARDEN",
-    "start": "11:30pm",
-    "end": "1:00am"
-  },
-  {
-    "name": "Joseph Capriati",
-    "day": 1,
-    "stage": "neonGARDEN",
-    "start": "1:00am",
-    "end": "2:30am"
-  },
-  {
-    "name": "MËSTIZA",
-    "day": 1,
-    "stage": "neonGARDEN",
-    "start": "2:30am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Peggy Gou",
-    "day": 1,
-    "stage": "neonGARDEN",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Jackie Hollander",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Max Dean B2B Luke Dean",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "MEDUZA",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "³MPH",
-    "day": 1,
-    "stage": "cosmicMEADOW",
+    "stage": "circuitGROUNDS",
     "start": "10:00pm",
-    "end": "11:00pm"
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5119/33e0d29c-07dc-11f1-96ee-0a58a9feac02.jpg"
   },
   {
-    "name": "Notion",
+    "name": "Kelland",
     "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Roddy Lima",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "San Pacho",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Underworld",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Walker & Royce B2B VNSSA",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Westend",
-    "day": 1,
-    "stage": "cosmicMEADOW",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Adventure Club (Throwback Set)",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "ATLiens",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Culture Shock",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Cyclops",
-    "day": 1,
-    "stage": "bassPOD",
+    "stage": "electrolitHOUSE",
     "start": "10:00pm",
-    "end": "11:00pm"
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8681/0e3e974a-445e-11f1-9c0c-0a58a9feac02.jpg"
   },
   {
-    "name": "Deathpact ∞ Deathpact",
+    "name": "Machete",
     "day": 1,
-    "stage": "bassPOD",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Ghengar",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "GorillaT",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "HEYZ",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Kai Wachi",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "MUZZ",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "4:00am",
-    "end": "5:00am"
-  },
-  {
-    "name": "RIOT",
-    "day": 1,
-    "stage": "bassPOD",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Adrián Mills",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Cloudy",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "DØMINA",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "DYEN",
-    "day": 1,
-    "stage": "wasteLAND",
+    "stage": "takisHANGAR",
     "start": "10:00pm",
-    "end": "11:00pm"
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1953/037524e1-eed1-11ed-b991-0ee6b8365494.jpg"
   },
   {
-    "name": "GRAVEDGR",
+    "name": "Max Low",
     "day": 1,
-    "stage": "wasteLAND",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Johannes Schuster",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "KUKO",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Rebekah",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Serafina",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Stan Christ",
-    "day": 1,
-    "stage": "wasteLAND",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Cold Blue",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Cosmic Gate",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Darren Porter",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Darude",
-    "day": 1,
-    "stage": "quantumVALLEY",
+    "stage": "forestHOUSE",
     "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Gareth Emery",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Ilan Bluestone",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Matty Ralph",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Paul van Dyk",
-    "day": 1,
-    "stage": "quantumVALLEY",
-    "start": "2:00am",
-    "end": "3:00am"
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5255/ba744fb3-8c5d-11ed-954e-0ecc81f4ee58.jpg"
   },
   {
     "name": "Pegassi",
     "day": 1,
     "stage": "quantumVALLEY",
-    "start": "3:00am",
-    "end": "4:00am"
+    "start": "10:00pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7176/98c0ca03-bcb3-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "Sarah de Warren",
+    "name": "Chris Lorenzo",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "10:07pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1448/df3b47b1-3017-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Dirty Audio",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "10:15pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1363/f3426a86-4429-11f1-a537-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Omar+",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "10:15pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8455/3bb46f04-02d9-11f1-aa1c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Adrián Mills",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7920/a18e0b3b-4c97-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Ghengar",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6470/63c309d0-2a00-11f1-a7e1-0a58a9feac02.jpg"
+  },
+  {
+    "name": "SKIBKID",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8677/0d97dfe2-4457-11f1-9f52-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Tsu Nami presents Club Tsu",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4844/631dc993-f129-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Darude",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "11:00pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4478/9da5a137-3992-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Joey G",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "11:00pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7623/1c3e9097-699b-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "PARAMIDA",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "11:00pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8107/5b2d761d-891e-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "R.A.W.",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "11:00pm",
+    "end": "12:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1484/GzvRCmBGSWQis0qlbyvxJIqiZcjurL2t66wHTuOs.jpeg"
+  },
+  {
+    "name": "Underworld",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "11:10pm",
+    "end": "12:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8002/68651032-07e1-11f1-8f0b-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Levity",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "11:15pm",
+    "end": "12:25am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6301/362d9b88-07e7-11f1-8f69-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Sofi Tukker",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "11:19pm",
+    "end": "12:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4165/4afadbff-e991-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Cloudy",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7551/655fea93-0f49-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Danny The Wildchild",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8670/45a43d40-4452-11f1-8409-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Deathpact ∞ Deathpact",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4939/9f7732f4-07e5-11f1-a94c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "JFUSE",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8673/b96e8e36-4454-11f1-b4b8-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Juliet Mendoza",
+    "day": 1,
+    "stage": "electrolitHOUSE",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5239/271f65a6-07a4-11f1-96bb-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Luke Dean",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "11:30pm",
+    "end": "12:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7782/768fb87b-2c67-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Peggy Gou",
+    "day": 1,
+    "stage": "neonGARDEN",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3127/6893fcd6-07e0-11f1-b9f9-0a58a9feac02.jpg"
+  },
+  {
+    "name": "99jakes",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6289/ae0a6383-6179-11ee-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "ARMNHMR presents Passport",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1550/15705f27-2f60-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Cosmic Gate",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/344/88a364db-22f2-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Grant Fisher",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8649/9657e28c-442a-11f1-b70f-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Taylor Kade",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2965/2250912c-442f-11f1-9c0c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Ron D Core",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "12:15am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1933/606da442-4446-11f1-a35f-0a58a9feac02.jpg"
+  },
+  {
+    "name": "MEDUZA³",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "12:25am",
+    "end": "1:40am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/IXnNRKdDy03csXaeiW9wzzIqTfJioc6TTQNN1EOo.jpg"
+  },
+  {
+    "name": "Wooli",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "12:25am",
+    "end": "1:35am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2608/9024a4b4-0833-11f1-9d8b-0a58a9feac02.jpg"
+  },
+  {
+    "name": "ATLiens",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2429/8cErwqlrIYKXyXefHae9wN4sPdMccMPwFxhywIOX.jpeg"
+  },
+  {
+    "name": "KUKO",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8439/settime/TSvfFcdnc7Pz73HL5airuRpOQKTuWnA6vi06zDfX.jpg"
+  },
+  {
+    "name": "salute B2B Chloé Caillet",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "12:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/U8IVu6eDRruYRWpzmIrA1cPBeqFX7wKZyqsu7dJd.jpg"
+  },
+  {
+    "name": "The Chainsmokers",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "12:32am",
+    "end": "1:40am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1132/d54374b0-083a-11f1-9d8b-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Josh Baker",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "12:45am",
+    "end": "2:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7063/3b82d8da-a961-11f0-852e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Adriatique",
+    "day": 1,
+    "stage": "neonGARDEN",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1755/d57272e5-0f4b-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Castor & Pollux",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "1:00am",
+    "end": "2:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4937/YILZJdWKhvTEPaNzDW4qS9zENd7sVLBBlfifez6n.png"
+  },
+  {
+    "name": "Dramos",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8672/60a1fcde-4454-11f1-8e3c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Gareth Emery",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "1:00am",
+    "end": "2:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/12/d746e97b-2daa-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Gold Lemonade",
+    "day": 1,
+    "stage": "electrolitHOUSE",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8683/1c9bec10-445f-11f1-ac15-0a58a9feac02.jpg"
+  },
+  {
+    "name": "MR DEEDS",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8669/d17bd5fe-4451-11f1-bba9-0a58a9feac02.jpg"
+  },
+  {
+    "name": "GRAVEDGR",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2704/8e08ee3f-8115-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Hixxy",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6294/fe4da24f-617b-11ee-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Kai Wachi",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2451/0755fa92-0834-11f1-a2db-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Moonpup",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "1:30am",
+    "end": "2:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8658/53ba8f4a-4445-11f1-ab4c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Roadhouse",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6629/2582ac6a-442d-11f1-bba9-0a58a9feac02.jpg"
+  },
+  {
+    "name": "ero808",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8682/a12d0ac8-445e-11f1-bfb1-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Outlaw",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "1:35am",
+    "end": "2:35am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7934/2f707629-82ac-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Fisher",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "1:47am",
+    "end": "2:57am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2694/8be5c83f-2daa-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Notion",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "1:47am",
+    "end": "2:47am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3838/4cc4f436-0855-11f1-a6c2-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Ilan Bluestone",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "2:00am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1327/c7aa651e-0855-11f1-a6c2-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Max Dean",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "2:00am",
+    "end": "3:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7067/e97c68fb-ff9a-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Zaanee",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "2:00am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8706/dac0e8f6-44f7-11f1-b228-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Adventure Club (Throwback Set)",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/152/16a4928a-0832-11f1-b3ad-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Guari",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8671/c05be0ba-4452-11f1-ac15-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Joseph Capriati",
+    "day": 1,
+    "stage": "neonGARDEN",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/867/a21370e8-07dd-11f1-8f0b-0a58a9feac02.jpg"
+  },
+  {
+    "name": "NXSTY",
+    "day": 1,
+    "stage": "electrolitHOUSE",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5966/633c3ac7-e94a-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "R.A.W.",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1484/GzvRCmBGSWQis0qlbyvxJIqiZcjurL2t66wHTuOs.jpeg"
+  },
+  {
+    "name": "Rebekah",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6821/ab4cfcc7-4f72-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Robert Hood",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4820/ba218891-3385-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Holy Priest",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "2:35am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7976/4Mvw6YtluoBRzGgUDFqXeReh3B67k3kiJyZXOb4R.jpg"
+  },
+  {
+    "name": "Steve Leclair",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "2:45am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8659/c9ac40da-4446-11f1-a152-0a58a9feac02.jpg"
+  },
+  {
+    "name": "MPH",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "2:47am",
+    "end": "4:02am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6794/c605d2eb-43c4-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Kelland",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8681/0e3e974a-445e-11f1-9c0c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Kygore",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8676/59cc180c-4456-11f1-8e0d-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Paul van Dyk",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "3:00am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/923/cd1a9021-5987-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Topcat",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "3:00am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+  },
+  {
+    "name": "Porter Robinson (DJ Set)",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "3:01am",
+    "end": "4:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/220/04514b70-07e0-11f1-8393-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Lucky Lou",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "3:15am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6623/596150b9-0352-11ef-b991-0ee6b8365494.jpeg"
+  },
+  {
+    "name": "Obskür",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "3:15am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7302/f65104e9-e7e2-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Culture Shock",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/346/1fe663a1-2d97-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "DYEN",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5689/9abd5753-9295-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Ray Volpe",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2384/f90e701b-42a4-11ee-b991-0ee6b8365494.jpeg"
+  },
+  {
+    "name": "Avalon Emerson",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4145/e4d15570-b027-11f0-9794-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Exile",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4803/abf57bbf-2d59-11ec-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Darren Porter",
     "day": 1,
     "stage": "quantumVALLEY",
     "start": "4:00am",
-    "end": "5:30am"
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1945/2d5eb682-0831-11f1-9835-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Eli Brown",
+    "day": 1,
+    "stage": "neonGARDEN",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2996/1e4631bb-2c77-11ec-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Jason Splat",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2104/3d3ca9f4-4438-11f1-ac15-0a58a9feac02.jpg"
+  },
+  {
+    "name": "PLS&TY",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2574/426f2d15-03fa-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Skanka",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7904/facb8997-48ac-11f0-954e-0ecc81f4ee58.png"
+  },
+  {
+    "name": "San Pacho",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "4:02am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5625/58c97799-ff9b-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Charlotte de Witte",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "4:14am",
+    "end": "5:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2816/fc968e0c-07b4-11f1-b3ad-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Hartshorn",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4956/aWNUbGDxEE3Y7HwHn6O6EszzITdznejGCbxzPZnU.jpeg"
+  },
+  {
+    "name": "Tavatli",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8116/6e74abcf-8ea4-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Cyclops",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5886/1b29990a-2a00-11f1-888a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Level Up",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3853/13756667-528a-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Stan Christ",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8457/d9285614-02da-11f1-837a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Toman",
+    "day": 1,
+    "stage": "stereoBLOOM",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5859/87bfff0d-b95e-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Heidi Lawden B2B Masha Mar",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "5:00pm",
+    "end": "7:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/4fpY85eQReij7hi7Xo8CCJCHdIMDuqBcDNsiZxlq.jpg"
+  },
+  {
+    "name": "Max Dean B2B Luke Dean",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "5:00pm",
+    "end": "6:55pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8439/settime/VdeG2diWZTGi3WIJLMxEFXpoiliUFFkWGY5xTqWw.jpg"
+  },
+  {
+    "name": "1991",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2190/6c3f6803-ac6d-11ec-954e-0ecc81f4ee58.jpg"
   },
   {
     "name": "Abana B2B Juliet Mendoza",
     "day": 1,
     "stage": "stereoBLOOM",
     "start": "7:00pm",
-    "end": "8:15pm"
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/vZNtLzLXuAz1EtzxzPaPw6fGNEln4pRPQEfXYUcZ.jpg"
   },
   {
-    "name": "Josh Baker",
+    "name": "Anastazja",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "8:15pm",
-    "end": "9:30pm"
+    "stage": "neonGARDEN",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8470/ffd99c88-0621-11f1-b01d-0a58a9feac02.jpg"
   },
   {
-    "name": "Luke Dean",
+    "name": "Big Daddy Kess",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "9:30pm",
-    "end": "10:45pm"
+    "stage": "forestHOUSE",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6641/d7302d7d-0f1c-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "Luuk van Dijk",
+    "name": "DØMINA",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "10:45pm",
-    "end": "12:00am"
+    "stage": "wasteLAND",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6292/228228b9-1c8a-11f0-954e-0ecc81f4ee58.png"
   },
   {
-    "name": "Max Dean",
+    "name": "JRuiz",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "12:00am",
-    "end": "1:15am"
+    "stage": "casaBACARDI",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8675/a263843e-4455-11f1-a012-0a58a9feac02.jpg"
   },
   {
-    "name": "Obskür",
+    "name": "Jackie Hollander",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "1:15am",
-    "end": "2:30am"
+    "stage": "cosmicMEADOW",
+    "start": "7:00pm",
+    "end": "7:55pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6640/7d94094a-07dc-11f1-85ff-0a58a9feac02.jpg"
   },
   {
-    "name": "Omar+",
+    "name": "Jem",
     "day": 1,
-    "stage": "stereoBLOOM",
-    "start": "2:30am",
-    "end": "3:45am"
+    "stage": "electrolitHOUSE",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6579/1b9f097f-e6f0-11ee-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Laidback Luke B2B Chuckie",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/Lrh313GeIT66lmN7UJvxu5VCdMSK8XgTdiS9p3FT.jpg"
+  },
+  {
+    "name": "Not Not",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6690/e9d2d5b3-290a-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "RIOT",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "7:00pm",
+    "end": "7:50pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2088/81f7f74c-c959-11f0-8cfe-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Sarah de Warren",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7682/103c194b-1f12-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Soso Drü",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8651/9cc980cc-442e-11f1-a477-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Stacy Christine",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4564/d4f26314-0839-11f1-a075-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Kandyman",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8660/76ca91fe-4447-11f1-acc5-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Trouble",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/58/be2c6ec9-92f5-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "gl00m13",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8680/4ec00f60-4459-11f1-9a66-0a58a9feac02.jpg"
+  },
+  {
+    "name": "HEYZ",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "7:50pm",
+    "end": "8:40pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5560/76481b86-07e6-11f1-b8a8-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Roddy Lima",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "7:55pm",
+    "end": "8:55pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7239/fdf1727e-061c-11f1-8926-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Bou",
+    "day": 1,
+    "stage": "circuitGROUNDS",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4312/a0d6ac43-636c-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Cardo",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8674/2d7f93ba-4455-11f1-8e0d-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Korolova",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5910/41d191ae-07df-11f1-8ea5-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Matty Ralph",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7879/ff3e1bfd-3ce9-11f0-954e-0ecc81f4ee58.jpg"
   },
   {
     "name": "SLAMM",
     "day": 1,
     "stage": "stereoBLOOM",
-    "start": "3:45am",
-    "end": "5:00am"
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7953/3d6417d3-61c6-11f0-843a-0ee6b8365494.jpg"
   },
   {
-    "name": "Toman",
+    "name": "Sussy",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7608/02ccf0fa-44f9-11f1-b4fa-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Carry Nation",
+    "day": 1,
+    "stage": "bionicJUNGLE",
+    "start": "8:00pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5895/e8244612-0c50-11f1-83f6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Mer Bear",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7667/fa5c8797-1f0b-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Punky Brewstar",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8679/7996764e-4458-11f1-a6eb-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Demigod",
+    "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "8:30pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4243/d3390096-4434-11f1-b228-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Dip Vertigo",
+    "day": 1,
+    "stage": "takisHANGAR",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1384/i3UlmoQWck449TWj4BBwpaMsJa9EVWvPRMacEpVM.jpeg"
+  },
+  {
+    "name": "MËSTIZA",
+    "day": 1,
+    "stage": "neonGARDEN",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7521/8b89df33-09ba-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Serafina",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "8:30pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8207/03000662-afac-11f0-9196-0a58a9feac02.jpg"
+  },
+  {
+    "name": "MUZZ",
+    "day": 1,
+    "stage": "bassPOD",
+    "start": "8:40pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3159/64d97be6-0837-11f1-ae4f-0a58a9feac02.jpg"
+  },
+  {
+    "name": "$ami G",
+    "day": 1,
+    "stage": "yeeDC",
+    "start": "8:45pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7502/c8e9a0e0-4426-11f1-b0ac-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Westend",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "8:55pm",
+    "end": "9:55pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3260/051b3381-8123-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Argy",
+    "day": 1,
+    "stage": "kineticFIELD",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6542/e4d9dba6-07a6-11f1-a1b5-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Cold Blue",
+    "day": 1,
+    "stage": "quantumVALLEY",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2560/e633b60c-07d8-11f1-a106-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Dono",
+    "day": 1,
+    "stage": "forestHOUSE",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7665/a5fb3d96-44f8-11f1-b0fd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "J Patron",
+    "day": 1,
+    "stage": "casaBACARDI",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8216/c6b760c0-b040-11f0-9411-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Luuk van Dijk",
     "day": 1,
     "stage": "stereoBLOOM",
-    "start": "5:00am",
-    "end": "5:30am"
+    "start": "9:00pm",
+    "end": "10:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6316/lzwMKGsBU9806vKrjnjzbmmhdUdvss6lDwAn5OA2.jpg"
   },
   {
-    "name": "Avalon Emerson",
+    "name": "Nico Moreno",
     "day": 1,
-    "stage": "bionicJUNGLE",
-    "start": "7:00pm",
-    "end": "8:15pm"
+    "stage": "circuitGROUNDS",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5690/04e7ca1d-f3d4-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "Heidi Lawden B2B Masha Mar",
+    "name": "GorillaT",
     "day": 1,
-    "stage": "bionicJUNGLE",
-    "start": "8:15pm",
-    "end": "9:30pm"
+    "stage": "bassPOD",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6065/548875ff-636d-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "InSpeKtor GadJet",
+    "day": 1,
+    "stage": "picnicCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8678/bb084be4-4457-11f1-b38f-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Johannes Schuster",
+    "day": 1,
+    "stage": "wasteLAND",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7524/3bfa15f3-09bc-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Lady Sinclair",
+    "day": 1,
+    "stage": "beatBoxCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5251/a42b9ce1-2bd1-11f0-b991-0ee6b8365494.jpg"
   },
   {
     "name": "Massimiliano Pagliara",
     "day": 1,
     "stage": "bionicJUNGLE",
     "start": "9:30pm",
-    "end": "10:45pm"
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8485/c13bcf32-07cf-11f1-a487-0a58a9feac02.jpg"
   },
   {
-    "name": "PARAMIDA",
+    "name": "Louis Love",
     "day": 1,
+    "stage": "insomniacFRIDAYS",
+    "start": "9:45pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6287/cf6a2f68-4442-11f1-a012-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Walker & Royce B2B VNSSA",
+    "day": 1,
+    "stage": "cosmicMEADOW",
+    "start": "9:55pm",
+    "end": "10:55pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/Kwa7KOncF8FT846wnHbBXSnl9LZb6EBN8zdfuYS5.png"
+  },
+  {
+    "name": "Ahmed Spins",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6346/a713f38c-07e3-11f1-a0c1-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Alves",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7651/b86608c3-1f05-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "CRS?",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3107/d9xa3rM92pZwUhaKQK4Lvd4nRZ3O9dSMK4COFSLJ.jpeg"
+  },
+  {
+    "name": "Eve Lauren",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8696/41a3ae8a-44f0-11f1-a152-0a58a9feac02.jpg"
+  },
+  {
+    "name": "OMNOM",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "10:00pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2938/b97bc3d6-0830-11f1-963a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Steve Aoki",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "10:07pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/128/cb672a63-3015-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Dazy Duke",
+    "day": 2,
+    "stage": "yeeDC",
+    "start": "10:15pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8556/57e3777e-4429-11f1-a36c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "VTSS (In The Round)",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "10:15pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5949/4a9a795c-083b-11f1-81fd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "HAAi B2B Luke Alessi",
+    "day": 2,
     "stage": "bionicJUNGLE",
-    "start": "10:45pm",
-    "end": "12:00am"
+    "start": "10:30pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/h8sDLvbnuLbX7l5BovOYKJ7gErJKzcHSAxFXKv4o.jpg"
   },
   {
-    "name": "Robert Hood",
-    "day": 1,
+    "name": "Paul Oakenfold",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/924/947779b5-3996-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Rob Gee B2B Lenny Dee",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/QiSMU4S8qpfmD5OUNEdF3NnNgdMMIJWFaZ7A6LJw.jpg"
+  },
+  {
+    "name": "YDG",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2140/3841c7c5-9af0-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Fluttershy",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8689/1b6bc35a-44ec-11f1-ab1e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Matt Faulk",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5977/fN272ujml0mrCwItfhANAJ0t3Gmgpr6BbaObEZ6U.jpeg"
+  },
+  {
+    "name": "Player Dave",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4632/18b6920d-f3d5-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Sammy Virji",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "10:45pm",
+    "end": "12:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6612/aa5227fb-00d6-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Fester, Oscure & Thee-O",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "11:00pm",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8440/settime/OEMEEnmh3BAcSp7OuxjrHiVtMOt2SjuZquHnnFIO.jpg"
+  },
+  {
+    "name": "Noizu",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "11:15pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3322/6tDZTr3D7JnFAMU0H5X9ku2nssglo8s15w3adhYe.jpg"
+  },
+  {
+    "name": "Hardwell",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "11:19pm",
+    "end": "12:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/944/0a3f9a4b-2a97-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Andrew Rayel",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/904/f215203d-398f-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "DREYA V",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5225/c58c1c3e-06be-11f1-ba59-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Delta Heavy",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/181/9cec7227-636a-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Fury",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/967/CNkcMtpRkvhHYhL1nSXakcwjhbvhtQ3VMA6I9H5O.jpg"
+  },
+  {
+    "name": "Lady Faith B2B LNY TNZ",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/YdS2FKj6GvyMeLqsrrVl3t6jIphzAULiYWWY1Bfy.jpg"
+  },
+  {
+    "name": "Luciano",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "11:30pm",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/931/cf01ba1c-0835-11f1-a106-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Off in LALA",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8695/d6108d6e-44ef-11f1-ac15-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Prodigy",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "11:35pm",
+    "end": "12:35am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8478/c2dd9968-07e0-11f1-a106-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Canary Yellow",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8540/30626748-112d-11f1-9b39-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Flapjack",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6291/604625af-7822-11ee-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "MCR-T",
+    "day": 2,
     "stage": "bionicJUNGLE",
     "start": "12:00am",
-    "end": "1:15am"
+    "end": "1:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7313/0f84de37-e80a-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "salute B2B Chloé Caillet",
-    "day": 1,
+    "name": "Madds",
+    "day": 2,
+    "stage": "yeeDC",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2523/b23826b8-442c-11f1-b228-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Polar Bears",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3225/d1cd1d6b-4182-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Tiësto",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "12:15am",
+    "end": "1:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/95/b7d76b33-6667-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Audiofreq B2B Code Black B2B Toneshifterz",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/RyP8sykymu0lt7PGJGF5kng9TWaOBbdHMR0bFO4i.jpg"
+  },
+  {
+    "name": "Getter",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1276/c4f27a23-fc01-11ed-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Maddix",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5875/40ea4554-0836-11f1-a436-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Wax Motif",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "12:30am",
+    "end": "1:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/712/d2181259-ff9b-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "John Summit",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "12:32am",
+    "end": "1:40am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4278/4ae3b18e-07dd-11f1-8f69-0a58a9feac02.jpg"
+  },
+  {
+    "name": "BUNT. (In The Round)",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "12:40am",
+    "end": "2:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6362/9ced6376-0832-11f1-a2db-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Abana",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5265/97d1aabc-07a3-11f1-84e3-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Airglo",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5884/07952b5f-6d31-11ee-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "GRAVAGERZ",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "1:00am",
+    "end": "2:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8168/8bd2a64c-a57b-11f0-85a0-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Trace",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7226/55953df1-ca26-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Bad Boombox B2B Ollie Lishman",
+    "day": 2,
     "stage": "bionicJUNGLE",
     "start": "1:15am",
-    "end": "2:30am"
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/t4wh7ImIGdkrLTuhQSsR3M9MOFo2oPsKsy5VDN9c.jpg"
   },
   {
-    "name": "Stacy Christine",
-    "day": 1,
+    "name": "Da Tweekaz",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1211/07b05349-da5b-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Eptic B2B Space Laces",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/kpjUTFV40581YU7gHauklZLVyLnPTG2TXKmi8q7C.jpg"
+  },
+  {
+    "name": "Jimni Cricket",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8688/9cc3f446-44eb-11f1-b4fa-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Mathame",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4390/71727687-3003-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Mellinfunk",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "1:30am",
+    "end": "2:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8657/9757a2e8-4444-11f1-ab4c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Prospa",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "1:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4256/58c78361-f3d5-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Samson",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7522/863bec23-09bb-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Slim McGraw",
+    "day": 2,
+    "stage": "yeeDC",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7705/c1b727be-442d-11f1-90f6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "CID",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "1:45am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1669/aaad1128-07b5-11f1-88c4-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Peggy Gou B2B KI/KI",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "1:45am",
+    "end": "3:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8440/settime/SQVdOFaObh0WPgF3CI5hKSfjBWk3N6DRTVVxJq0p.jpg"
+  },
+  {
+    "name": "Subtronics",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "1:47am",
+    "end": "2:57am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2760/80210cb8-083a-11f1-88f7-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Odd Language",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "2:00am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7678/480b5775-1f11-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Interplanetary Criminal",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "2:10am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6449/e4f3d399-c6b8-11ee-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Astrix",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/958/6e38e20d-3990-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Benwal",
+    "day": 2,
     "stage": "bionicJUNGLE",
     "start": "2:30am",
-    "end": "3:45am"
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8428/bf2dd978-f66e-11f0-b764-0a58a9feac02.jpg"
   },
   {
-    "name": "The Carry Nation",
-    "day": 1,
+    "name": "Discovery Project",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/350/gfShPG03C1Q7Mkuk7MUJbHrfejM2KBVaWUnBwLIb.jpeg"
+  },
+  {
+    "name": "Doctor P B2B Flux Pavilion B2B FuntCase",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/N3eSZ6ANAlUprme1WNXyGgtLSojQgei17b7IASd6.jpg"
+  },
+  {
+    "name": "Eli Fola",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7697/27ba22b5-1f95-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Koji Aiken",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8287/b5e6805c-c65a-11f0-bf51-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Lil Texas",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2668/8d1551a7-4eda-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Jon Bishop",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "2:45am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8654/55a2ed2e-4441-11f1-ba9a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Damon Sharpe",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "3:00am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4760/e916cd15-08c5-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "HNTR",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7485/6dbeef7d-415c-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Mattilo",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6779/cf6daeb3-409e-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Vulkauf",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8687/ae04aada-44ea-11f1-a5a9-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Kaskade",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "3:01am",
+    "end": "4:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/25/ad6445a6-07df-11f1-b9f9-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Boys Noize",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "3:15am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/634/a9217285-d5d7-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Taylor Kade",
+    "day": 2,
+    "stage": "yeeDC",
+    "start": "3:15am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2965/2250912c-442f-11f1-9c0c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "BAUGRUPPE90",
+    "day": 2,
     "stage": "bionicJUNGLE",
-    "start": "3:45am",
-    "end": "5:30am"
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8346/faec857a-d55f-11f0-940a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "HOL!",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4940/ccea2006-07e6-11f1-a436-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Josh Baker B2B KETTAMA B2B Prospa",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "3:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8440/settime/sMJA01CB8MEuEgOuBShllQ8bX2KvQPUM1llxv3P0.jpg"
+  },
+  {
+    "name": "MALUGI",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6970/8d780d67-f3d3-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Mish",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6354/08010308-0837-11f1-9ac0-0a58a9feac02.jpg"
+  },
+  {
+    "name": "T78",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6800/90532c63-448f-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Eric Davenport",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8653/f30fe2fc-4436-11f1-a152-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Falko",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8118/c5d2f1b9-8ea5-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Micah Martin",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7620/95667b48-44f9-11f1-8672-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Skilah",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7735/554d7faf-2464-11f0-954e-0ecc81f4ee58.jpg"
   },
   {
     "name": "Above & Beyond (Sunrise Set)",
     "day": 2,
     "stage": "kineticFIELD",
-    "start": "4:00am",
-    "end": "5:30am"
+    "start": "4:14am",
+    "end": "5:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/151/b6156052-0831-11f1-9745-0a58a9feac02.jpg"
+  },
+  {
+    "name": "BOLO (Sunrise Set)",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6575/525fa35c-07e5-11f1-96f4-0a58a9feac02.jpg"
+  },
+  {
+    "name": "OKAYVAL",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6661/5b4eec98-b99d-11f0-b637-0a58a9feac02.JPEG"
+  },
+  {
+    "name": "Puking Spice Latte",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8686/e9136d38-44df-11f1-a301-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Alyssa Jolee",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7048/a839ae17-3b2c-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Club Angel",
+    "day": 2,
+    "stage": "bionicJUNGLE",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8454/bb93ac98-02d5-11f1-baa3-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Gigola B2B MCR-T",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/smhCfIAhGOWS7pNptgYwviHput5Hnn8uLm6wieHt.jpg"
+  },
+  {
+    "name": "Lilly Palmer",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5656/mkLXqTp8vXstALSbP3hPfy1ysIHgXQAWfVSHqFOv.jpg"
+  },
+  {
+    "name": "Mary Droppinz",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4452/a208a54b-636f-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Thomas Schumacher",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8018/f810926b-61fb-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "AJ Ball",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "7:00pm",
+    "end": "7:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
   },
   {
     "name": "AR/CO",
     "day": 2,
     "stage": "kineticFIELD",
     "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Hardwell",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "HAYLA",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "John Summit",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Kaskade",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Steve Aoki",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Sub Focus",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Subtronics",
-    "day": 2,
-    "stage": "kineticFIELD",
-    "start": "2:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Boys Noize",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "7:00pm",
-    "end": "8:15pm"
-  },
-  {
-    "name": "DJ Mandy",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "KETTAMA",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Lilly Palmer",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Peggy Gou B2B KI/KI",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "RØZ",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Sammy Virji",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "Tiësto",
-    "day": 2,
-    "stage": "circuitGROUNDS",
-    "start": "3:45am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Ahmed Spins",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "7:00pm",
-    "end": "8:45pm"
-  },
-  {
-    "name": "Josh Baker B2B KETTAMA B2B Prospa",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "8:45pm",
-    "end": "10:30pm"
-  },
-  {
-    "name": "Luciano",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "10:30pm",
-    "end": "12:15am"
-  },
-  {
-    "name": "mink",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "12:15am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Prospa",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "2:00am",
-    "end": "3:45am"
-  },
-  {
-    "name": "Silvie Loto",
-    "day": 2,
-    "stage": "neonGARDEN",
-    "start": "3:45am",
-    "end": "5:30am"
-  },
-  {
-    "name": "BUNT. (In The Round)",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "7:00pm",
-    "end": "8:15pm"
-  },
-  {
-    "name": "DJ Gigola B2B MCR-T",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "Frost Children",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Hannah Laing",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Interplanetary Criminal",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "MALUGI",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Snow Strippers",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "The Prodigy",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "3:45am",
-    "end": "5:00am"
-  },
-  {
-    "name": "VTSS (In The Round)",
-    "day": 2,
-    "stage": "cosmicMEADOW",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "AVELLO B2B Dennett",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Delta Heavy",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Doctor P B2B Flux Pavilion B2B FuntCase",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Eptic B2B Space Laces",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Fallen with MC Dino",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Getter",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "HOL!",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Hybrid Minds",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Mary Droppinz",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Viperactive",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "4:00am",
-    "end": "5:00am"
-  },
-  {
-    "name": "YDG",
-    "day": 2,
-    "stage": "bassPOD",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Alyssa Jolee",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Audiofreq B2B Code Black B2B Toneshifterz",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "8:00pm",
-    "end": "9:00pm"
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7166/550360bd-504d-11f0-843a-0ee6b8365494.jpg"
   },
   {
     "name": "CUTDWN",
     "day": 2,
     "stage": "wasteLAND",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Da Tweekaz",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Dead X",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Lady Faith B2B LNY TNZ",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Lil Texas",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Mish",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Rob Gee B2B Lenny Dee",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "The Saints",
-    "day": 2,
-    "stage": "wasteLAND",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Andrew Rayel",
-    "day": 2,
-    "stage": "quantumVALLEY",
     "start": "7:00pm",
-    "end": "8:00pm"
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7648/e7671277-1f03-11f0-b991-0ee6b8365494.jpg"
   },
   {
-    "name": "Astrix",
+    "name": "Carneyval",
     "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "8:00pm",
-    "end": "9:00pm"
+    "stage": "yeeDC",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8648/d5a66faa-4428-11f1-91b3-0a58a9feac02.jpg"
   },
   {
-    "name": "Billy Gillies",
+    "name": "DJ Flite",
     "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "9:00pm",
-    "end": "10:00pm"
+    "stage": "insomniacFRIDAYS",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8652/663987da-4435-11f1-8449-0a58a9feac02.jpg"
   },
   {
-    "name": "Maddix",
+    "name": "DJ Mandy",
     "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "10:00pm",
-    "end": "11:00pm"
+    "stage": "circuitGROUNDS",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7903/afd5b404-07db-11f1-a3f6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Espii",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8697/ce31a56e-44f0-11f1-abf0-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Fallen with MC Dino",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "7:00pm",
+    "end": "7:50pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/RMkJ8tnynDQtBsRpg8lkw7HuLeNKEoCmt2QbQaC2.jpg"
+  },
+  {
+    "name": "Frost Children",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8475/7ca9af60-0626-11f1-9a9e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Gusta",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8694/4e47514c-44ef-11f1-91cd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Lucky Lou",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6623/596150b9-0352-11ef-b991-0ee6b8365494.jpeg"
   },
   {
     "name": "Maria Healy",
     "day": 2,
     "stage": "quantumVALLEY",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Mathame",
-    "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Paul Oakenfold",
-    "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "SUPERSTRINGS",
-    "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "T78",
-    "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Thomas Schumacher",
-    "day": 2,
-    "stage": "quantumVALLEY",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "BOLO (Sunrise Set)",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "CID",
-    "day": 2,
-    "stage": "stereoBLOOM",
     "start": "7:00pm",
-    "end": "8:00pm"
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3654/QOeTPqzfmAua8ou22XJ3BHWevhrqHYNeJvNh2FTm.jpeg"
   },
   {
-    "name": "Discip",
+    "name": "N0where G1rl",
     "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "DREYA V",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "HNTR",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Noizu",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "OMNOM",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Slugg",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Wax Motif",
-    "day": 2,
-    "stage": "stereoBLOOM",
-    "start": "2:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Bad Boombox B2B Ollie Lishman",
-    "day": 2,
-    "stage": "bionicJUNGLE",
+    "stage": "picnicCAR",
     "start": "7:00pm",
-    "end": "8:15pm"
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8692/89589fa4-44ed-11f1-8c20-0a58a9feac02.jpg"
   },
   {
-    "name": "Bashkka B2B Sedef Adasï",
+    "name": "PHNX",
     "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "BAUGRUPPE90",
-    "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Benwal",
-    "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Club Angel",
-    "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "HAAi B2B Luke Alessi",
-    "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "MCR-T",
-    "day": 2,
-    "stage": "bionicJUNGLE",
-    "start": "2:30am",
-    "end": "3:45am"
+    "stage": "takisHANGAR",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8684/c4ad1efe-44de-11f1-8449-0a58a9feac02.jpg"
   },
   {
     "name": "Player Dave",
     "day": 2,
     "stage": "bionicJUNGLE",
-    "start": "3:45am",
-    "end": "5:00am"
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4632/18b6920d-f3d5-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Slugg",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4405/42af3d73-e4fb-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "mink",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5552/9b5bae74-0836-11f1-a197-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Linney",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "7:45pm",
+    "end": "8:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7593/RaQUKmpGRUvLkEW4wiHqRRfyEiWymd5N35YnRg4G.png"
+  },
+  {
+    "name": "AVELLO B2B Dennett",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "7:50pm",
+    "end": "8:40pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/tCN78DbusZbNKETv1mwB4hLbvcPTzHMDSOcZSLx9.jpg"
+  },
+  {
+    "name": "DREYA V",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5225/c58c1c3e-06be-11f1-ba59-0a58a9feac02.jpg"
+  },
+  {
+    "name": "HAYLA",
+    "day": 2,
+    "stage": "kineticFIELD",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7404/60c937ed-ee18-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "RØZ",
+    "day": 2,
+    "stage": "circuitGROUNDS",
+    "start": "8:00pm",
+    "end": "9:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7111/05be0401-d8f5-11ef-b991-0ee6b8365494.jpg"
   },
   {
     "name": "Spray",
     "day": 2,
     "stage": "bionicJUNGLE",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Armin van Buuren (Sunrise Set)",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Cloonee",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "Funk Tribu",
-    "day": 3,
-    "stage": "kineticFIELD",
     "start": "8:00pm",
-    "end": "9:00pm"
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8474/2acf30c2-0624-11f1-a82a-0a58a9feac02.jpg"
   },
   {
-    "name": "GRiZ B2B Wooli",
-    "day": 3,
+    "name": "Androcided",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8691/1f56a7e0-44ed-11f1-acc5-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Hannah Laing",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "8:15pm",
+    "end": "9:25pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6546/b3671f59-e361-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "RAJE",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7981/4d4455f3-5601-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Dead X",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "8:30pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5669/d36b4461-d5d8-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Luke Alexander",
+    "day": 2,
+    "stage": "casaBACARDI",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8685/41807e3a-44df-11f1-a55a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Mateezy",
+    "day": 2,
+    "stage": "electrolitHOUSE",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8698/20366b5a-44f7-11f1-8449-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Nightstalker",
+    "day": 2,
+    "stage": "takisHANGAR",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1481/4jCpgA33aLSTdGJ8lpnQ4znnN5DqubxXeDdDfhTs.jpeg"
+  },
+  {
+    "name": "SUPERSTRINGS",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "8:30pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7999/26f80785-5b85-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Silvie Loto",
+    "day": 2,
+    "stage": "neonGARDEN",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6975/e1e8b183-7c5c-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Tony Gamboa",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "8:30pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8661/e75ba5c0-4447-11f1-b23e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Viperactive",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "8:40pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7439/425df989-f3cb-11ef-954e-0ecc81f4ee58.png"
+  },
+  {
+    "name": "Justus",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "8:45pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8708/50644470-44fa-11f1-b002-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Roxy Ferrari",
+    "day": 2,
+    "stage": "yeeDC",
+    "start": "8:45pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7503/7c71a382-442d-11f1-9fcc-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Bashkka B2B Sedef Adasï",
+    "day": 2,
+    "stage": "bionicJUNGLE",
+    "start": "9:00pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/TRG4mqNAvkjuaNQ2zNEN1lUGOr5hBtgNL4lXsPLJ.jpg"
+  },
+  {
+    "name": "Discip",
+    "day": 2,
+    "stage": "stereoBLOOM",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7786/e935cc9b-2c6f-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Sub Focus",
+    "day": 2,
     "stage": "kineticFIELD",
     "start": "9:00pm",
-    "end": "10:00pm"
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/109/37c5d3ea-083a-11f1-8ea5-0a58a9feac02.jpg"
   },
   {
-    "name": "Layton Giordani",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Martin Garrix",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Ship Wrek",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Trace",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Zedd",
-    "day": 3,
-    "stage": "kineticFIELD",
-    "start": "2:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "ANNA",
-    "day": 3,
+    "name": "KETTAMA",
+    "day": 2,
     "stage": "circuitGROUNDS",
-    "start": "7:00pm",
-    "end": "8:30pm"
+    "start": "9:15pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5916/33d48315-d023-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Snow Strippers",
+    "day": 2,
+    "stage": "cosmicMEADOW",
+    "start": "9:25pm",
+    "end": "10:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6702/24d83eb2-bbff-11f0-a977-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Benni Ola",
+    "day": 2,
+    "stage": "beatBoxCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8693/320a8c0c-44ee-11f1-a012-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Billy Gillies",
+    "day": 2,
+    "stage": "quantumVALLEY",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4169/69be204d-3991-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Hybrid Minds",
+    "day": 2,
+    "stage": "bassPOD",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4294/f4952c79-f3d2-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Love2Hate",
+    "day": 2,
+    "stage": "picnicCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8690/b6c3b7cc-44ec-11f1-b0fd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Saints",
+    "day": 2,
+    "stage": "wasteLAND",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8479/1c3ab984-064a-11f1-a3f6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Discovery Project",
+    "day": 2,
+    "stage": "forestHOUSE",
+    "start": "9:45pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/350/gfShPG03C1Q7Mkuk7MUJbHrfejM2KBVaWUnBwLIb.jpeg"
+  },
+  {
+    "name": "Reid Speed",
+    "day": 2,
+    "stage": "insomniacFRIDAYS",
+    "start": "9:45pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2453/c4ea85bc-4445-11f1-a012-0a58a9feac02.jpg"
+  },
+  {
+    "name": "BROSA",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "10:00pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7990/65eabf93-584a-11f0-843a-0ee6b8365494.jpg"
   },
   {
     "name": "Beltran",
     "day": 3,
     "stage": "circuitGROUNDS",
-    "start": "8:30pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Chris Stussy",
-    "day": 3,
-    "stage": "circuitGROUNDS",
     "start": "10:00pm",
-    "end": "11:30pm"
-  },
-  {
-    "name": "Kevin de Vries",
-    "day": 3,
-    "stage": "circuitGROUNDS",
-    "start": "11:30pm",
-    "end": "1:00am"
-  },
-  {
-    "name": "Linska",
-    "day": 3,
-    "stage": "circuitGROUNDS",
-    "start": "1:00am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Solomun",
-    "day": 3,
-    "stage": "circuitGROUNDS",
-    "start": "2:30am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Vintage Culture",
-    "day": 3,
-    "stage": "circuitGROUNDS",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "999999999",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "7:00pm",
-    "end": "8:30pm"
-  },
-  {
-    "name": "Adiel",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "8:30pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "DJ Gigola",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "10:00pm",
-    "end": "11:30pm"
-  },
-  {
-    "name": "Frankie Bones",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "11:30pm",
-    "end": "1:00am"
-  },
-  {
-    "name": "Indira Paganotto",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "1:00am",
-    "end": "2:30am"
-  },
-  {
-    "name": "KI/KI",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "2:30am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Klangkuenstler",
-    "day": 3,
-    "stage": "neonGARDEN",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Alison Wonderland",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "7:00pm",
-    "end": "8:15pm"
-  },
-  {
-    "name": "Black Tiger Sex Machine",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "Dabin",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "GRAVAGERZ",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Nico Moreno B2B Holy Priest",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "Nostalgix",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "San Holo (Wholesome Riddim Set)",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "Seven Lions",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "3:45am",
-    "end": "5:00am"
-  },
-  {
-    "name": "William Black",
-    "day": 3,
-    "stage": "cosmicMEADOW",
-    "start": "5:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "A.M.C with MC Phantom",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "ÆON:MODE (Sunrise Set)",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "AHEE B2B Liquid Stranger",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Boogie T B2B Distinct Motive",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "EAZYBAKED",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "INFEKT B2B Samplifire",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Nightstalker with MC Dino",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "Peekaboo",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Sippy",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Virtual Riot",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Whethan",
-    "day": 3,
-    "stage": "bassPOD",
-    "start": "4:00am",
-    "end": "4:15am"
-  },
-  {
-    "name": "Clawz",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "7:00pm",
-    "end": "8:00pm"
-  },
-  {
-    "name": "DJ Isaac",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Restricted",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Rooler",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "10:00pm",
-    "end": "11:00pm"
-  },
-  {
-    "name": "Sihk",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "11:00pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Sub Zero Project",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "12:00am",
-    "end": "1:00am"
-  },
-  {
-    "name": "The Purge",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "1:00am",
-    "end": "2:00am"
-  },
-  {
-    "name": "Vieze Asbak",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "2:00am",
-    "end": "3:00am"
-  },
-  {
-    "name": "Warface",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "3:00am",
-    "end": "4:00am"
-  },
-  {
-    "name": "Yosuf",
-    "day": 3,
-    "stage": "wasteLAND",
-    "start": "4:00am",
-    "end": "5:30am"
-  },
-  {
-    "name": "Cassian",
-    "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "7:00pm",
-    "end": "8:00pm"
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5940/a8b7b182-a961-11f0-9c6f-0a58a9feac02.jpg"
   },
   {
     "name": "Cristoph",
     "day": 3,
     "stage": "quantumVALLEY",
-    "start": "8:00pm",
-    "end": "9:00pm"
-  },
-  {
-    "name": "Eli & Fur",
-    "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "9:00pm",
-    "end": "10:00pm"
-  },
-  {
-    "name": "Innellea",
-    "day": 3,
-    "stage": "quantumVALLEY",
     "start": "10:00pm",
-    "end": "11:00pm"
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1999/31331445-8b00-11ed-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "KREAM",
+    "name": "Dena",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "11:00pm",
-    "end": "12:00am"
+    "stage": "electrolitHOUSE",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7716/2cc0ed93-212a-11f0-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "Massano",
+    "name": "Rohaan (DnB Set)",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "12:00am",
-    "end": "1:00am"
+    "stage": "takisHANGAR",
+    "start": "10:00pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5229/2a3e18f2-12a5-11f1-bd9e-0a58a9feac02.jpg"
   },
   {
-    "name": "Rebūke",
+    "name": "San Holo (Wholesome Riddim Set)",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "1:00am",
-    "end": "2:00am"
+    "stage": "cosmicMEADOW",
+    "start": "10:00pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2078/da49a91e-07e2-11f1-a48a-0a58a9feac02.jpg"
   },
   {
-    "name": "Shingo Nakamura",
+    "name": "Tensteps",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "2:00am",
-    "end": "3:00am"
+    "stage": "forestHOUSE",
+    "start": "10:00pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4479/eccbb0ef-df71-11eb-b991-0ee6b8365494.jpg"
   },
   {
-    "name": "Tinlicker (DJ Set)",
+    "name": "Funk Tribu",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "3:00am",
-    "end": "4:00am"
+    "stage": "kineticFIELD",
+    "start": "10:07pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6782/fe701ead-f3d1-11ef-954e-0ecc81f4ee58.jpg"
   },
   {
-    "name": "Warung",
+    "name": "Sommer Ray",
     "day": 3,
-    "stage": "quantumVALLEY",
-    "start": "4:00am",
-    "end": "5:30am"
+    "stage": "yeeDC",
+    "start": "10:15pm",
+    "end": "11:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7421/3beeccb2-442e-11f1-a55a-0a58a9feac02.jpg"
   },
   {
-    "name": "Chris Lorenzo B2B Bullet Tooth",
+    "name": "A.M.C with MC Phantom",
     "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "7:00pm",
-    "end": "8:15pm"
+    "stage": "bassPOD",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/JRBI9GerOEuTz6fDX9TlpjWFwnJEOW0mWvnsNrxW.jpg"
   },
   {
-    "name": "Hamdi",
+    "name": "KinAhau",
     "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "8:15pm",
-    "end": "9:30pm"
-  },
-  {
-    "name": "KLO",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "9:30pm",
-    "end": "10:45pm"
-  },
-  {
-    "name": "Lu.Re",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "10:45pm",
-    "end": "12:00am"
-  },
-  {
-    "name": "Morgan Seatree",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "12:00am",
-    "end": "1:15am"
-  },
-  {
-    "name": "Murphy's Law",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "1:15am",
-    "end": "2:30am"
-  },
-  {
-    "name": "Sidney Charles B2B Bushbaby",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "2:30am",
-    "end": "3:45am"
-  },
-  {
-    "name": "Silva Bumpa",
-    "day": 3,
-    "stage": "stereoBLOOM",
-    "start": "3:45am",
-    "end": "5:00am"
+    "stage": "bionicJUNGLE",
+    "start": "10:30pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7065/3569b80c-07de-11f1-af45-0a58a9feac02.jpg"
   },
   {
     "name": "Skream",
     "day": 3,
     "stage": "stereoBLOOM",
-    "start": "5:00am",
-    "end": "5:30am"
+    "start": "10:30pm",
+    "end": "11:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/889/9326b73f-7695-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Yosuf",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "10:30pm",
+    "end": "11:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5670/1d338cd2-07e2-11f1-bdcd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Chibs",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5889/wOFB9z5ICcBikkUAqXW4ulg68G7BUzYdiILRLp1U.jpeg"
+  },
+  {
+    "name": "Simon Apex & Lostboy Tribute Set",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "10:45pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8701/97165a3a-44f4-11f1-b3df-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Gigola",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "10:50pm",
+    "end": "12:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7306/933224f5-e7ed-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Dabin",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "11:00pm",
+    "end": "12:05am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1998/TXqqHtKiiDahjltH7bBzkwrp5MBwgf5gR77xrB3Q.jpeg"
+  },
+  {
+    "name": "Eli & Fur",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "11:00pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3043/Np1cxyLVVxQcn2bv30EMTOHUGcKFJJfl2Ogp4cyf.jpeg"
+  },
+  {
+    "name": "Just.Shaun",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "11:00pm",
+    "end": "12:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8710/53e50dbc-4524-11f1-b05c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Steve Loria",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "11:00pm",
+    "end": "12:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1934/CUdsV2LzjBPzxJmFtlYBUmMtdcvSVAT5IDHX4arI.jpeg"
+  },
+  {
+    "name": "Juos",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "11:15pm",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7113/a50ea9d6-93fa-11f0-92d7-0a58a9feac02.jpg"
+  },
+  {
+    "name": "GRiZ B2B Wooli",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "11:19pm",
+    "end": "12:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/kffu2HvYAKdoM2BABD0gkcV99wlnudUTKBomZx4P.jpg"
+  },
+  {
+    "name": "Chris Stussy",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4975/c5ad54ce-06b6-11f1-a388-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Isaac",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/195/e520a431-8b00-11ed-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Eric D-Lux",
+    "day": 3,
+    "stage": "electrolitHOUSE",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5205/46391c07-bf42-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Justin Hawkes",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "11:30pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4557/27216535-0472-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Virtual Riot",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "11:30pm",
+    "end": "12:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2028/3b90e545-3e3f-11ef-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Hamdi",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "11:45pm",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5862/17519ec2-07e6-11f1-bdcd-0a58a9feac02.jpg"
+  },
+  {
+    "name": "2DY4",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4786/29eedb43-2d4f-11ec-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Disko Cowboy",
+    "day": 3,
+    "stage": "yeeDC",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6620/20ce6a59-033c-11ef-b991-0ee6b8365494.jpeg"
+  },
+  {
+    "name": "Goshfather",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3408/03847023-2aa6-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Kuta",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7902/0d79e0a8-44f4-11f1-8672-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Tiga",
+    "day": 3,
+    "stage": "bionicJUNGLE",
+    "start": "12:00am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/533/197993f8-07e1-11f1-a94c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Tinlicker (DJ Set)",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "12:00am",
+    "end": "1:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3070/24d9a4b3-b47a-11ed-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Alison Wonderland",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "12:05am",
+    "end": "1:05am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1403/e362d576-07a5-11f1-ba59-0a58a9feac02.jpg"
+  },
+  {
+    "name": "999999999",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "12:10am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5416/245749bc-07e3-11f1-b306-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Frankie Bones",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "12:15am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1927/l5bFRuervy3Z8Q3TLFXNXJSPzV4xedMWm73uZk1H.jpeg"
+  },
+  {
+    "name": "Peekaboo",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3196/faffbbdb-f3d4-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Vieze Asbak",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "12:30am",
+    "end": "1:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6587/4bbbd379-eb9e-11ee-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Zedd",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "12:32am",
+    "end": "1:40am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/125/2876d245-8123-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "AK1200",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/442/5e566e79-79b9-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Cassian",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "1:00am",
+    "end": "2:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1744/b5c9e29d-7ed1-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Chris Lorenzo B2B Bullet Tooth",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "1:00am",
+    "end": "2:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8441/settime/nrNdBbHfOpHSnKrfbX1yDn8EpghNTg8SNhugpHTB.jpg"
+  },
+  {
+    "name": "OKAYVAL",
+    "day": 3,
+    "stage": "electrolitHOUSE",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6661/5b4eec98-b99d-11f0-b637-0a58a9feac02.JPEG"
+  },
+  {
+    "name": "Silver Panda",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "1:00am",
+    "end": "2:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6798/txoCwxyJ6qay80oFGz27MFMnCasLhmtoyISEoRhH.png"
+  },
+  {
+    "name": "Solomun",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "1:00am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1253/31cfb8c4-afda-11f0-8cb2-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Seven Lions",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "1:05am",
+    "end": "2:20am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/580/6849ddbf-4edb-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "AHEE B2B Liquid Stranger",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/d1nQW6CRzqAxwGuuOCNbKjlxicfqAvwQmjcYfXlc.jpg"
+  },
+  {
+    "name": "Ashley Walls",
+    "day": 3,
+    "stage": "yeeDC",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8646/4d65dd70-4427-11f1-993e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "DJ Tennis B2B Red Axes",
+    "day": 3,
+    "stage": "bionicJUNGLE",
+    "start": "1:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/c5fpCaeLCMZ730lV0R4mmIRl6ePxtwgb6sFEDYgk.jpg"
+  },
+  {
+    "name": "Donald Glaude",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "1:30am",
+    "end": "2:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1071/8981618a-4436-11f1-a07a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Indira Paganotto",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "1:30am",
+    "end": "2:50am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5121/eeea70ca-07dc-11f1-8f69-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Lucky Rabbit",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5124/f26c9a31-9e5d-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Rommii",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "1:30am",
+    "end": "2:45am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6251/b7f3f753-3e13-11ee-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Sqishi",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "1:30am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5244/53322066-45b6-11f1-bf08-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Sub Zero Project",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "1:30am",
+    "end": "2:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2795/20d0ebfd-8b0b-11ed-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Martin Garrix",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "1:47am",
+    "end": "2:57am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/887/f9bba6a8-07e7-11f1-a82a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "NEKTER",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "2:00am",
+    "end": "3:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7614/vu9wqQAKInQIJ1STtcI914tGRysCTvMD0RPy13E8.png"
+  },
+  {
+    "name": "Massano",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "2:15am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7988/22887e07-5845-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Silva Bumpa",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "2:15am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8456/5ae6baf2-02da-11f1-855e-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Restricted",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "2:20am",
+    "end": "3:20am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6387/a71c22ab-e331-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "APX1",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3106/bX5F7OEQ0tjF6p3aMdElq0Kwb6o4giECeOCy0p7a.jpeg"
+  },
+  {
+    "name": "MTK",
+    "day": 3,
+    "stage": "electrolitHOUSE",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+  },
+  {
+    "name": "Rooler",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4274/3370c3cd-5387-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Vintage Culture",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "2:30am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1628/1a10ce15-301d-11ef-954e-0ecc81f4ee58.JPEG"
+  },
+  {
+    "name": "Whethan",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "2:30am",
+    "end": "3:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2793/cda0f704-07e1-11f1-a487-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Charles Feelgood",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "2:45am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1069/77687ea9-d392-11eb-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Close Friends Only",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "2:45am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8166/5e933a68-216b-11f1-a4c8-0a58a9feac02.jpg"
+  },
+  {
+    "name": "KI/KI",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "2:50am",
+    "end": "4:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7087/59126571-b103-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Muñequita",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8700/a255e6d2-44f3-11f1-a952-0a58a9feac02.jpg"
+  },
+  {
+    "name": "SISTO",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "3:00am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4530/f1e9edf3-017a-11ee-b991-0ee6b8365494.jpeg"
+  },
+  {
+    "name": "Tim Clark",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "3:00am",
+    "end": "4:00am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6008/35c76be7-8e50-11ee-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Cloonee",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "3:01am",
+    "end": "4:10am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4268/a91d12bb-00d5-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Willie Pake",
+    "day": 3,
+    "stage": "yeeDC",
+    "start": "3:15am",
+    "end": "4:15am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7684/6137bd98-442f-11f1-946d-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Black Tiger Sex Machine",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "3:20am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1606/59a53155-5492-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Beltran B2B Simas",
+    "day": 3,
+    "stage": "bionicJUNGLE",
+    "start": "3:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/8pNH3svIQV8J5SxeKkMbTK9Bmbmocet61ADym2Ts.jpg"
+  },
+  {
+    "name": "Boogie T B2B Distinct Motive",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/sRKU9Gawg1vIq7iyMd90OGqZeJ6KuDBeYxqKjMSE.jpg"
+  },
+  {
+    "name": "Innellea",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5906/93362ed5-c86c-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Morgan Seatree",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7930/17264573-5000-11f0-843a-0ee6b8365494.jpeg"
+  },
+  {
+    "name": "Warface",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "3:30am",
+    "end": "4:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2797/a0f67969-da62-11ed-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "B2B2B2B",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/142/qtAIaviJkbwfnUTu7gxwG7tUuX0arnX5f8KtBVBM.jpeg"
+  },
+  {
+    "name": "Kevin de Vries",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6247/5dec74d0-0834-11f1-9ae6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Mark E Quark",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8656/56b2eb36-4443-11f1-8114-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Scooba",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1963/square.jpg"
+  },
+  {
+    "name": "Synnhaven",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "4:00am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7694/18600b69-1f17-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Klangkuenstler",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "4:10am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5483/7e1c4c5e-07de-11f1-b306-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Armin van Buuren (Sunrise Set)",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "4:14am",
+    "end": "5:28am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/113/fc67707a-07e3-11f1-96ee-0a58a9feac02.jpg"
+  },
+  {
+    "name": "2b Happy",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8699/fe86378c-44f2-11f1-8882-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Vicious",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "4:15am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7431/e44355ac-c735-11f0-9fdc-0a58a9feac02.jpg"
+  },
+  {
+    "name": "KREAM",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4036/6f142a79-2a56-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Lu.Re",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8477/71952db2-0648-11f1-94b7-0a58a9feac02.jpg"
+  },
+  {
+    "name": "MADGRRL B2B VESSEL",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8441/settime/unjUdECHlgXAo23AjmP8a7IpOktuQxwdyBbiC1OK.jpg"
+  },
+  {
+    "name": "Nico Moreno B2B Holy Priest",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/8441/settime/syUi5hIEE2Tg9MAdOmONQZCAD5koV1iicBfLV5X9.jpg"
+  },
+  {
+    "name": "ÆON:MODE (Sunrise Set)",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "4:30am",
+    "end": "5:30am",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6583/1c6c6b6f-e6ee-11ee-954e-0ecc81f4ee58.jpeg"
   },
   {
     "name": "Alves",
     "day": 3,
     "stage": "bionicJUNGLE",
     "start": "7:00pm",
-    "end": "8:45pm"
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7651/b86608c3-1f05-11f0-b991-0ee6b8365494.jpg"
   },
   {
-    "name": "Beltran B2B Simas",
+    "name": "Assembly",
     "day": 3,
-    "stage": "bionicJUNGLE",
-    "start": "8:45pm",
-    "end": "10:30pm"
+    "stage": "forestHOUSE",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2099/1a882d89-10d8-11ef-b991-0ee6b8365494.jpg"
   },
   {
-    "name": "DJ Tennis B2B Red Axes",
+    "name": "Bad Beat",
     "day": 3,
-    "stage": "bionicJUNGLE",
-    "start": "10:30pm",
-    "end": "12:15am"
+    "stage": "neonGARDEN",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5206/2da8abc5-bf43-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Chassi",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6723/4aa50f5d-275f-11ef-954e-0ecc81f4ee58.jpeg"
+  },
+  {
+    "name": "Connor q",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6000/14b70cdd-ef7b-11ed-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Espii",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8697/ce31a56e-44f0-11f1-abf0-0a58a9feac02.jpg"
+  },
+  {
+    "name": "GRAVAGERZ",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8168/8bd2a64c-a57b-11f0-85a0-0a58a9feac02.jpg"
+  },
+  {
+    "name": "John Price",
+    "day": 3,
+    "stage": "yeeDC",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8650/f925192a-442a-11f1-acc5-0a58a9feac02.jpg"
+  },
+  {
+    "name": "KLO",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8273/b4d51010-c192-11f0-b9ad-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Kendo",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8655/f2fe6648-4441-11f1-a152-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Linska",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7312/922944cc-31e6-11f1-acec-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Marc V",
+    "day": 3,
+    "stage": "electrolitHOUSE",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4812/fc6d54b3-3106-11ec-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Nerz",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "7:00pm",
+    "end": "8:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+  },
+  {
+    "name": "Nightstalker with MC Dino",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "7:00pm",
+    "end": "7:50pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1481/4jCpgA33aLSTdGJ8lpnQ4znnN5DqubxXeDdDfhTs.jpeg"
+  },
+  {
+    "name": "Sihk",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "7:00pm",
+    "end": "8:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6347/2feaa99f-8f05-11ee-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Trace",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7226/55953df1-ca26-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Warung",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "7:00pm",
+    "end": "8:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4605/e2d829ee-061f-11f1-9580-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Sippy",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "7:50pm",
+    "end": "8:40pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4356/7cf6668a-07e2-11f1-8ff3-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Murphy's Law",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "8:00pm",
+    "end": "9:15pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7241/64dde3d2-eb3d-11f0-b58c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Nostalgix",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4200/41308bef-89cf-11f0-843a-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Shingo Nakamura",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8017/84072499-61fa-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Ship Wrek",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4019/f6dd2c2d-05bd-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Soraya",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8628/eac8df1e-383c-11f1-9e3c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Ward Andrews",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "8:00pm",
+    "end": "9:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7283/d818e233-2baa-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Frankie Bones",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1927/l5bFRuervy3Z8Q3TLFXNXJSPzV4xedMWm73uZk1H.jpeg"
+  },
+  {
+    "name": "Kimmycat",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8703/0756a75e-44f6-11f1-b05c-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Odd Language",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "8:15pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7678/480b5775-1f11-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "ANNA",
+    "day": 3,
+    "stage": "circuitGROUNDS",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1614/7f3daebc-07a6-11f1-a3f6-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Clawz",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "8:30pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6293/3ee6866b-810e-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Fallen",
+    "day": 3,
+    "stage": "takisHANGAR",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/545/JSQSZklPzhqsHrpd4n6kBLmQoGZklrw0XtyuQK2h.jpeg"
   },
   {
     "name": "ISAbella",
     "day": 3,
     "stage": "bionicJUNGLE",
-    "start": "12:15am",
-    "end": "2:00am"
+    "start": "8:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8472/1cf4f5aa-0623-11f1-b3ad-0a58a9feac02.jpg"
   },
   {
-    "name": "KinAhau",
+    "name": "Mars",
     "day": 3,
-    "stage": "bionicJUNGLE",
-    "start": "2:00am",
-    "end": "3:45am"
+    "stage": "insomniacFRIDAYS",
+    "start": "8:30pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5272/ffc7e258-4443-11f1-b53e-0a58a9feac02.jpg"
   },
   {
-    "name": "Tiga",
+    "name": "RAJE",
     "day": 3,
-    "stage": "bionicJUNGLE",
-    "start": "3:45am",
-    "end": "5:30am"
+    "stage": "electrolitHOUSE",
+    "start": "8:30pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/7981/4d4455f3-5601-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "EAZYBAKED",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "8:40pm",
+    "end": "9:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3429/4498ef61-2daa-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Bad Ash",
+    "day": 3,
+    "stage": "yeeDC",
+    "start": "8:45pm",
+    "end": "9:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8647/4896d88e-4428-11f1-a477-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Doozie",
+    "day": 3,
+    "stage": "casaBACARDI",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5434/d8db23ff-1f13-11f0-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Layton Giordani",
+    "day": 3,
+    "stage": "kineticFIELD",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/2397/493b727f-ff99-11ef-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Neon Deluz",
+    "day": 3,
+    "stage": "forestHOUSE",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4777/309673c1-2d3f-11ec-b991-0ee6b8365494.jpg"
+  },
+  {
+    "name": "Rebūke",
+    "day": 3,
+    "stage": "quantumVALLEY",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4420/f4406481-bd8b-11eb-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "William Black",
+    "day": 3,
+    "stage": "cosmicMEADOW",
+    "start": "9:00pm",
+    "end": "10:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3028/d090d1cf-1001-11f0-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Sidney Charles B2B Bushbaby",
+    "day": 3,
+    "stage": "stereoBLOOM",
+    "start": "9:15pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/nBUufWkbD1MdPu1XyFRXE5HfEuA7ZoCkbO0kSf95.jpg"
+  },
+  {
+    "name": "Adiel",
+    "day": 3,
+    "stage": "neonGARDEN",
+    "start": "9:30pm",
+    "end": "10:50pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6408/9ce8478d-ae80-11ee-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "INFEKT B2B Samplifire",
+    "day": 3,
+    "stage": "bassPOD",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/events/7314/settime/sax9iFHcXw990SsUcRIu3VxCrpT6k189B2IS599n.jpg"
+  },
+  {
+    "name": "Lexxy Jax",
+    "day": 3,
+    "stage": "picnicCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8702/faf209e6-44f4-11f1-9765-0a58a9feac02.jpg"
+  },
+  {
+    "name": "The Purge",
+    "day": 3,
+    "stage": "wasteLAND",
+    "start": "9:30pm",
+    "end": "10:30pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8476/14decdba-0627-11f1-a48a-0a58a9feac02.jpg"
+  },
+  {
+    "name": "Wolfie",
+    "day": 3,
+    "stage": "beatBoxCAR",
+    "start": "9:30pm",
+    "end": "10:45pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/1665/5f9227e3-ac3e-11ef-954e-0ecc81f4ee58.jpg"
+  },
+  {
+    "name": "Mark Lewis",
+    "day": 3,
+    "stage": "insomniacFRIDAYS",
+    "start": "9:45pm",
+    "end": "11:00pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6678/a65ece8e-4443-11f1-ac15-0a58a9feac02.jpg"
   }
 ]

@@ -1,4 +1,8 @@
 .DS_Store
 .claude/
 docs/
+data-source/
 assets/_gen_times.py
+assets/_make_icon.py
+assets/_import_official_settimes.py
+assets/artists.json.backup
