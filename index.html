@@ -1550,6 +1550,13 @@
     return `https://open.spotify.com/search/${encodeURIComponent(q)}`;
   }
 
+  // Open the combined 3-night schedule PNG in a new tab. Pre-generated
+  // offline by assets/_regen_schedules.js, bundled in APP_SHELL — works at
+  // the festival without signal. Long-press to share/save from there.
+  function openSchedulePng() {
+    window.open('./assets/schedule-all.png', '_blank', 'noopener');
+  }
+
   const main = document.getElementById('main');
   const planControls = document.getElementById('planControls');
   const lineupView = document.getElementById('lineupView');
@@ -2166,6 +2173,15 @@
     };
     timeBucketsEl.appendChild(nowBtn);
 
+    // Open this day's schedule PNG in a new tab
+    const schedBtn = document.createElement('button');
+    schedBtn.type = 'button';
+    schedBtn.className = 'tool-btn';
+    schedBtn.setAttribute('aria-label', 'Open full 3-night schedule');
+    schedBtn.innerHTML = '↗ Full schedule';
+    schedBtn.onclick = () => openSchedulePng();
+    timeBucketsEl.appendChild(schedBtn);
+
     // Spacer pushes the sort toggle to the right
     const spacer = document.createElement('div');
     spacer.className = 'tool-spacer';
@@ -2194,6 +2210,7 @@
   function syncClearBtn() {
     clearArtistBtn.classList.toggle('show', artistInput.value.trim().length > 0);
   }
+
 
   // Live search as user types
   artistInput.addEventListener('input', (e) => {

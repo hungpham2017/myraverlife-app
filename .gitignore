@@ -6,4 +6,5 @@ assets/_gen_times.py
 assets/_make_icon.py
 assets/_import_official_settimes.py
 assets/_update_map_url.py
+assets/_regen_schedules.js
 assets/artists.json.backup
