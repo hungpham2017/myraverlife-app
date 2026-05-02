@@ -458,28 +458,28 @@
     gap: 5px;
   }
 
-  /* shared chip with stacked label — unified spacing across day, time, stage */
+  /* shared chip with stacked label — unified compact sizing */
   .day-chip, .time-chip, .stage-opt {
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--muted);
-    padding: 7px 6px;
-    border-radius: 9px;
+    padding: 5px 5px;
+    border-radius: 8px;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 11.5px;
     cursor: pointer;
     transition: all 0.15s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
     line-height: 1;
     box-sizing: border-box;
   }
   .day-chip .name, .time-chip .name, .stage-opt .so-name {
     display: block;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     letter-spacing: 0.2px;
     line-height: 1.05;
@@ -494,8 +494,8 @@
   }
   .day-chip .sub, .time-chip .range, .stage-opt .so-genre {
     display: block;
-    font-size: 9.5px;
-    opacity: 0.6;
+    font-size: 9px;
+    opacity: 0.55;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     line-height: 1.05;
@@ -503,7 +503,7 @@
     width: 100%;
     text-align: center;
     text-transform: lowercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     color: var(--muted);
     flex: 0 0 auto;
   }
@@ -957,23 +957,23 @@
   .stage-grid {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   .stage-group-label {
-    font-size: 10px;
+    font-size: 9.5px;
     text-transform: uppercase;
-    letter-spacing: 1.4px;
+    letter-spacing: 1.3px;
     color: var(--muted);
     font-weight: 700;
-    margin-top: 4px;
-    margin-bottom: 2px;
-    opacity: 0.7;
+    margin-top: 2px;
+    margin-bottom: 1px;
+    opacity: 0.6;
   }
   .stage-group-label:first-child { margin-top: 0; }
   .stage-group-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 4px;
   }
   /* Secondary stages render slightly dimmer to communicate hierarchy */
   .stage-opt.secondary { opacity: 0.78; }
