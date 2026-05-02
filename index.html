@@ -955,10 +955,29 @@
   }
 
   .stage-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stage-group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--muted);
+    font-weight: 700;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    opacity: 0.7;
+  }
+  .stage-group-label:first-child { margin-top: 0; }
+  .stage-group-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 5px;
   }
+  /* Secondary stages render slightly dimmer to communicate hierarchy */
+  .stage-opt.secondary { opacity: 0.78; }
+  .stage-opt.secondary:hover, .stage-opt.secondary.selected { opacity: 1; }
   /* stage-specific overrides on top of the shared chip base */
   .stage-opt {
     text-shadow: 0 0 10px color-mix(in oklab, currentColor 35%, transparent);
@@ -1485,29 +1504,44 @@
 
   function renderStageGrid() {
     stageGrid.innerHTML = '';
-    STAGES.forEach(s => {
-      const lbl = document.createElement('label');
-      const isSel = s.id === pickedStage;
-      lbl.className = 'stage-opt' + (isSel ? ' selected' : '');
-      lbl.style.color = s.color;
-      lbl.title = `${s.id} · ${s.genre}`;
-      if (isSel) {
-        lbl.style.borderColor = s.color;
-        lbl.style.background = s.color + '1f';
-      }
-      lbl.innerHTML = `
-        <span class="so-name">${escape(s.id)}</span>
-        <span class="so-genre">${escape(s.short)}</span>
-        <input type="radio" name="stage" value="${s.id}" ${isSel ? 'checked' : ''} />
-      `;
-      lbl.onclick = (e) => {
-        e.preventDefault();
-        pickedStage = (pickedStage === s.id) ? null : s.id;
-        renderStageGrid();
-        clearArtistIfConflicting();
-        renderArtistResults(artistInput.value, pickedStage);
-      };
-      stageGrid.appendChild(lbl);
+    const groups = [
+      { tier: 'main',      label: 'Main stages' },
+      { tier: 'secondary', label: 'Art cars & pop-ups' },
+    ];
+    groups.forEach(group => {
+      const stagesInGroup = STAGES.filter(s => (s.tier || 'main') === group.tier);
+      if (stagesInGroup.length === 0) return;
+      const heading = document.createElement('div');
+      heading.className = 'stage-group-label';
+      heading.textContent = group.label;
+      stageGrid.appendChild(heading);
+      const groupGrid = document.createElement('div');
+      groupGrid.className = 'stage-group-grid';
+      stagesInGroup.forEach(s => {
+        const lbl = document.createElement('label');
+        const isSel = s.id === pickedStage;
+        lbl.className = 'stage-opt' + (isSel ? ' selected' : '') + (s.tier === 'secondary' ? ' secondary' : '');
+        lbl.style.color = s.color;
+        lbl.title = `${s.id} · ${s.genre}`;
+        if (isSel) {
+          lbl.style.borderColor = s.color;
+          lbl.style.background = s.color + '1f';
+        }
+        lbl.innerHTML = `
+          <span class="so-name">${escape(s.id)}</span>
+          <span class="so-genre">${escape(s.short)}</span>
+          <input type="radio" name="stage" value="${s.id}" ${isSel ? 'checked' : ''} />
+        `;
+        lbl.onclick = (e) => {
+          e.preventDefault();
+          pickedStage = (pickedStage === s.id) ? null : s.id;
+          renderStageGrid();
+          clearArtistIfConflicting();
+          renderArtistResults(artistInput.value, pickedStage);
+        };
+        groupGrid.appendChild(lbl);
+      });
+      stageGrid.appendChild(groupGrid);
     });
   }
 

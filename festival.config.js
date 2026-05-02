@@ -39,26 +39,28 @@ window.FESTIVAL = {
   // ── Stages ───────────────────────────────────────────────────────────
   // `id` matches strings used in artists.json's `stage` field.
   // `short` is the 2-3 keyword genre tag shown on the chip's second line.
+  // `tier`: 'main' = the 9 big stages most people care about,
+  //         'secondary' = art cars, sponsored areas, smaller pop-ups.
   stages: [
     // Main 9
-    { id: 'kineticFIELD',     color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners', short: 'mainstage / edm' },
-    { id: 'circuitGROUNDS',   color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',       short: 'techno / house / bass' },
-    { id: 'cosmicMEADOW',     color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',         short: 'bass / mixed / alt' },
-    { id: 'neonGARDEN',       color: '#5cff3a', genre: 'Techno (some house early)',                   short: 'techno / house' },
-    { id: 'stereoBLOOM',      color: '#ff95dd', genre: 'House + tech house, groove-leaning',          short: 'house / tech house' },
-    { id: 'bionicJUNGLE',     color: '#a3e635', genre: 'House + techno + disco / funk',               short: 'house / techno / disco' },
-    { id: 'quantumVALLEY',    color: '#8b8dff', genre: 'Trance + progressive + melodic',              short: 'trance / prog / melodic' },
-    { id: 'bassPOD',          color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',          short: 'dubstep / d&b / riddim' },
-    { id: 'wasteLAND',        color: '#ff5560', genre: 'Hardstyle / hardcore',                        short: 'hardstyle / hardcore' },
+    { id: 'kineticFIELD',     tier: 'main', color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners', short: 'mainstage / edm' },
+    { id: 'circuitGROUNDS',   tier: 'main', color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',       short: 'techno / house / bass' },
+    { id: 'cosmicMEADOW',     tier: 'main', color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',         short: 'bass / mixed / alt' },
+    { id: 'neonGARDEN',       tier: 'main', color: '#5cff3a', genre: 'Techno (some house early)',                   short: 'techno / house' },
+    { id: 'stereoBLOOM',      tier: 'main', color: '#ff95dd', genre: 'House + tech house, groove-leaning',          short: 'house / tech house' },
+    { id: 'bionicJUNGLE',     tier: 'main', color: '#a3e635', genre: 'House + techno + disco / funk',               short: 'house / techno / disco' },
+    { id: 'quantumVALLEY',    tier: 'main', color: '#8b8dff', genre: 'Trance + progressive + melodic',              short: 'trance / prog / melodic' },
+    { id: 'bassPOD',          tier: 'main', color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',          short: 'dubstep / d&b / riddim' },
+    { id: 'wasteLAND',        tier: 'main', color: '#ff5560', genre: 'Hardstyle / hardcore',                        short: 'hardstyle / hardcore' },
     // Secondary / pop-up / art-car stages
-    { id: 'beatBoxCAR',       color: '#ff9933', genre: 'BeatBox Art Car — roving bass / electro',     short: 'art car / bass' },
-    { id: 'casaBACARDI',      color: '#ddb060', genre: 'Casa Bacardí — lounge / house',               short: 'lounge / house' },
-    { id: 'electrolitHOUSE',  color: '#5fd4ce', genre: 'Electrolit Hydration House — chill / house',  short: 'chill / house' },
-    { id: 'forestHOUSE',      color: '#6b8e6b', genre: 'Forest House — house / groove',               short: 'house / groove' },
-    { id: 'insomniacFRIDAYS', color: '#b08cff', genre: 'Insomniac Fridays — house / techno',          short: 'house / techno' },
-    { id: 'picnicCAR',        color: '#ffaa80', genre: 'Picnic Playtime Art Car — playful / mixed',   short: 'art car / mixed' },
-    { id: 'takisHANGAR',      color: '#ff5722', genre: 'Takis Rave Hangar — bass / heavy',            short: 'bass / heavy' },
-    { id: 'yeeDC',            color: '#f5c842', genre: 'YeeDC! — fun themed mixed',                   short: 'mixed / fun' },
+    { id: 'beatBoxCAR',       tier: 'secondary', color: '#ff9933', genre: 'BeatBox Art Car — roving bass / electro',     short: 'art car / bass' },
+    { id: 'casaBACARDI',      tier: 'secondary', color: '#ddb060', genre: 'Casa Bacardí — lounge / house',               short: 'lounge / house' },
+    { id: 'electrolitHOUSE',  tier: 'secondary', color: '#5fd4ce', genre: 'Electrolit Hydration House — chill / house',  short: 'chill / house' },
+    { id: 'forestHOUSE',      tier: 'secondary', color: '#6b8e6b', genre: 'Forest House — house / groove',               short: 'house / groove' },
+    { id: 'insomniacFRIDAYS', tier: 'secondary', color: '#b08cff', genre: 'Insomniac Fridays — house / techno',          short: 'house / techno' },
+    { id: 'picnicCAR',        tier: 'secondary', color: '#ffaa80', genre: 'Picnic Playtime Art Car — playful / mixed',   short: 'art car / mixed' },
+    { id: 'takisHANGAR',      tier: 'secondary', color: '#ff5722', genre: 'Takis Rave Hangar — bass / heavy',            short: 'bass / heavy' },
+    { id: 'yeeDC',            tier: 'secondary', color: '#f5c842', genre: 'YeeDC! — fun themed mixed',                   short: 'mixed / fun' },
   ],
 
   // ── Time buckets (slots) ─────────────────────────────────────────────
