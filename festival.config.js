@@ -24,10 +24,10 @@ window.FESTIVAL = {
 
   // ── Time grid ────────────────────────────────────────────────────────
   // Festival hours are expressed as "minutes from a reference start time"
-  // so overnight festivals (7pm → 6am next day) work cleanly.
+  // so overnight festivals (5pm → 6am next day) work cleanly.
   // Reference: 0 = `dayStartHour` o'clock; festival ends at `dayLengthMins`.
-  dayStartHour: 19,        // 7pm
-  dayLengthMins: 660,      // 11 hours: ends at 6am next day
+  dayStartHour: 17,        // 5pm — covers Friday's pre-show 5pm openers too
+  dayLengthMins: 780,      // 13 hours: ends at 6am next day
 
   // ── Days ─────────────────────────────────────────────────────────────
   days: [
@@ -68,26 +68,17 @@ window.FESTIVAL = {
   // Buckets must cover the full day window without gaps for the
   // bucket-from-time mapping to work. Order = display order.
   buckets: [
-    { id: 'opener',  name: 'Opener',  time: '7–9pm',     range: [0,   120] },
-    { id: 'mid',     name: 'Mid',     time: '9–11pm',    range: [120, 240] },
-    { id: 'peak',    name: 'Peak',    time: '11pm–2am',  range: [240, 420] },
-    { id: 'late',    name: 'Late',    time: '2–4am',     range: [420, 540] },
-    { id: 'sunrise', name: 'Sunrise', time: '4–5:30am',  range: [540, 660] },
+    { id: 'opener',  name: 'Opener',  time: '5–9pm',     range: [0,   240] },
+    { id: 'mid',     name: 'Mid',     time: '9–11pm',    range: [240, 360] },
+    { id: 'peak',    name: 'Peak',    time: '11pm–2am',  range: [360, 540] },
+    { id: 'late',    name: 'Late',    time: '2–4am',     range: [540, 660] },
+    { id: 'sunrise', name: 'Sunrise', time: '4–6am',     range: [660, 780] },
   ],
 
   // ── Timeline hour labels ─────────────────────────────────────────────
   // Auto-generated below from dayStartHour + dayLengthMins so you don't
   // hand-maintain this list. Override here only for non-hourly festivals.
   hourLabels: null, // set by buildHourLabels() below
-
-  // ── Help page tips ───────────────────────────────────────────────────
-  // First-timer tips shown on the Help page. Festival-specific.
-  firstTimerTips: [
-    { ico: '🎯', title: 'Anchor 2 must-sees per night', body: 'Plan around 2 picks. The rest by feel.' },
-    { ico: '🚶', title: '10–15 min between stages',     body: 'The Speedway is huge. Buffer for walks, water, bathroom.' },
-    { ico: '🌅', title: 'Arrive ~9pm, not 7pm',         body: 'Lineup heats up at 9–10. Save your legs.' },
-    { ico: '🍔', title: 'Sit + eat 1–2am',              body: 'Non-negotiable. Skip and you crash by 3.' },
-  ],
 };
 
 // ── Auto-generate hour labels every 60 min ──────────────────────────────

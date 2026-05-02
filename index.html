@@ -154,7 +154,6 @@
   }
   main {
     padding: 16px;
-    padding-bottom: 100px;
     max-width: 720px;
     margin: 0 auto;
   }
@@ -299,67 +298,209 @@
   .stage-card .genre { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
   .stage-card .desc { font-size: 13px; line-height: 1.5; color: var(--text); opacity: 0.9; }
 
-  /* map view */
-  .map-wrap { text-align: center; }
-  .map-wrap img {
-    max-width: 100%;
-    border-radius: 10px;
-    border: 1px solid var(--border);
+  /* Map view — official illustrated map.png with invisible tap hotspots
+     overlaid at each main stage. Hotspots only become visible on hover/tap. */
+  .map-wrap {
+    padding: 4px 0 16px;
+    max-width: 480px;
+    margin: 0 auto;
   }
-  .map-empty {
-    background: var(--surface);
-    border: 2px dashed var(--border);
+  .map-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin: 10px 4px 0;
+    text-align: center;
+    opacity: 0.75;
+  }
+  .map-note a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .map-img-container {
+    position: relative;
+    line-height: 0;
     border-radius: 12px;
-    padding: 40px 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    touch-action: none;          /* JS owns pinch + pan gestures */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .map-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* Stage marker — clean colored dot, name lives only in the popover. */
+  .map-hotspot {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    margin-top: -9px;
+    border-radius: 50%;
+    background: currentColor;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.5);
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 2;
+  }
+  .map-hotspot:hover,
+  .map-hotspot:focus-visible {
+    transform: scale(1.3);
+    outline: none;
+    z-index: 3;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.22), 0 0 10px currentColor;
+  }
+  .map-hotspot.selected {
+    transform: scale(1.5);
+    z-index: 4;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 4px rgba(255,255,255,0.28), 0 0 14px currentColor;
+  }
+  .map-hint {
+    margin: 12px 4px 0;
     text-align: center;
     color: var(--muted);
+    font-size: 12.5px;
+    font-style: italic;
   }
-  .map-empty p { margin: 0 0 12px; font-size: 13px; }
-  .upload-btn {
-    display: inline-block;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: white;
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 500;
-  }
-  .upload-btn input { display: none; }
-  .map-actions {
-    margin-top: 10px;
-    display: flex; gap: 8px; justify-content: center;
-  }
-  .link-btn {
-    background: none; border: none;
-    color: var(--muted);
-    font-size: 12px;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 4px 8px;
-    font-family: inherit;
-  }
-  .link-btn:hover { color: var(--accent); }
 
-  .fab {
-    position: fixed;
-    bottom: calc(60px + env(safe-area-inset-bottom));
-    right: 18px;
-    width: 46px; height: 46px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: white;
-    border: none;
-    font-size: 22px;
-    font-weight: 300;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(255, 46, 138, 0.28);
-    z-index: 20;
-    line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding-bottom: 2px;
+  /* GPS "you are here" pin — pulsing cyan dot with directional cone above.
+     Counter-scaled in JS so it stays the same on-screen size at any zoom. */
+  .user-pin {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    margin-top: -9px;
+    pointer-events: none;
+    z-index: 6;
+    transform-origin: center center;
+    transition: transform 0.05s linear;
   }
-  .fab:active { transform: scale(0.93); }
+  .user-pin-dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent-2);
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 0 12px var(--accent-2);
+  }
+  .user-pin-pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    opacity: 0.4;
+    animation: userPinPulse 2.2s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes userPinPulse {
+    0%   { transform: scale(0.6); opacity: 0.55; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  /* Directional cone — anchored at the dot center, extends "up" by default,
+     rotated to phone heading. Uses conic-gradient for the beam shape. */
+  .user-pin-cone {
+    position: absolute;
+    inset: -16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background:
+      conic-gradient(
+        from 330deg,
+        transparent 0deg,
+        rgba(0, 212, 255, 0.55) 18deg,
+        rgba(0, 212, 255, 0.05) 30deg,
+        transparent 30deg
+      );
+    transform-origin: center center;
+    pointer-events: none;
+    transition: transform 0.12s linear;
+  }
+
+  /* Map status line (GPS errors, etc.) */
+  .map-status {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(14, 16, 24, 0.92);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 7;
+    white-space: nowrap;
+  }
+
+  /* Zoom controls — top-right of the map */
+  .map-zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 4;
+  }
+  .map-zoom-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(14, 16, 24, 0.85);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .map-zoom-btn:active { background: var(--accent); border-color: var(--accent); }
+
+  .map-zoom-target {
+    transform-origin: center center;
+    transition: transform 0.05s linear;
+    will-change: transform;
+  }
+
+  .lineup-view {
+    padding: 0 18px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  /* Lineup's sticky bar must clear the page header (which is also sticky
+     at top:0). --header-h is measured at runtime since header height
+     varies between viewports. */
+  .lineup-view .lineup-sticky {
+    position: sticky;
+    top: var(--header-h, 0px);
+    z-index: 5;
+    padding: 12px 0 10px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .lineup-view .artist-results {
+    max-height: none;
+    border-radius: 8px;
+    display: block;
+    border: 1px solid var(--border);
+  }
 
   .modal-bg {
     position: fixed; inset: 0;
@@ -451,6 +592,64 @@
     outline: none;
     border-color: var(--accent-2);
   }
+
+  /* ── Lineup search bar — pill, real icon, focus glow ───────────── */
+  .search-bar {
+    position: relative;
+    margin-top: 10px;
+  }
+  .search-bar input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 12px 44px 12px 44px;
+    font-size: 16px;       /* 16px+ prevents iOS auto-zoom */
+    font-family: inherit;
+    line-height: 1.2;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .search-bar input::placeholder {
+    color: var(--muted);
+    opacity: 0.7;
+  }
+  .search-bar input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg);
+    box-shadow: 0 0 0 4px rgba(255, 46, 138, 0.18);
+  }
+  .search-bar .search-ico {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    display: flex;
+    transition: color 0.15s ease;
+  }
+  .search-bar input:focus + .search-ico,
+  .search-bar input:focus ~ .search-ico { color: var(--accent); }
+  .search-bar .input-clear {
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    padding: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    background: var(--surface);
+    font-size: 18px;
+  }
+  .search-bar .input-clear.show { display: flex; }
+  .search-bar .input-clear:hover { color: var(--text); background: var(--border); }
   /* day chips */
   .day-chips {
     display: grid;
@@ -458,8 +657,134 @@
     gap: 4px;
   }
 
-  /* shared chip with stacked label — unified compact sizing */
-  .day-chip, .time-chip, .stage-opt {
+  /* Lineup toolbar: 🔴 Now (filter) on the left + Sort toggle (A-Z / Stages) on the right.
+     The #timeBuckets element is reused as the toolbar container. */
+  .time-buckets {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .tool-spacer { flex: 1 1 auto; }
+  .tool-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
+  }
+  .tool-btn.now-chip { gap: 5px; }
+  /* ON: solid red fill so the toggle state reads at a glance — no extra glow. */
+  .tool-btn.now-chip.active {
+    background: #ff3b3b;
+    border-color: #ff3b3b;
+    color: #fff;
+  }
+  .tool-btn.now-chip.active .now-dot {
+    background: #fff;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+  }
+  .now-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff3b3b;
+    animation: nowPulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+    box-shadow: 0 0 4px #ff3b3b;
+  }
+  @keyframes nowPulse {
+    0%, 100% { opacity: 0.45; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.35); }
+  }
+  /* Sort toggle — segmented control (Name / Stage) */
+  .sort-toggle {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 0;
+  }
+  .sort-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
+  }
+  .sort-btn.active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  /* Stage section header (when sorted by Stage) — also a tap target that
+     fills the search bar with the stage id, narrowing the list to that stage. */
+  .lineup-stage-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 12px 6px;
+    background: var(--bg);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease;
+  }
+  .lineup-stage-header:first-child { padding-top: 6px; }
+  .lineup-stage-header:hover, .lineup-stage-header:active {
+    background: var(--surface);
+  }
+  .lsh-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .lsh-name {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .lsh-tap {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-2);
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.2px;
+    text-transform: none;
+    opacity: 0.95;
+  }
+
+  /* day chip — stacked label */
+  .day-chip {
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--muted);
@@ -477,7 +802,7 @@
     line-height: 1;
     box-sizing: border-box;
   }
-  .day-chip .name, .time-chip .name, .stage-opt .so-name {
+  .day-chip .name {
     display: block;
     font-size: 11.5px;
     font-weight: 600;
@@ -489,10 +814,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
-    text-transform: none;
     flex: 0 0 auto;
   }
-  .day-chip .sub, .time-chip .range, .stage-opt .so-genre {
+  .day-chip .sub {
     display: block;
     font-size: 9px;
     opacity: 0.55;
@@ -507,31 +831,22 @@
     color: var(--muted);
     flex: 0 0 auto;
   }
-  .day-chip.active, .time-chip.active {
+  .day-chip.active {
     border-color: var(--accent);
     background: rgba(255, 46, 138, 0.14);
     color: var(--text);
   }
-  .day-chip.active .sub, .time-chip.active .range {
+  .day-chip.active .sub {
     opacity: 0.85;
     color: var(--accent);
   }
-  .time-chips {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-  }
-
-  /* searchable artist results */
+  /* Artist list — flows full-height; the page is the scroll container. */
   .artist-results {
-    max-height: 220px;
-    overflow-y: auto;
     margin-top: 8px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--bg);
     display: none;
-    -webkit-overflow-scrolling: touch;
   }
   .artist-results.show { display: block; }
   .artist-result {
@@ -548,6 +863,15 @@
   .artist-result:hover, .artist-result.active {
     background: var(--surface-2);
   }
+  .artist-result .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
   .artist-result .name { flex: 1; font-weight: 500; }
   .artist-result .name mark {
     background: rgba(255,180,84,0.25);
@@ -563,10 +887,46 @@
     white-space: nowrap;
     opacity: 0.85;
   }
+  .artist-result .heart {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 8px;
+    margin-left: 2px;
+    margin-right: -4px;
+    transition: color 0.15s, transform 0.12s;
+    font-family: inherit;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .artist-result .heart:hover { color: var(--accent); }
+  .artist-result .heart:active { transform: scale(1.25); }
+  .artist-result .heart.on {
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(255, 46, 138, 0.5);
+  }
   .artist-result .stage-tag .day-part { opacity: 0.6; font-weight: 500; }
   .artist-result .stage-tag .time-part { opacity: 0.85; font-weight: 600; font-variant-numeric: tabular-nums; }
   .artist-result .stage-tag .sep { opacity: 0.4; margin: 0 4px; }
-  .artist-result .stage-tag .stage-part { font-weight: 600; }
+  /* Stage chip — read-only colored label (dot + name) on each artist row. */
+  .artist-result .stage-tag .stage-part {
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .artist-result .stage-tag .stage-part::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+    flex-shrink: 0;
+  }
 
   /* Timeline grid view */
   .timeline {
@@ -608,47 +968,76 @@
     border: 1px solid var(--border);
     border-left-width: 3px;
     border-radius: 4px;
-    padding: 2px 5px;
+    padding: 0;
     overflow: hidden;
     box-sizing: border-box;
     min-height: 16px;
+    display: flex;
+    align-items: center;
+  }
+  .timeline-block .b-img {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    object-position: center 28%;
+    border-radius: 8px;
+    margin: 7px 0 7px 7px;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  .timeline-block .b-content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    padding: 7px 22px 7px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
   }
   .timeline-block .b-artist {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     overflow: hidden;
     line-height: 1.15;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
   }
-  .timeline-block .b-meta {
-    font-size: 11px;
-    opacity: 0.75;
-    margin-top: 2px;
+  .timeline-block .b-stageline {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.1px;
+  }
+  .timeline-block .b-time {
+    font-size: 11.5px;
+    opacity: 0.7;
+    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-variant-numeric: tabular-nums;
-    line-height: 1.2;
   }
-  .timeline-block .b-stage { font-weight: 700; }
   .timeline-block .b-del {
     position: absolute;
     top: 0px; right: 1px;
     background: none; border: none;
-    color: var(--muted);
-    font-size: 13px;
+    color: var(--accent);
+    font-size: 14px;
     line-height: 1;
-    padding: 2px 4px;
+    padding: 2px 5px;
     cursor: pointer;
     border-radius: 4px;
-    opacity: 0.45;
-    transition: opacity 0.15s ease, color 0.15s ease;
+    text-shadow: 0 0 6px rgba(255, 46, 138, 0.5);
+    transition: transform 0.12s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .timeline-block .b-del:hover { opacity: 1; color: var(--accent); }
+  .timeline-block .b-del:hover { color: var(--text); }
+  .timeline-block .b-del:active { transform: scale(1.25); }
 
   /* Help page — full content sections */
   .help-page { padding: 4px 0 16px; }
@@ -676,6 +1065,14 @@
     opacity: 0.9;
   }
   .help-page h2:first-child { margin-top: 4px; }
+  .help-fineprint {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0 0 4px;
+    opacity: 0.85;
+  }
+  .help-fineprint b { color: var(--text); opacity: 0.9; }
   .help-list {
     list-style: none;
     padding: 0;
@@ -782,19 +1179,27 @@
     margin: 8px 0 0;
     font-style: italic;
   }
-  .byline {
+  /* Global footer — appears at the end of every page's content. The
+     padding-bottom clears the fixed bottom nav so the credit lines aren't
+     hidden behind it when scrolled to the end. */
+  .app-footer {
+    padding: 24px 18px calc(72px + env(safe-area-inset-bottom));
     text-align: center;
-    font-size: 14px;
-    font-weight: 600;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .byline {
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text);
-    margin: 30px 0 8px;
+    opacity: 0.85;
+    margin: 0 0 6px;
     letter-spacing: 0.2px;
   }
   .copyright-bottom {
-    text-align: center;
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--muted);
-    opacity: 0.8;
+    opacity: 0.7;
     margin: 0;
     line-height: 1.45;
   }
@@ -879,121 +1284,43 @@
     opacity: 0.7;
   }
 
-  /* Undo toast for accidental deletes */
-  .undo-toast {
-    position: fixed;
-    bottom: calc(82px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 6px 9px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 50;
-    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(.2,.8,.2,1);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-    max-width: calc(100vw - 32px);
-  }
-  .undo-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-  }
-  .undo-toast b {
-    font-weight: 700;
-    margin: 0 4px;
-    max-width: 14ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: bottom;
-  }
-  .undo-toast .undo-btn {
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: white;
-    border: none;
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    letter-spacing: 0.3px;
-    margin-left: 6px;
-  }
-
-  .pick-overlap-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--warn);
-    background: rgba(255, 209, 102, 0.10);
-    border: 1px solid rgba(255, 209, 102, 0.25);
-    border-radius: 999px;
-    padding: 2px 7px 2px 6px;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    margin-left: 4px;
-  }
   .artist-result-empty {
     padding: 14px 12px;
     color: var(--muted);
     font-size: 13px;
-    font-style: italic;
     text-align: center;
   }
-
-  .stage-grid {
+  .artist-result-empty p { font-style: italic; }
+  .cross-day-links {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-top: 8px;
   }
-  .stage-group-label {
-    font-size: 9.5px;
-    text-transform: uppercase;
-    letter-spacing: 1.3px;
-    color: var(--muted);
+  .switch-day-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .switch-day-btn:hover, .switch-day-btn:active {
+    border-color: var(--accent);
+    background: rgba(255, 46, 138, 0.10);
+  }
+  .switch-day-btn b {
+    color: var(--accent);
     font-weight: 700;
-    margin-top: 2px;
-    margin-bottom: 1px;
-    opacity: 0.6;
+    margin: 0 2px;
   }
-  .stage-group-label:first-child { margin-top: 0; }
-  .stage-group-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-  }
-  .stage-group-grid.secondary { grid-template-columns: repeat(4, 1fr); }
-  /* Secondary stages: desaturate + slight dim to communicate hierarchy.
-     Selected/hover restores full vibrance. */
-  .stage-opt.secondary {
-    filter: saturate(0.55) brightness(0.92);
-  }
-  .stage-opt.secondary:hover,
-  .stage-opt.secondary.selected {
-    filter: none;
-  }
-  /* stage-specific overrides on top of the shared chip base */
-  .stage-opt {
-    text-shadow: 0 0 10px color-mix(in oklab, currentColor 35%, transparent);
-  }
-  .stage-opt .so-genre {
-    text-shadow: none;
-  }
-  .stage-opt input { display: none; }
-  .stage-opt.selected .so-genre { opacity: 0.85; }
+  .switch-day-btn .muted { color: var(--muted); font-weight: 400; }
+
   .modal-actions {
     display: flex; gap: 8px;
     margin-top: 16px;
@@ -1035,43 +1362,34 @@
 
 <main id="main"></main>
 
-<button class="fab" id="addBtn" aria-label="Add artist">+</button>
+<div id="lineupView" class="lineup-view" style="display:none">
+  <div class="lineup-sticky">
+    <div class="day-chips" id="dayChips"></div>
+    <div class="search-bar">
+      <input id="artistInput" type="text" placeholder="search artist or stage…" autocomplete="off" enterkeyhint="search" />
+      <span class="search-ico" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </span>
+      <button type="button" id="clearArtistBtn" class="input-clear" aria-label="Clear">×</button>
+    </div>
+    <div class="time-buckets" id="timeBuckets"></div>
+  </div>
+  <div class="artist-results" id="artistResults"></div>
+</div>
+
+<footer class="app-footer">
+  <div class="byline">
+    made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
+  </div>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham</p>
+</footer>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="plan">Plan</button>
+  <button class="tab" data-tab="lineup">Lineup</button>
+  <button class="tab active" data-tab="plan">My Schedule</button>
   <button class="tab" data-tab="map">Map</button>
   <button class="tab" data-tab="help">Help</button>
 </nav>
-
-<div class="modal-bg" id="modal">
-  <div class="modal">
-    <button class="modal-close" id="cancelBtn" aria-label="Close">×</button>
-    <h2 id="modalTitle" style="display:none">Add artist</h2>
-    <div class="field" style="margin-top:6px">
-      <label for="artistInput">Artist</label>
-      <div class="input-wrap">
-        <input id="artistInput" type="text" placeholder="search or type a name…" autocomplete="off" />
-        <button type="button" id="clearArtistBtn" class="input-clear" aria-label="Clear">×</button>
-      </div>
-      <div class="artist-results" id="artistResults"></div>
-    </div>
-    <div class="field">
-      <label>Day</label>
-      <div class="day-chips" id="dayChips"></div>
-    </div>
-    <div class="field">
-      <label>Stage</label>
-      <div class="stage-grid" id="stageGrid"></div>
-    </div>
-    <div class="field">
-      <label>Set time</label>
-      <div class="time-chips" id="timeChips"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="saveBtn">Add to schedule</button>
-    </div>
-  </div>
-</div>
 
 <script>
   // Festival-specific data is loaded from festival.config.js (window.FESTIVAL).
@@ -1091,6 +1409,42 @@
       .then(data => { ARTISTS = Array.isArray(data) ? data : []; })
       .catch(() => { ARTISTS = []; });
   }
+  // Returns existing pick.id if user has hearted this artist (same name+day+stage), else null.
+  function findPickIdForArtist(a) {
+    const list = state.picks[a.day] || [];
+    const target = a.name.toLowerCase();
+    const hit = list.find(p =>
+      p.artist.toLowerCase() === target && p.stage === a.stage
+    );
+    return hit ? hit.id : null;
+  }
+
+  // Heart toggle: add the artist as a pick (with their real lineup time) or remove if already there.
+  function toggleHeartArtist(a) {
+    const existing = findPickIdForArtist(a);
+    if (existing) {
+      deletePick(existing);
+      return;
+    }
+    const startMins = timeStrToMins(a.start);
+    const endMins = timeStrToMins(a.end);
+    const hasTime = startMins != null && endMins != null && endMins > startMins;
+    const pick = {
+      id: uid(),
+      artist: a.name,
+      stage: a.stage,
+      bucket: hasTime ? bucketFromMinutes(startMins) : 'peak',
+      startMins: hasTime ? startMins : null,
+      endMins: hasTime ? endMins : null,
+      image: a.image || null,
+    };
+    if (!state.picks[a.day]) state.picks[a.day] = [];
+    state.picks[a.day].push(pick);
+    save();
+    renderArtistResults(artistInput.value);
+    render();
+  }
+
   function findStageForArtist(night, artistName) {
     const target = artistName.trim().toLowerCase();
     const hit = ARTISTS.find(a => a.day === night && a.name.toLowerCase() === target);
@@ -1108,10 +1462,8 @@
     mode: 'assumed',
     picks: { 1: [], 2: [], 3: [] },
     tab: 'plan',
-    map: null,
     welcomeDismissed: false,
   }, load() || {});
-  let editingId = null;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches
@@ -1157,7 +1509,7 @@
       if (m[3] === 'pm' && h !== 12) h += 12;
       if (m[3] === 'am' && h === 12) h = 0;
     }
-    // Festival window: from DAY_START_HOUR ... wraps around midnight if overnight
+    // Festival window: from DAY_START_HOUR ... wraps around midnight if overnight.
     if (h >= DAY_START_HOUR) return (h - DAY_START_HOUR) * 60 + min;
     if (h < DAY_END_HOUR_24) return (h + (24 - DAY_START_HOUR)) * 60 + min;
     return null;
@@ -1184,27 +1536,49 @@
 
   const main = document.getElementById('main');
   const planControls = document.getElementById('planControls');
-  const addBtn = document.getElementById('addBtn');
+  const lineupView = document.getElementById('lineupView');
+  const pageHeader = document.querySelector('header');
+
+  // Measure header height so the lineup-sticky bar sticks just below it.
+  function syncHeaderHeightVar() {
+    const h = pageHeader ? pageHeader.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  window.addEventListener('resize', syncHeaderHeightVar);
+  window.addEventListener('load', syncHeaderHeightVar);
 
   function render() {
     document.querySelectorAll('.tab').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === state.tab);
     });
 
+    // Lineup tab: hide planControls (night-btn row) but keep page header.
+    if (state.tab === 'lineup') {
+      planControls.style.display = 'none';
+      main.style.display = 'none';
+      lineupView.style.display = '';
+      syncHeaderHeightVar();
+      renderDayChips();
+      renderTimeBuckets();
+      renderArtistResults(artistInput.value);
+      return;
+    }
+
+    // Other tabs: page header visible, main content stack
+    main.style.display = '';
+    lineupView.style.display = 'none';
+
     if (state.tab === 'map') {
       planControls.style.display = 'none';
-      addBtn.classList.add('hidden');
       renderMap();
       return;
     }
     if (state.tab === 'help') {
       planControls.style.display = 'none';
-      addBtn.classList.add('hidden');
       renderHelp();
       return;
     }
     planControls.style.display = '';
-    addBtn.classList.remove('hidden');
     renderPlan();
   }
 
@@ -1214,71 +1588,343 @@
 
         <h2>how to use</h2>
         <ul class="help-list">
-          <li><span class="help-ico">📱</span><div><b>Best on phone</b><p>Share → <b>Add to Home Screen</b> for offline use at the festival.</p></div></li>
-          <li><span class="help-ico">＋</span><div><b>Build your night</b><p>Tap + to search a DJ. Stage and time auto-fill.</p></div></li>
-          <li><span class="help-ico">⌖</span><div><b>Filter chips</b><p>Tap day, stage, or time slot. Tap again to clear.</p></div></li>
-          <li><span class="help-ico">🗺</span><div><b>Map tab</b><p>Full Speedway grounds. Pinch to zoom.</p></div></li>
-          <li><span class="help-ico">💾</span><div><b>On this device</b><p>Picks live in your browser. Not synced across devices.</p></div></li>
+          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>Keep a shortcut on your home screen so it works without signal.<br><b>iPhone</b>: <b>Share</b> → <b>Add to Home Screen</b>. <b>Android</b>: <b>⋮</b> → <b>Add to Home screen</b>.</p></div></li>
+          <li><span class="help-ico">♥</span><div><b>Build your night</b><p>In <b>Lineup</b>, tap a DJ's heart to add them to your <b>Schedule</b>. Tap again to remove.</p></div></li>
+          <li><span class="help-ico">🔍</span><div><b>Find an artist or stage</b><p>In <b>Lineup</b>, type an artist (<i>"John Summit"</i>) or a stage (<i>"kinetic"</i>).</p></div></li>
+          <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>In <b>Lineup</b>, tap <b>Now</b>.</p></div></li>
+          <li><span class="help-ico">🎯</span><div><b>Browse one stage at a time</b><p>In <b>Lineup</b>, set sort to <b>Stage</b>, then tap a stage header.</p></div></li>
+          <li><span class="help-ico">📍</span><div><b>See where you are on the map</b><p>On the <b>Map</b>, tap 📍.</p></div></li>
         </ul>
 
-        <h2>first-timer tips</h2>
-        <ul class="help-list">
-          ${(window.FESTIVAL.firstTimerTips || []).map(t =>
-            `<li><span class="help-ico">${t.ico}</span><div><b>${escape(t.title)}</b><p>${escape(t.body)}</p></div></li>`
-          ).join('')}
-        </ul>
-
-        <div class="byline">
-          <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a> made this  ·  catch me at EDC
-        </div>
-        <p class="copyright-bottom">© 2026 · Hung Pham · Personal project, not affiliated with Insomniac or EDC</p>
+        <h2>fine print</h2>
+        <p class="help-fineprint">
+          Fan-made tool. Set times can change last-minute, the app can break, your phone can die. <b>Don't rely on it alone.</b> Check stage signage and the official Insomniac app. We're not responsible for missed sets, getting lost, lost devices, or anything else that happens while using this app. Use at your own risk.
+        </p>
+        <p class="help-fineprint" style="margin-top:10px">
+          <b>Privacy.</b> Hearts and notes are saved only on your phone, never sent anywhere. The site uses Google Analytics for traffic stats (pageviews, browser, country). Nothing personal is collected.
+        </p>
       </div>
     `;
+  }
+
+  // GPS bounding box of the festival on the map image (corners of map.png).
+  // Approximations from Las Vegas Motor Speedway location — tune as needed.
+  const MAP_BOUNDS = {
+    north: 36.2790,
+    south: 36.2660,
+    west:  -115.0210,
+    east:  -115.0030,
+  };
+  // Map image's true heading (deg from north). 0 = north-up. EDC's official
+  // map is roughly north-up; tune if the compass arrow points wrong on-site.
+  const MAP_ROTATION_DEG = 0;
+
+  function gpsToMapPercent(lat, lng) {
+    const top  = ((MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south)) * 100;
+    const left = ((lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west))   * 100;
+    const inBounds = top >= 0 && top <= 100 && left >= 0 && left <= 100;
+    return { left, top, inBounds };
   }
 
   function renderMap() {
     main.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'map-wrap';
-    const mapSrc = state.map || './assets/map.png';
-    const img = document.createElement('img');
-    img.src = mapSrc;
-    img.alt = 'EDC map';
-    img.onerror = () => {
-      wrap.innerHTML = '';
-      renderMapEmpty(wrap);
-    };
-    wrap.appendChild(img);
-    main.appendChild(wrap);
-  }
-  function renderMapEmpty(wrap) {
-    const empty = document.createElement('div');
-    empty.className = 'map-empty';
-    empty.innerHTML = `
-      <p>Upload the EDC map (image). It saves on this device — works offline after.</p>
-      <label class="upload-btn">
-        Choose image
-        <input type="file" accept="image/*" />
-      </label>
+
+    wrap.innerHTML = `
+      <div class="map-img-container" id="mapContainer">
+        <div class="map-zoom-target" id="mapZoomTarget">
+          <img class="map-img" src="https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png" alt="EDC Las Vegas festival map" draggable="false" />
+          <div class="user-pin" id="userPin" style="display:none">
+            <span class="user-pin-cone" id="userPinCone"></span>
+            <span class="user-pin-pulse"></span>
+            <span class="user-pin-dot"></span>
+          </div>
+        </div>
+        <div class="map-zoom-controls">
+          <button type="button" class="map-zoom-btn" id="gpsBtn"     aria-label="Find my location">📍</button>
+          <button type="button" class="map-zoom-btn" data-zoom="in"  aria-label="Zoom in">⊕</button>
+          <button type="button" class="map-zoom-btn" data-zoom="out" aria-label="Zoom out">⊖</button>
+          <button type="button" class="map-zoom-btn" data-zoom="reset" aria-label="Reset zoom">↺</button>
+        </div>
+        <div class="map-status" id="mapStatus" aria-live="polite"></div>
+      </div>
+      <p class="map-note">
+        Loaded live from <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a> · currently the 2025 layout · auto-updates once Insomniac publishes the 2026 map.
+      </p>
     `;
-    empty.querySelector('input').onchange = handleMapUpload;
-    wrap.appendChild(empty);
+
+    main.appendChild(wrap);
+    setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
+    wrap.querySelector('#gpsBtn').onclick = (e) => { e.stopPropagation(); locateUser(); };
   }
 
-  function handleMapUpload(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const prev = state.map;
-      state.map = reader.result;
-      try { save(); render(); }
-      catch (err) {
-        state.map = prev;
-        alert('Image too large to store. Try a smaller image (under ~4 MB).');
-      }
+  // ── GPS "you are here" ──────────────────────────────────────────────────
+  let userHeading = null;
+  let compassAttached = false;
+
+  function setMapStatus(msg) {
+    const s = document.getElementById('mapStatus');
+    if (s) {
+      s.textContent = msg || '';
+      s.style.display = msg ? 'block' : 'none';
+    }
+  }
+
+  function locateUser() {
+    if (!navigator.geolocation) {
+      setMapStatus('GPS not available');
+      setTimeout(() => setMapStatus(''), 2200);
+      return;
+    }
+    setMapStatus('finding you…');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const p = gpsToMapPercent(latitude, longitude);
+        placePin(p.left, p.top);
+        // If zoomed in, recenter the view so the pin is visible.
+        if (mapZoom.panToImagePct) mapZoom.panToImagePct(p.left, p.top);
+        setMapStatus('');
+        startCompass();
+      },
+      (err) => {
+        setMapStatus(err.code === 1 ? 'permission denied' : 'no GPS fix');
+        setTimeout(() => setMapStatus(''), 2500);
+      },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 30000 }
+    );
+  }
+
+  function placePin(leftPct, topPct) {
+    const pin = document.getElementById('userPin');
+    if (!pin) return;
+    pin.style.left = Math.max(0, Math.min(100, leftPct)) + '%';
+    pin.style.top  = Math.max(0, Math.min(100, topPct))  + '%';
+    pin.style.display = '';
+  }
+
+  function startCompass() {
+    if (compassAttached) return;
+    // iOS 13+ requires explicit permission via user gesture (the GPS button).
+    const Req = window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission;
+    if (typeof Req === 'function') {
+      Req().then(perm => {
+        if (perm === 'granted') attachCompass();
+      }).catch(() => {});
+    } else {
+      attachCompass();
+    }
+  }
+
+  function attachCompass() {
+    if (compassAttached) return;
+    compassAttached = true;
+    window.addEventListener('deviceorientationabsolute', onOrient, true);
+    window.addEventListener('deviceorientation', onOrient, true);
+  }
+
+  // Smoothing buffer for compass — phone sensors fire at 30+ Hz which makes
+  // the cone twitch. We low-pass-filter and throttle DOM writes via rAF.
+  let smoothedHeading = null;
+  let conePending = false;
+  const SMOOTH_FACTOR = 0.18;     // 0 = no smoothing, 1 = no smoothing-effect
+
+  function onOrient(e) {
+    let heading = null;
+    if (typeof e.webkitCompassHeading === 'number') {
+      heading = e.webkitCompassHeading;       // iOS: clockwise from true north
+    } else if (e.alpha != null && e.absolute) {
+      heading = (360 - e.alpha) % 360;         // standard alpha is counterclockwise
+    }
+    if (heading == null) return;
+
+    if (smoothedHeading == null) {
+      smoothedHeading = heading;
+    } else {
+      // Handle the 360/0 wrap so we always rotate the short way.
+      let diff = heading - smoothedHeading;
+      if (diff > 180)  diff -= 360;
+      if (diff < -180) diff += 360;
+      smoothedHeading = (smoothedHeading + diff * SMOOTH_FACTOR + 360) % 360;
+    }
+    userHeading = smoothedHeading;
+
+    if (!conePending) {
+      conePending = true;
+      requestAnimationFrame(() => {
+        conePending = false;
+        const cone = document.getElementById('userPinCone');
+        if (cone) cone.style.transform = `rotate(${smoothedHeading - MAP_ROTATION_DEG}deg)`;
+      });
+    }
+  }
+
+  // Module-scoped so other map features (drop-pin) can read the live state.
+  const mapZoom = { scale: 1, tx: 0, ty: 0, container: null };
+
+  // Inline pinch-zoom + pan for the map. Single transform (scale + translate)
+  // applied to the zoom-target so img + hotspots scale together.
+  function setupMapZoom(container, target) {
+    mapZoom.container = container;
+    let scale = mapZoom.scale = 1, tx = mapZoom.tx = 0, ty = mapZoom.ty = 0;
+    const MIN = 1, MAX = 4;
+
+    function clamp() {
+      // Keep scaled content within container bounds (no panning into empty space).
+      const cw = container.clientWidth, ch = container.clientHeight;
+      const maxX = Math.max(0, (cw * scale - cw) / 2);
+      const maxY = Math.max(0, (ch * scale - ch) / 2);
+      tx = Math.max(-maxX, Math.min(maxX, tx));
+      ty = Math.max(-maxY, Math.min(maxY, ty));
+    }
+    function apply() {
+      clamp();
+      target.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      mapZoom.scale = scale; mapZoom.tx = tx; mapZoom.ty = ty;
+      // Counter-scale GPS pin so it stays constant on-screen (Google Maps style)
+      const pin = document.getElementById('userPin');
+      if (pin) pin.style.transform = `scale(${1 / scale})`;
+    }
+    function reset() { scale = 1; tx = 0; ty = 0; apply(); }
+
+    // If the pin is offscreen, recenter the viewport on it. If it's already
+    // visible, leave the map alone. Math accounts for transform-origin: center.
+    mapZoom.panToImagePct = (leftPct, topPct) => {
+      if (scale <= 1) return; // at zoom 1 the whole map is visible
+      const cw = container.clientWidth, ch = container.clientHeight;
+      const imgX = (leftPct / 100) * cw;
+      const imgY = (topPct  / 100) * ch;
+      // Real screen position with center transform-origin:
+      // screenX = tx + imgX*scale + cw/2*(1-scale)
+      const offX = (cw / 2) * (1 - scale);
+      const offY = (ch / 2) * (1 - scale);
+      const screenX = tx + imgX * scale + offX;
+      const screenY = ty + imgY * scale + offY;
+      const MARGIN = 32;
+      const inView = screenX >= MARGIN && screenX <= cw - MARGIN
+                  && screenY >= MARGIN && screenY <= ch - MARGIN;
+      if (inView) return;    // already visible — leave the map alone
+      // Pan to center the pin: solve screenX_target = cw/2.
+      tx = (cw / 2 - imgX) * scale;
+      ty = (ch / 2 - imgY) * scale;
+      apply();
     };
-    reader.readAsDataURL(file);
+
+    // Buttons
+    container.querySelectorAll('.map-zoom-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const action = btn.dataset.zoom;
+        if (action === 'in')        scale = Math.min(MAX, scale * 1.5);
+        else if (action === 'out')  scale = Math.max(MIN, scale / 1.5);
+        else if (action === 'reset') { reset(); return; }
+        apply();
+      };
+    });
+
+    // Pinch-zoom (2 fingers) + pan (1 finger when zoomed)
+    let pinchStart = null, panStart = null;
+    function dist(t) {
+      const dx = t[0].clientX - t[1].clientX;
+      const dy = t[0].clientY - t[1].clientY;
+      return Math.hypot(dx, dy);
+    }
+    function midpoint(t) {
+      return {
+        x: (t[0].clientX + t[1].clientX) / 2,
+        y: (t[0].clientY + t[1].clientY) / 2,
+      };
+    }
+
+    container.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        pinchStart = { dist: dist(e.touches), scale, mid: midpoint(e.touches), tx, ty };
+        panStart = null;
+      } else if (e.touches.length === 1 && scale > 1) {
+        panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx, ty };
+        pinchStart = null;
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      // Always block native scrolling when the touch started on the map —
+      // otherwise iOS lets a 1-finger drag at scale=1 move the page.
+      e.preventDefault();
+      if (e.touches.length === 2 && pinchStart) {
+        const newDist = dist(e.touches);
+        scale = Math.max(MIN, Math.min(MAX, pinchStart.scale * (newDist / pinchStart.dist)));
+        apply();
+      } else if (e.touches.length === 1 && panStart && scale > 1) {
+        tx = panStart.tx + (e.touches[0].clientX - panStart.x);
+        ty = panStart.ty + (e.touches[0].clientY - panStart.y);
+        apply();
+      }
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+      // Pinch ended (one finger lifted)? Transition to pan with remaining finger.
+      if (e.touches.length < 2) pinchStart = null;
+      if (e.touches.length === 0) {
+        panStart = null;
+      } else if (e.touches.length === 1 && !panStart && scale > 1) {
+        panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx, ty };
+      }
+    });
+
+    // ── Desktop input (MacBook / mouse / trackpad) ──────────────────────
+    function setCursor() {
+      container.style.cursor = dragStart
+        ? 'grabbing'
+        : (scale > 1 ? 'grab' : '');
+    }
+
+    // Click-and-drag to pan (only when zoomed in).
+    let dragStart = null;
+    container.addEventListener('mousedown', (e) => {
+      if (scale <= 1) return;
+      if (e.target.closest('.map-zoom-btn') || e.target.closest('.user-pin')) return;
+      dragStart = { x: e.clientX, y: e.clientY, tx, ty };
+      setCursor();
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragStart) return;
+      tx = dragStart.tx + (e.clientX - dragStart.x);
+      ty = dragStart.ty + (e.clientY - dragStart.y);
+      apply();
+    });
+    window.addEventListener('mouseup', () => {
+      if (!dragStart) return;
+      dragStart = null;
+      setCursor();
+    });
+
+    // Wheel / trackpad scroll = zoom. Trackpad pinch on macOS fires wheel
+    // events with ctrlKey=true and a larger deltaY — handle both naturally.
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.ctrlKey ? 0.02 : 0.005;  // pinch is more sensitive
+      const next = scale * Math.exp(-e.deltaY * factor);
+      scale = Math.max(MIN, Math.min(MAX, next));
+      if (scale === 1) { tx = 0; ty = 0; }
+      apply();
+      setCursor();
+    }, { passive: false });
+
+    // Double-tap (touch) / double-click (mouse) toggles zoom.
+    let lastTap = 0;
+    container.addEventListener('click', (e) => {
+      if (e.target.closest('.map-zoom-btn') || e.target.closest('.user-pin')) return;
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        scale = scale > 1 ? 1 : 2.2;
+        if (scale === 1) { tx = 0; ty = 0; }
+        apply();
+        setCursor();
+      }
+      lastTap = now;
+    });
   }
 
   function renderPlan() {
@@ -1355,7 +2001,8 @@
     blocksArea.className = 'timeline-blocks';
     wrap.appendChild(blocksArea);
 
-    // Pick blocks with lane layout
+    // Pick blocks with lane layout — side-by-side blocks at the same time
+    // ARE the overlap signal. No explicit warning needed.
     const layouts = layoutLanes(picks);
     layouts.forEach(({ pick, lane, totalLanes }) => {
       const s = stage(pick.stage);
@@ -1373,10 +2020,24 @@
       block.style.borderLeftColor = s.color;
 
       const timeText = `${formatMins(pick.startMins)}–${formatMins(pick.endMins)}`;
+      const imageUrl = pick.image || (() => {
+        const t = pick.artist.toLowerCase();
+        const hit = ARTISTS.find(x =>
+          x.name.toLowerCase() === t && x.stage === pick.stage
+        );
+        return hit ? hit.image : null;
+      })();
+      const imgHTML = imageUrl
+        ? `<img class="b-img" src="${escape(imageUrl)}" loading="lazy" alt="" onerror="this.style.display='none'" />`
+        : '';
       block.innerHTML = `
-        <div class="b-artist">${escape(pick.artist)}</div>
-        <div class="b-meta"><span class="b-stage" style="color:${s.color}">${s.id}</span> · ${escape(timeText)}</div>
-        <button class="b-del" aria-label="Remove">×</button>
+        ${imgHTML}
+        <div class="b-content">
+          <div class="b-artist">${escape(pick.artist)}</div>
+          <div class="b-stageline" style="color:${s.color}">${escape(s.id)}</div>
+          <div class="b-time">${escape(timeText)}</div>
+        </div>
+        <button class="b-del" aria-label="Remove from schedule">♥</button>
       `;
       block.querySelector('.b-del').onclick = () => deletePick(pick.id);
       blocksArea.appendChild(block);
@@ -1384,93 +2045,29 @@
     return wrap;
   }
 
-  // Returns {pickId: [otherArtistName, ...]} of picks whose times overlap on different stages.
-  function computeOverlaps(picks) {
-    const out = {};
-    const valid = picks.filter(p =>
-      typeof p.startMins === 'number' && typeof p.endMins === 'number'
-    );
-    for (let i = 0; i < valid.length; i++) {
-      for (let j = i + 1; j < valid.length; j++) {
-        const a = valid[i], b = valid[j];
-        if (a.stage === b.stage) continue;
-        if (a.startMins < b.endMins && a.endMins > b.startMins) {
-          (out[a.id] = out[a.id] || []).push(b.artist);
-          (out[b.id] = out[b.id] || []).push(a.artist);
-        }
-      }
-    }
-    return out;
-  }
-
-  function renderPick(p, overlapCount = 0) {
-    const s = stage(p.stage);
-    let timeText;
-    if (typeof p.startMins === 'number' && typeof p.endMins === 'number') {
-      timeText = `${formatMins(p.startMins)} — ${formatMins(p.endMins)}`;
-    } else {
-      const bucket = BUCKETS.find(b => b.id === p.bucket) || BUCKETS[2];
-      timeText = bucket.time;
-    }
-    const el = document.createElement('div');
-    el.className = 'pick';
-    el.style.borderLeftColor = s.color;
-    const overlapBadge = overlapCount > 0
-      ? `<span class="pick-overlap-badge" title="overlaps with ${overlapCount} other pick${overlapCount === 1 ? '' : 's'}">↻${overlapCount}</span>`
-      : '';
-    el.innerHTML = `
-      <div class="pick-artist">${escape(p.artist)}</div>
-      <div class="pick-stage">
-        <span class="stage-part" style="color:${s.color}">${s.id}</span><span class="sep">·</span><span class="time-part">${escape(timeText)}</span>${overlapBadge}
-      </div>
-      <button class="pick-del" aria-label="Remove">×</button>
-    `;
-    el.querySelector('.pick-del').onclick = (e) => {
-      e.stopPropagation();
-      state.picks[state.night] = state.picks[state.night].filter(x => x.id !== p.id);
-      save(); render();
-    };
-    el.onclick = (e) => {
-      if (e.target.closest('.pick-del')) return;
-      openModal(p);
-    };
-    return el;
-  }
-
-  // modal
-  const modal = document.getElementById('modal');
+  // Lineup view DOM references
   const artistInput = document.getElementById('artistInput');
-  const stageGrid = document.getElementById('stageGrid');
-  const timeChips = document.getElementById('timeChips');
-  let pickedStage = null;
-  let selectedTimeBucket = 'any'; // 'any' | bucket id
-  let selectedDay = null;          // null = any day, 1|2|3 = specific night
+  // Smart default for the day chip — pure-local logic, works offline.
+  // Pre-festival → Friday · During festival night → that day · Post-festival → Sunday.
+  let selectedDay = (() => {
+    const ctx = currentFestivalContext();
+    if (ctx) return ctx.dayId;
+    const ts = appNow().getTime();
+    const fri5pm = new Date(2026, 4, 15, 17).getTime();
+    const sat5pm = new Date(2026, 4, 16, 17).getTime();
+    const sun5pm = new Date(2026, 4, 17, 17).getTime();
+    const mon7am = new Date(2026, 4, 18,  7).getTime();
+    if (ts <  fri5pm) return 1;
+    if (ts >= mon7am) return 3;
+    if (ts <  sat5pm) return 2;
+    if (ts <  sun5pm) return 3;
+    return 3;
+  })();
+  let selectedNow = false;         // Now filter — show only currently-playing acts
+  let selectedSort = 'name';       // 'name' (A-Z) or 'stage' (grouped by stage)
 
   const DAY_LABELS = window.FESTIVAL.days;
-
   const dayChips = document.getElementById('dayChips');
-  // If the typed artist doesn't fit the current filters, clear the input so
-  // the search list isn't stale. (Day, stage, or time changed under them.)
-  function clearArtistIfConflicting() {
-    const v = artistInput.value.trim().toLowerCase();
-    if (!v) return;
-    const win = getTimeWindowFilter();
-    const stillFits = ARTISTS.some(a =>
-      a.name.toLowerCase() === v &&
-      (selectedDay == null || a.day === selectedDay) &&
-      (!pickedStage || a.stage === pickedStage) &&
-      (!win || (() => {
-        const sm = timeStrToMins(a.start), em = timeStrToMins(a.end);
-        return sm == null || em == null || (sm < win.end && em > win.start);
-      })())
-    );
-    if (!stillFits) {
-      artistInput.value = '';
-      selectedArtistTime = null;
-      selectedArtistDay = null;
-      syncClearBtn();
-    }
-  }
 
   function renderDayChips() {
     dayChips.innerHTML = '';
@@ -1480,76 +2077,101 @@
       btn.className = 'day-chip' + (d.id === selectedDay ? ' active' : '');
       btn.innerHTML = `<span class="name">${d.name}</span><span class="sub">${d.sub}</span>`;
       btn.onclick = () => {
-        selectedDay = (selectedDay === d.id && d.id !== null) ? null : d.id;
+        if (selectedDay === d.id) return;
+        selectedDay = d.id;
+        // Switching day = explicit intent to see another day. "Now" only
+        // makes sense for the current festival night, so auto-clear it.
+        // Search persists (independent of day; smart-fallback handles misses).
+        if (selectedNow) {
+          selectedNow = false;
+          renderTimeBuckets();
+        }
         renderDayChips();
-        clearArtistIfConflicting();
-        renderArtistResults(artistInput.value, pickedStage);
+        renderArtistResults(artistInput.value);
       };
       dayChips.appendChild(btn);
     });
   }
 
-  // Bucket id → [startMins, endMins] derived from FESTIVAL.buckets
-  const BUCKET_RANGE = Object.fromEntries(BUCKETS.map(b => [b.id, b.range]));
+  // Time-bucket chips — Opener / Mid / Peak / Late / Sunrise.
+  // Default = any time; tap a chip to filter, tap same chip to clear.
+  const timeBucketsEl = document.getElementById('timeBuckets');
 
-  function renderTimeChips() {
-    timeChips.innerHTML = '';
-    BUCKETS.forEach(b => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'time-chip' + (b.id === selectedTimeBucket ? ' active' : '');
-      btn.innerHTML = `<span class="name">${b.name}</span><span class="range">${b.time}</span>`;
-      btn.onclick = () => {
-        selectedTimeBucket = (selectedTimeBucket === b.id) ? 'any' : b.id;
-        renderTimeChips();
-        clearArtistIfConflicting();
-        renderArtistResults(artistInput.value, pickedStage);
-      };
-      timeChips.appendChild(btn);
-    });
+  // Single source of "now" — supports the ?now=... testing override.
+  function appNow() {
+    const override = new URLSearchParams(window.location.search).get('now');
+    const d = override ? new Date(override) : new Date();
+    return isNaN(d.getTime()) ? new Date() : d;
   }
 
-  function renderStageGrid() {
-    stageGrid.innerHTML = '';
-    const groups = [
-      { tier: 'main',      label: 'Main stages' },
-      { tier: 'secondary', label: 'Art cars & pop-ups' },
-    ];
-    groups.forEach(group => {
-      const stagesInGroup = STAGES.filter(s => (s.tier || 'main') === group.tier);
-      if (stagesInGroup.length === 0) return;
-      const heading = document.createElement('div');
-      heading.className = 'stage-group-label';
-      heading.textContent = group.label;
-      stageGrid.appendChild(heading);
-      const groupGrid = document.createElement('div');
-      groupGrid.className = 'stage-group-grid' + (group.tier === 'secondary' ? ' secondary' : '');
-      stagesInGroup.forEach(s => {
-        const lbl = document.createElement('label');
-        const isSel = s.id === pickedStage;
-        lbl.className = 'stage-opt' + (isSel ? ' selected' : '') + (s.tier === 'secondary' ? ' secondary' : '');
-        lbl.style.color = s.color;
-        lbl.title = `${s.id} · ${s.genre}`;
-        if (isSel) {
-          lbl.style.borderColor = s.color;
-          lbl.style.background = s.color + '1f';
+  // Current festival context: which night is it (1/2/3) and how many minutes
+  // into that night are we? Returns null when not within festival hours.
+  // Hardcoded to EDC LV 2026: May 15-17 5pm to next-morning 6am.
+  function currentFestivalContext() {
+    const now = appNow();
+    if (now.getFullYear() !== 2026 || now.getMonth() !== 4) return null; // not May 2026
+    const d = now.getDate();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    let dayId = null;
+    if      (d === 15 && h >= 17)               dayId = 1;  // Fri 5pm onward
+    else if (d === 16 && h <  7)                dayId = 1;  // Fri night → Sat dawn
+    else if (d === 16 && h >= 17)               dayId = 2;
+    else if (d === 17 && h <  7)                dayId = 2;
+    else if (d === 17 && h >= 17)               dayId = 3;
+    else if (d === 18 && h <  7)                dayId = 3;
+    if (dayId == null) return null;
+    const DS = window.FESTIVAL.dayStartHour;
+    const nowMins = h >= DS ? (h - DS) * 60 + m : (h + 24 - DS) * 60 + m;
+    return { dayId, nowMins };
+  }
+
+  // Lineup toolbar: 🔴 Now (filter) + Sort toggle (A-Z / Stages).
+  function renderTimeBuckets() {
+    if (!timeBucketsEl) return;
+    timeBucketsEl.innerHTML = '';
+
+    // Now chip
+    const nowBtn = document.createElement('button');
+    nowBtn.type = 'button';
+    nowBtn.className = 'tool-btn now-chip' + (selectedNow ? ' active' : '');
+    nowBtn.innerHTML = `<span class="now-dot"></span>Now`;
+    nowBtn.onclick = () => {
+      selectedNow = !selectedNow;
+      if (selectedNow) {
+        const ctx = currentFestivalContext();
+        if (ctx && selectedDay !== ctx.dayId) {
+          selectedDay = ctx.dayId;
+          renderDayChips();
         }
-        lbl.innerHTML = `
-          <span class="so-name">${escape(s.id)}</span>
-          <span class="so-genre">${escape(s.short)}</span>
-          <input type="radio" name="stage" value="${s.id}" ${isSel ? 'checked' : ''} />
-        `;
-        lbl.onclick = (e) => {
-          e.preventDefault();
-          pickedStage = (pickedStage === s.id) ? null : s.id;
-          renderStageGrid();
-          clearArtistIfConflicting();
-          renderArtistResults(artistInput.value, pickedStage);
-        };
-        groupGrid.appendChild(lbl);
-      });
-      stageGrid.appendChild(groupGrid);
+      }
+      renderTimeBuckets();
+      renderArtistResults(artistInput.value);
+    };
+    timeBucketsEl.appendChild(nowBtn);
+
+    // Spacer pushes the sort toggle to the right
+    const spacer = document.createElement('div');
+    spacer.className = 'tool-spacer';
+    timeBucketsEl.appendChild(spacer);
+
+    // Sort toggle (A-Z / Time / Stages) — segmented control
+    const sortWrap = document.createElement('div');
+    sortWrap.className = 'sort-toggle';
+    [['name', 'Name'], ['time', 'Time'], ['stage', 'Stage']].forEach(([id, label]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sort-btn' + (selectedSort === id ? ' active' : '');
+      b.textContent = label;
+      b.onclick = () => {
+        if (selectedSort === id) return;
+        selectedSort = id;
+        renderTimeBuckets();
+        renderArtistResults(artistInput.value);
+      };
+      sortWrap.appendChild(b);
     });
+    timeBucketsEl.appendChild(sortWrap);
   }
 
   const clearArtistBtn = document.getElementById('clearArtistBtn');
@@ -1560,17 +2182,16 @@
   // Live search as user types
   artistInput.addEventListener('input', (e) => {
     syncClearBtn();
-    renderArtistResults(e.target.value, pickedStage);
+    renderArtistResults(e.target.value);
   });
   artistInput.addEventListener('focus', () => {
     syncClearBtn();
-    renderArtistResults(artistInput.value, pickedStage);
+    renderArtistResults(artistInput.value);
   });
   clearArtistBtn.addEventListener('click', () => {
     artistInput.value = '';
-    selectedArtistTime = null;
     syncClearBtn();
-    renderArtistResults('', pickedStage);
+    renderArtistResults('');
     artistInput.focus();
   });
 
@@ -1585,33 +2206,51 @@
     return escape(name).replace(re, '<mark>$1</mark>');
   }
 
-  function getTimeWindowFilter() {
-    if (selectedTimeBucket === 'any') return null;
-    const r = BUCKET_RANGE[selectedTimeBucket];
-    return r ? { start: r[0], end: r[1] } : null;
-  }
-
-  function renderArtistResults(query, stageFilter) {
+  function renderArtistResults(query) {
     const q = (query || '').trim().toLowerCase();
-    const win = q ? null : getTimeWindowFilter(); // search-by-name bypasses time filter
+    const isNow = selectedNow;
+    const nowCtx = isNow ? currentFestivalContext() : null;
     const all = ARTISTS
       .filter(a => selectedDay == null || a.day === selectedDay)
-      .filter(a => !stageFilter || a.stage === stageFilter)
       .filter(a => {
-        if (!win) return true;
-        const aStart = timeStrToMins(a.start);
-        const aEnd = timeStrToMins(a.end);
-        if (aStart == null || aEnd == null) return true;
-        return aStart < win.end && aEnd > win.start;
+        if (!isNow) return true;
+        if (!nowCtx) return false;
+        if (a.day !== nowCtx.dayId) return false;
+        const sm = timeStrToMins(a.start);
+        const em = timeStrToMins(a.end);
+        if (sm == null || em == null) return false;
+        return sm <= nowCtx.nowMins && em >= nowCtx.nowMins;
       })
-      .slice()
-      .sort((a, b) => {
-        const sa = timeStrToMins(a.start) ?? 0;
-        const sb = timeStrToMins(b.start) ?? 0;
-        return sa - sb || a.name.localeCompare(b.name);
+      .slice();
+    // Sort: A-Z (name), Time (chronological), or Stages (grouped + time within).
+    // Now respects the chosen sort — combos like Now+A-Z or Now+Stage are useful.
+    const useTimeSort = selectedSort === 'time';
+    if (useTimeSort) {
+      all.sort((a, b) =>
+        ((timeStrToMins(a.start) ?? 0) - (timeStrToMins(b.start) ?? 0))
+        || a.name.localeCompare(b.name)
+      );
+    } else if (selectedSort === 'stage') {
+      // Group order: stages as defined in festival.config.js; within stage, by time.
+      const stageOrder = Object.fromEntries(STAGES.map((s, i) => [s.id, i]));
+      all.sort((a, b) => {
+        const sa = stageOrder[a.stage] ?? 99;
+        const sb = stageOrder[b.stage] ?? 99;
+        if (sa !== sb) return sa - sb;
+        return ((timeStrToMins(a.start) ?? 0) - (timeStrToMins(b.start) ?? 0))
+            || a.name.localeCompare(b.name);
       });
+    } else {
+      all.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+      );
+    }
+    // Match artist name OR stage id.
     const filtered = q
-      ? all.filter(a => a.name.toLowerCase().includes(q))
+      ? all.filter(a =>
+          a.name.toLowerCase().includes(q) ||
+          a.stage.toLowerCase().includes(q)
+        )
       : all;
 
     artistResults.innerHTML = '';
@@ -1619,199 +2258,132 @@
       const e = document.createElement('div');
       e.className = 'artist-result-empty';
       if (q) {
-        e.textContent = `No DJ found — Save adds "${query.trim()}" as a custom pick.`;
-      } else if (win || stageFilter) {
-        const bits = [];
-        if (stageFilter) bits.push(`stage ${stageFilter}`);
-        if (win) bits.push('that time window');
-        e.textContent = `No DJs in ${bits.join(' + ')} on this night. Clear filters to see more.`;
+        // Smart fallback: ignore day + Now filters, find ALL name/stage matches.
+        const allHits = ARTISTS.filter(a =>
+          a.name.toLowerCase().includes(q) || a.stage.toLowerCase().includes(q)
+        );
+        const dayShort = { 1: 'Fri', 2: 'Sat', 3: 'Sun' };
+        const dayName = { 1: 'Friday', 2: 'Saturday', 3: 'Sunday' };
+        // Describe what the user IS filtering by, so the empty state explains
+        // *why* nothing matched (not just "no results").
+        const ctxParts = [];
+        if (selectedDay) ctxParts.push(dayName[selectedDay]);
+        if (isNow)       ctxParts.push('right now');
+        const ctxStr = ctxParts.length ? ' on ' + ctxParts.join(' · ') : '';
+        e.innerHTML = `<p style="margin:0 0 6px">No "${escape(query.trim())}"${ctxStr}.</p>`;
+        if (allHits.length > 0) {
+          // Group by day; for each day, surface a "switch to this day" button.
+          const byDay = {};
+          allHits.forEach(a => { (byDay[a.day] = byDay[a.day] || []).push(a); });
+          const links = document.createElement('div');
+          links.className = 'cross-day-links';
+          Object.keys(byDay).map(Number).sort().forEach(d => {
+            const sample = byDay[d][0];
+            const sampleStartMin = timeStrToMins(sample.start);
+            const sampleStart = sampleStartMin != null ? formatMins(sampleStartMin) : '';
+            const more = byDay[d].length > 1 ? ` +${byDay[d].length - 1}` : '';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'switch-day-btn';
+            btn.innerHTML = `Switch to <b>${dayShort[d]}</b> · <span class="muted">${escape(sample.name)} · ${sampleStart}${more}</span>`;
+            btn.onclick = () => {
+              selectedDay = d;
+              selectedNow = false;          // clear Now so the matching artist isn't filtered out
+              renderDayChips();
+              renderTimeBuckets();
+              renderArtistResults(artistInput.value);
+            };
+            links.appendChild(btn);
+          });
+          e.appendChild(links);
+        }
+        artistResults.appendChild(e);
+      } else if (isNow && !nowCtx) {
+        // Tailor the empty-state copy to where we are vs the festival window.
+        const ts = appNow().getTime();
+        const fri5pm = new Date(2026, 4, 15, 17).getTime();
+        const mon7am = new Date(2026, 4, 18,  7).getTime();
+        if (ts < fri5pm) {
+          e.textContent = 'Festival drops Fri May 15 · 5pm.';
+        } else if (ts >= mon7am) {
+          e.textContent = 'EDC ’26 wrapped. PLUR forever.';
+        } else {
+          // Daytime gap — show which night is up next AND when its first set fires.
+          // Day 1 has 5pm openers; Day 2 & 3 first sets are at 7pm.
+          const sat5pm = new Date(2026, 4, 16, 17).getTime();
+          const sun5pm = new Date(2026, 4, 17, 17).getTime();
+          const next = ts < sat5pm ? { name: 'Saturday', start: '7pm' }
+                     : ts < sun5pm ? { name: 'Sunday',   start: '7pm' }
+                     : null;
+          e.textContent = next
+            ? `${next.name} kicks off at ${next.start}.`
+            : 'Tonight kicks off soon.';
+        }
+        artistResults.appendChild(e);
+      } else if (isNow && nowCtx) {
+        e.textContent = 'Nothing playing right now on this day.';
+        artistResults.appendChild(e);
       } else {
         e.textContent = 'No DJs in the lineup yet for this night.';
+        artistResults.appendChild(e);
       }
-      artistResults.appendChild(e);
     } else {
-      const dayShort = { 1: 'Friday', 2: 'Saturday', 3: 'Sunday' };
-      filtered.slice(0, 60).forEach(a => {
+      const dayShort = { 1: 'Fri', 2: 'Sat', 3: 'Sun' };
+      // For stage-grouped sort, insert a section header before each new stage.
+      // Stage filter overrides (one stage already, no need for headers).
+      const showStageHeaders = selectedSort === 'stage';
+      let lastStage = null;
+      filtered.forEach(a => {
+        if (showStageHeaders && a.stage !== lastStage) {
+          lastStage = a.stage;
+          const sObj = stage(a.stage);
+          const header = document.createElement('button');
+          header.type = 'button';
+          header.className = 'lineup-stage-header';
+          header.setAttribute('aria-label', `Filter to ${sObj.id}`);
+          header.innerHTML = `<span class="lsh-dot" style="background:${sObj.color}"></span><span class="lsh-name" style="color:${sObj.color}">${sObj.id}</span><span class="lsh-tap">tap to filter →</span>`;
+          header.onclick = () => {
+            artistInput.value = sObj.id;
+            syncClearBtn();
+            renderArtistResults(sObj.id);
+            artistInput.focus();
+          };
+          artistResults.appendChild(header);
+        }
         const s = stage(a.stage);
         const sm = timeStrToMins(a.start);
         const startLabel = sm != null ? formatMins(sm) : '';
+        const existingPickId = findPickIdForArtist(a);
         const row = document.createElement('div');
         row.className = 'artist-result';
+        const avatarHTML = a.image
+          ? `<img class="avatar" src="${escape(a.image)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'" />`
+          : `<span class="avatar"></span>`;
         row.innerHTML = `
+          ${avatarHTML}
           <span class="name">${highlight(a.name, query)}</span>
           <span class="stage-tag">
             ${startLabel ? `<span class="time-part">${startLabel}</span><span class="sep">·</span>` : ''}<span class="day-part">${dayShort[a.day] || ''}</span><span class="sep">·</span><span class="stage-part" style="color:${s.color}">${s.id}</span>
           </span>
+          <button class="heart ${existingPickId ? 'on' : ''}" aria-label="${existingPickId ? 'Remove from schedule' : 'Add to schedule'}">${existingPickId ? '♥' : '♡'}</button>
         `;
-        row.onclick = () => selectArtist(a);
+        row.querySelector('.heart').onclick = (e) => { e.stopPropagation(); toggleHeartArtist(a); };
         artistResults.appendChild(row);
       });
     }
     artistResults.classList.add('show');
   }
 
-  // Time of the DJ chosen from the lineup — used on save. Decoupled from the filter dropdowns.
-  let selectedArtistTime = null;
-
-  let selectedArtistDay = null;
-
-  function selectArtist(a) {
-    artistInput.value = a.name;
-    syncClearBtn();
-    artistResults.classList.remove('show');
-    if (a.stage && a.stage !== pickedStage) {
-      pickedStage = a.stage;
-      renderStageGrid();
-    }
-    if (a.day != null && a.day !== selectedDay) {
-      selectedDay = a.day;
-      renderDayChips();
-    }
-    selectedArtistDay = a.day;
-    const startMins = timeStrToMins(a.start);
-    const endMins = timeStrToMins(a.end);
-    if (startMins != null && endMins != null && endMins > startMins) {
-      const snap = (m) => Math.max(0, Math.min(630, Math.round(m / 15) * 15));
-      const snapStart = snap(startMins);
-      selectedArtistTime = { startMins: snapStart, endMins: snap(endMins) };
-      const newBucket = bucketFromMinutes(snapStart);
-      if (newBucket !== selectedTimeBucket) {
-        selectedTimeBucket = newBucket;
-        renderTimeChips();
-      }
-    } else {
-      selectedArtistTime = null;
-    }
-  }
-
-  function openModal(pick) {
-    editingId = pick ? pick.id : null;
-    document.getElementById('modalTitle').textContent = pick ? 'Edit pick' : 'Add artist';
-    artistInput.value = pick ? pick.artist : '';
-    syncClearBtn();
-    if (pick) {
-      // Editing: snap filters to this pick's context
-      pickedStage = pick.stage;
-      selectedDay = state.night;
-      selectedTimeBucket = 'any';
-      selectedArtistDay = state.night;
-      selectedArtistTime = (typeof pick.startMins === 'number' && typeof pick.endMins === 'number')
-        ? { startMins: pick.startMins, endMins: pick.endMins } : null;
-    } else {
-      // Adding: keep filter context from previous session for batch-add convenience
-      selectedArtistTime = null;
-      selectedArtistDay = null;
-    }
-    renderDayChips();
-    renderTimeChips();
-    renderStageGrid();
-    modal.classList.add('open');
-    renderArtistResults('', pickedStage);
-    setTimeout(() => artistInput.focus(), 50);
-  }
-  function closeModal() {
-    modal.classList.remove('open');
-    editingId = null;
-  }
-  function savePick() {
-    const artist = artistInput.value.trim();
-    if (!artist) { artistInput.focus(); return; }
-    // Find the artist in the lineup (across all days unless a day is filtered)
-    const lineupHit = ARTISTS.find(a =>
-      a.name.toLowerCase() === artist.toLowerCase() &&
-      (selectedDay == null || a.day === selectedDay)
-    );
-    // Where the pick lands: artist's day if known → else the day chip if set → else current night
-    const targetDay = selectedArtistDay
-      || (lineupHit ? lineupHit.day : null)
-      || selectedDay
-      || state.night;
-    const finalStage = pickedStage
-      || (lineupHit ? lineupHit.stage : null)
-      || STAGES[0].id;
-    let timeData = selectedArtistTime;
-    if (!timeData && lineupHit) {
-      const sm = timeStrToMins(lineupHit.start);
-      const em = timeStrToMins(lineupHit.end);
-      if (sm != null && em != null && em > sm) timeData = { startMins: sm, endMins: em };
-    }
-    const data = {
-      id: editingId || uid(),
-      artist,
-      stage: finalStage,
-      bucket: timeData ? bucketFromMinutes(timeData.startMins) : 'peak',
-      startMins: timeData ? timeData.startMins : null,
-      endMins: timeData ? timeData.endMins : null,
-    };
-    if (!state.picks[targetDay]) state.picks[targetDay] = [];
-    const list = state.picks[targetDay];
-    if (editingId) {
-      // editing might move the pick to a different day
-      Object.values(state.picks).forEach(arr => {
-        const i = arr.findIndex(x => x.id === editingId);
-        if (i >= 0) arr.splice(i, 1);
-      });
-      list.push(data);
-    } else {
-      list.push(data);
-    }
-    // Auto-switch the visible night to where the pick landed
-    if (state.night !== targetDay) state.night = targetDay;
-    save(); render(); closeModal();
-  }
-
-  // events
-  addBtn.onclick = () => openModal(null);
-  document.getElementById('cancelBtn').onclick = closeModal;
-  document.getElementById('saveBtn').onclick = savePick;
-  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-  artistInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') savePick();
-    if (e.key === 'Escape') closeModal();
-  });
-
   document.querySelectorAll('.night-btn').forEach(b => {
     b.onclick = () => { state.night = Number(b.dataset.night); save(); render(); };
   });
 
-  // Delete a pick + show undo toast for 5s
-  let undoData = null;
-  let undoTimer = null;
   function deletePick(pickId) {
-    let removed = null, removedFrom = null;
-    Object.entries(state.picks).forEach(([day, arr]) => {
+    Object.values(state.picks).forEach(arr => {
       const i = arr.findIndex(x => x.id === pickId);
-      if (i >= 0) { removed = arr[i]; removedFrom = +day; arr.splice(i, 1); }
+      if (i >= 0) arr.splice(i, 1);
     });
-    if (!removed) return;
     save(); render();
-    showUndoToast(removed, removedFrom);
-  }
-  function showUndoToast(pick, day) {
-    if (undoTimer) clearTimeout(undoTimer);
-    let toast = document.getElementById('undoToast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'undoToast';
-      toast.className = 'undo-toast';
-      document.body.appendChild(toast);
-    }
-    undoData = { pick, day };
-    toast.innerHTML = `Removed <b>${escape(pick.artist)}</b><button class="undo-btn">Undo</button>`;
-    toast.classList.add('show');
-    toast.querySelector('.undo-btn').onclick = () => {
-      if (!undoData) return;
-      if (!state.picks[undoData.day]) state.picks[undoData.day] = [];
-      state.picks[undoData.day].push(undoData.pick);
-      undoData = null;
-      if (undoTimer) clearTimeout(undoTimer);
-      toast.classList.remove('show');
-      save(); render();
-    };
-    undoTimer = setTimeout(() => {
-      toast.classList.remove('show');
-      undoData = null;
-    }, 5000);
   }
 
   document.querySelectorAll('.tab').forEach(b => {
@@ -1819,7 +2391,61 @@
     b.onclick = () => { state.tab = b.dataset.tab; save(); render(); };
   });
 
-  loadArtists().then(render);
+  loadArtists().then(() => {
+    // Re-sync existing picks against the lineup. Two reasons:
+    //   1. Backfill missing image URLs (older picks before image was saved)
+    //   2. Re-compute startMins/endMins/bucket — these depend on dayStartHour,
+    //      and shifting the festival window moves all positions by an offset.
+    let migrated = false;
+    Object.values(state.picks).forEach(arr => {
+      arr.forEach(p => {
+        const t = p.artist.toLowerCase();
+        const hit = ARTISTS.find(x =>
+          x.name.toLowerCase() === t && x.stage === p.stage
+        );
+        if (!hit) return;
+        if (!p.image && hit.image) { p.image = hit.image; migrated = true; }
+        const newStart = timeStrToMins(hit.start);
+        const newEnd   = timeStrToMins(hit.end);
+        if (newStart != null && newEnd != null) {
+          if (p.startMins !== newStart) { p.startMins = newStart; migrated = true; }
+          if (p.endMins   !== newEnd)   { p.endMins   = newEnd;   migrated = true; }
+          const newBucket = bucketFromMinutes(newStart);
+          if (p.bucket !== newBucket)   { p.bucket    = newBucket; migrated = true; }
+        }
+      });
+    });
+    if (migrated) save();
+    render();
+
+    // Pre-warm all artist images so the lineup is fully offline-ready.
+    // Without this, only avatars the user scrolled past get cached. We want
+    // the festival case to work even if they just opened the app once at home.
+    setTimeout(prewarmArtistImages, 800);
+  });
+
+  // Background-prefetch every artist avatar via Image() so the browser
+  // requests them at low priority. The service worker intercepts and stores
+  // them in the persistent images cache. Throttled to 6 at a time so we
+  // don't hammer the CDN or saturate the user's connection.
+  function prewarmArtistImages() {
+    if (!ARTISTS || !ARTISTS.length) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    const urls = ARTISTS.map(a => a.image).filter(Boolean);
+    let i = 0;
+    const BATCH = 6;
+    const DELAY = 120;
+    function step() {
+      for (let j = 0; j < BATCH && i < urls.length; j++, i++) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.loading = 'lazy';
+        img.src = urls[i];
+      }
+      if (i < urls.length) setTimeout(step, DELAY);
+    }
+    step();
+  }
 
   // Service worker for offline support. New versions install in the background
   // and apply on the user's next app open.
