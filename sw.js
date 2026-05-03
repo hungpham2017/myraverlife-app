@@ -16,7 +16,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v141';
+const SHELL_VERSION  = 'myraverlife-shell-v142';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [
@@ -80,19 +80,27 @@ self.addEventListener('fetch', (event) => {
                 || url.pathname.endsWith('.html')
                 || url.pathname === '/' || url.pathname.endsWith('/');
 
-    // HTML: network-first so updates reach users on next page load.
-    // Falls back to cache when offline.
+    // HTML: cache-first, identical to all other static assets. Online and
+    // offline ALWAYS serve the same cached HTML, so the app behaves the
+    // same regardless of network state. New HTML only lands when the SW
+    // shell version bumps (which we do every push) — the new SW installs
+    // in background, atomically replaces the cache on activation, and the
+    // user picks it up on next page load.
     if (isDoc) {
       event.respondWith(
-        fetch(event.request)
-          .then((response) => {
-            if (cacheable(response)) {
-              const clone = response.clone();
-              caches.open(SHELL_VERSION).then((c) => c.put(event.request, clone));
-            }
-            return response;
-          })
-          .catch(() => caches.match(event.request).then(c => c || caches.match('./index.html')))
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          // First-ever visit: nothing cached yet, fall through to network.
+          return fetch(event.request)
+            .then((response) => {
+              if (cacheable(response)) {
+                const clone = response.clone();
+                caches.open(SHELL_VERSION).then((c) => c.put(event.request, clone));
+              }
+              return response;
+            })
+            .catch(() => caches.match('./index.html'));
+        })
       );
       return;
     }
