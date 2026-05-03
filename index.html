@@ -2632,12 +2632,21 @@
     }
   }
 
-  // Service worker for offline support. New versions install in the background
-  // and apply on the user's next app open.
+  // Service worker for offline support. New versions install in the
+  // background and apply on the user's next app open. The controllerchange
+  // listener auto-reloads the page once when a new SW takes over, so users
+  // never get stuck on a stale HTML if they forget to manually refresh.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
         .catch(err => console.warn('Service worker registration failed:', err));
+    });
+    // Auto-reload on SW takeover. Guard against infinite reload loops.
+    let _swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_swRefreshing) return;
+      _swRefreshing = true;
+      window.location.reload();
     });
   }
 </script>
