@@ -16,7 +16,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v142';
+const SHELL_VERSION  = 'myraverlife-shell-v143';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [
@@ -36,10 +36,17 @@ const APP_SHELL = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(SHELL_VERSION).then(async (cache) => {
-      // Per-item add so a single failed fetch doesn't fail the entire install.
-      // Critical for users on weak signal — we'd rather have a partial cache
-      // than no cache at all.
-      await Promise.allSettled(APP_SHELL.map((url) => cache.add(url)));
+      // Per-item add with cache: 'reload' so each fetch BYPASSES the
+      // browser's HTTP cache and gets fresh bytes from the server. Without
+      // this, an install triggered by a new SW could re-cache the OLD HTML
+      // that's still in the browser cache — and with cache-first HTML
+      // strategy, the user would then be stuck on the stale version
+      // forever (until another SW bump).
+      // allSettled lets one failure not break the whole install (resilient
+      // on weak signal).
+      await Promise.allSettled(APP_SHELL.map((url) =>
+        cache.add(new Request(url, { cache: 'reload' }))
+      ));
       return self.skipWaiting();
     })
   );
