@@ -2632,16 +2632,27 @@
     }
   }
 
-  // Service worker for offline support. New versions install in the
-  // background and apply on the user's next app open. The controllerchange
-  // listener auto-reloads the page once when a new SW takes over, so users
-  // never get stuck on a stale HTML if they forget to manually refresh.
+  // Service worker for offline support. Defenses against stale-cache
+  // problems (especially iOS Safari, which caches sw.js aggressively):
+  //   1. updateViaCache: 'none' → browser never uses HTTP cache for sw.js,
+  //      always fetches fresh. Safari detects new SWs much faster.
+  //   2. Force registration.update() on visibility → checks for new SW
+  //      whenever the user comes back to the app.
+  //   3. Auto-reload on controllerchange → when a new SW takes over, the
+  //      page reloads itself once so the user sees the latest version
+  //      without needing to manually refresh.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
         .catch(err => console.warn('Service worker registration failed:', err));
     });
-    // Auto-reload on SW takeover. Guard against infinite reload loops.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        navigator.serviceWorker.getRegistration()
+          .then(reg => reg && reg.update())
+          .catch(() => {});
+      }
+    });
     let _swRefreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (_swRefreshing) return;
