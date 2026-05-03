@@ -1210,6 +1210,15 @@
     margin: 0;
     line-height: 1.45;
   }
+  .offline-status {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    margin: 0 0 8px;
+    text-align: center;
+    color: var(--muted);
+    opacity: 0.45;
+  }
   .help-credit {
     margin-top: 18px;
     padding: 16px;
@@ -1385,6 +1394,7 @@
 </div>
 
 <footer class="app-footer">
+  <div id="offlineStatus" class="offline-status" aria-live="polite"></div>
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
@@ -2177,8 +2187,10 @@
     const schedBtn = document.createElement('button');
     schedBtn.type = 'button';
     schedBtn.className = 'tool-btn';
-    schedBtn.setAttribute('aria-label', 'Open full 3-night schedule');
-    schedBtn.innerHTML = '↗ Full schedule';
+    schedBtn.setAttribute('aria-label', 'Open full 3-night schedule as one page');
+    schedBtn.innerHTML = '↗ One page';
+    schedBtn.style.opacity = '0.75';
+    schedBtn.style.fontWeight = '500';
     schedBtn.onclick = () => openSchedulePng();
     timeBucketsEl.appendChild(schedBtn);
 
@@ -2455,7 +2467,46 @@
     // Without this, only avatars the user scrolled past get cached. We want
     // the festival case to work even if they just opened the app once at home.
     setTimeout(prewarmArtistImages, 800);
+    setTimeout(startOfflineStatusPoll, 1200);
   });
+
+  // Show a subtle "Offline ready" line above the footer ONLY when every
+  // critical image is cached. Hidden otherwise — silence is the signal.
+  async function refreshOfflineStatus() {
+    const el = document.getElementById('offlineStatus');
+    if (!el) return null;
+    const allUrls = (ARTISTS || []).map(a => a.image).filter(Boolean);
+    if (typeof FESTIVAL_MAP_URL === 'string') allUrls.push(FESTIVAL_MAP_URL);
+    if (!allUrls.length) return null;
+
+    let cached = 0;
+    if ('caches' in window) {
+      try {
+        const c = await caches.open('myraverlife-images-v1');
+        const set = new Set((await c.keys()).map(r => r.url));
+        cached = allUrls.filter(u => set.has(u)).length;
+      } catch (e) {}
+    }
+    const ready = cached >= allUrls.length;
+    if (ready) {
+      el.textContent = '✓ Offline ready';
+      el.style.display = '';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+    return ready;
+  }
+
+  // Poll until ready, then stop.
+  function startOfflineStatusPoll() {
+    refreshOfflineStatus().then((ready) => {
+      if (ready) return;
+      const t = setInterval(async () => {
+        if (await refreshOfflineStatus()) clearInterval(t);
+      }, 1500);
+    });
+  }
 
   // Background-prefetch every artist avatar AND the festival map via Image()
   // so the browser requests them at low priority. The service worker
