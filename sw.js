@@ -14,7 +14,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v118';
+const SHELL_VERSION  = 'myraverlife-shell-v120';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [

@@ -1657,7 +1657,7 @@
     wrap.innerHTML = `
       <div class="map-img-container" id="mapContainer">
         <div class="map-zoom-target" id="mapZoomTarget">
-          <img class="map-img" src="https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png" alt="EDC Las Vegas festival map" draggable="false" />
+          <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" />
           <div class="user-pin" id="userPin" style="display:none">
             <span class="user-pin-cone" id="userPinCone"></span>
             <span class="user-pin-pulse"></span>
@@ -2457,22 +2457,27 @@
     setTimeout(prewarmArtistImages, 800);
   });
 
-  // Background-prefetch every artist avatar via Image() so the browser
-  // requests them at low priority. The service worker intercepts and stores
-  // them in the persistent images cache. Throttled to 6 at a time so we
-  // don't hammer the CDN or saturate the user's connection.
+  // Background-prefetch every artist avatar AND the festival map via Image()
+  // so the browser requests them at low priority. The service worker
+  // intercepts and stores them in the persistent images cache. Throttled to
+  // 6 at a time so we don't hammer the CDN or saturate the user's connection.
+  // This makes the entire app work offline at the Speedway after a single
+  // online visit anywhere in the app — even if the user never opens Map.
+  const FESTIVAL_MAP_URL = 'https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png';
   function prewarmArtistImages() {
-    if (!ARTISTS || !ARTISTS.length) return;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
-    const urls = ARTISTS.map(a => a.image).filter(Boolean);
+    const urls = [];
+    if (ARTISTS && ARTISTS.length) urls.push(...ARTISTS.map(a => a.image).filter(Boolean));
+    urls.push(FESTIVAL_MAP_URL);
     let i = 0;
     const BATCH = 6;
     const DELAY = 120;
     function step() {
       for (let j = 0; j < BATCH && i < urls.length; j++, i++) {
+        // Note: NO `loading='lazy'` — detached <img> with lazy never fetches.
+        // We need the request to actually fire so the SW can cache it.
         const img = new Image();
         img.decoding = 'async';
-        img.loading = 'lazy';
         img.src = urls[i];
       }
       if (i < urls.length) setTimeout(step, DELAY);
