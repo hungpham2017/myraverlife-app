@@ -918,12 +918,18 @@
   .artist-result .stage-tag .day-part { opacity: 0.6; font-weight: 500; }
   .artist-result .stage-tag .time-part { opacity: 0.85; font-weight: 600; font-variant-numeric: tabular-nums; }
   .artist-result .stage-tag .sep { opacity: 0.4; margin: 0 4px; }
-  /* Stage chip — read-only colored label (dot + name) on each artist row. */
+  /* Stage chip — read-only colored label (dot + name) on each artist row.
+     Secondary stages (art cars, pop-ups) get reduced opacity so the 9 main
+     stages naturally read as the headliner venues at first glance. */
   .artist-result .stage-tag .stage-part {
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+  }
+  .artist-result .stage-tag .stage-part.stage-secondary {
+    opacity: 0.55;
+    font-weight: 500;
   }
   .artist-result .stage-tag .stage-part::before {
     content: '';
@@ -1655,6 +1661,7 @@
           <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>Open the site at least once on Wi-Fi before you lose signal. After that it works without internet.</p></div></li>
           <li><span class="help-ico">♥</span><div><b>Build your night</b><p>In <b>Lineup</b>, tap a DJ's heart to add them to your <b>Schedule</b>. Tap again to remove.</p></div></li>
           <li><span class="help-ico">🔍</span><div><b>Find an artist or stage</b><p>In <b>Lineup</b>, type an artist (<i>"John Summit"</i>) or a stage (<i>"kinetic"</i>).</p></div></li>
+          <li><span class="help-ico">🎧</span><div><b>Listen before the show</b><p>Tap any DJ's name to find their music.</p></div></li>
           <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>In <b>Lineup</b>, tap <b>Now</b>.</p></div></li>
           <li><span class="help-ico">🎯</span><div><b>Browse one stage at a time</b><p>In <b>Lineup</b>, set sort to <b>Stage</b>, then tap a stage header.</p></div></li>
           <li><span class="help-ico">📍</span><div><b>See where you are on the map</b><p>On the <b>Map</b>, tap 📍.</p></div></li>
@@ -2457,7 +2464,7 @@
           ${avatarHTML}
           <a class="name" href="${escape(spotifyUrl(a.name))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(a.name)} on Spotify">${highlight(a.name, query)}</a>
           <span class="stage-tag">
-            ${startLabel ? `<span class="time-part">${startLabel}</span><span class="sep">·</span>` : ''}<span class="day-part">${dayShort[a.day] || ''}</span><span class="sep">·</span><span class="stage-part" style="color:${s.color}">${s.id}</span>
+            ${startLabel ? `<span class="time-part">${startLabel}</span><span class="sep">·</span>` : ''}<span class="day-part">${dayShort[a.day] || ''}</span><span class="sep">·</span><span class="stage-part${s.tier === 'secondary' ? ' stage-secondary' : ''}" style="color:${s.color}">${s.id}</span>
           </span>
           <button class="heart ${existingPickId ? 'on' : ''}" aria-label="${existingPickId ? 'Remove from schedule' : 'Add to schedule'}">${existingPickId ? '♥' : '♡'}</button>
         `;
