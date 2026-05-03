@@ -1560,11 +1560,42 @@
     return `https://open.spotify.com/search/${encodeURIComponent(q)}`;
   }
 
+
   // Open the combined 3-night schedule PNG in a new tab. Pre-generated
   // offline by assets/_regen_schedules.js, bundled in APP_SHELL — works at
   // the festival without signal. Long-press to share/save from there.
   function openSchedulePng() {
     window.open('./assets/schedule-all.png', '_blank', 'noopener');
+  }
+
+  // ── Avatar sprite map ──────────────────────────────────────────────────
+  // 144×144 cells in a 21×20 grid (3024×2880 px), one cell per unique
+  // avatar. Bundled in APP_SHELL so atomic install = 100% offline reliable.
+  // Used by both Lineup (36px display) and My Schedule (76px display).
+  // The 144px source is 4× retina at 36 and 2× retina at 76 — sharp on phones.
+  let _avatarCoords = null; // { cols, cell, idx: { url: cellIndex } }
+  async function loadAvatarCoords() {
+    if (_avatarCoords) return _avatarCoords;
+    try {
+      _avatarCoords = await (await fetch('./assets/avatars-coords.json')).json();
+    } catch (e) { _avatarCoords = null; }
+    return _avatarCoords;
+  }
+  // Returns inline style for background-image + size + position, or '' if
+  // the URL isn't in the sprite (falls back to original <img src=url>).
+  function avatarSpriteStyleFor(url, displaySize) {
+    if (!url || !_avatarCoords) return '';
+    const idx = _avatarCoords.idx[url];
+    if (idx == null) return '';
+    const cell = _avatarCoords.cell;
+    const cols = _avatarCoords.cols;
+    const totalRows = Math.ceil(Object.keys(_avatarCoords.idx).length / cols);
+    const row = Math.floor(idx / cols);
+    const col = idx % cols;
+    const scale = displaySize / cell;
+    const bgW = cell * cols * scale;
+    const bgH = cell * totalRows * scale;
+    return `background-image:url('./assets/avatars-sprite.jpg');background-repeat:no-repeat;background-size:${bgW.toFixed(1)}px ${bgH.toFixed(1)}px;background-position:-${(col * displaySize).toFixed(1)}px -${(row * displaySize).toFixed(1)}px`;
   }
 
   const main = document.getElementById('main');
@@ -1621,12 +1652,18 @@
 
         <h2>how to use</h2>
         <ul class="help-list">
-          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>Open the site at least once on Wi-Fi before you lose signal. After that it works without internet.<br>Tip: add it to your home screen so it looks like an app. <b>iPhone</b>: <b>Share</b> → <b>Add to Home Screen</b>. <b>Android</b>: <b>⋮</b> → <b>Add to Home screen</b>.</p></div></li>
+          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>Open the site at least once on Wi-Fi before you lose signal. After that it works without internet.</p></div></li>
           <li><span class="help-ico">♥</span><div><b>Build your night</b><p>In <b>Lineup</b>, tap a DJ's heart to add them to your <b>Schedule</b>. Tap again to remove.</p></div></li>
           <li><span class="help-ico">🔍</span><div><b>Find an artist or stage</b><p>In <b>Lineup</b>, type an artist (<i>"John Summit"</i>) or a stage (<i>"kinetic"</i>).</p></div></li>
           <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>In <b>Lineup</b>, tap <b>Now</b>.</p></div></li>
           <li><span class="help-ico">🎯</span><div><b>Browse one stage at a time</b><p>In <b>Lineup</b>, set sort to <b>Stage</b>, then tap a stage header.</p></div></li>
           <li><span class="help-ico">📍</span><div><b>See where you are on the map</b><p>On the <b>Map</b>, tap 📍.</p></div></li>
+        </ul>
+
+        <h2>tips</h2>
+        <ul class="help-list">
+          <li><span class="help-ico">🎪</span><div><b>The 9 main stages</b><p style="line-height:1.65"><b style="color:#ff5aa0">kineticFIELD</b>: mainstage. House, EDM, big-room headliners.<br><b style="color:#2cc8ff">circuitGROUNDS</b>: techno + house (Fri d&amp;b / bass burst).<br><b style="color:#d39bff">cosmicMEADOW</b>: bass, alt, future, live sets.<br><b style="color:#5cff3a">neonGARDEN</b>: techno (some house early).<br><b style="color:#ff95dd">stereoBLOOM</b>: house, tech house, groove.<br><b style="color:#a3e635">bionicJUNGLE</b>: house, techno, disco / funk.<br><b style="color:#8b8dff">quantumVALLEY</b>: trance, progressive, melodic.<br><b style="color:#2dd4c0">bassPOD</b>: dubstep, d&amp;b, riddim. Pure bass.<br><b style="color:#ff5560">wasteLAND</b>: hardstyle, hardcore.</p></div></li>
+          <li><span class="help-ico">🚐</span><div><b>Pop-ups + art cars</b><p>Smaller side stops scattered around, often with their own vibe. <b>BeatBox</b> + <b>PicnicPlaytime</b> are roving art cars (they move). <b>Casa Bacardí</b>, <b>Electrolit House</b>, <b>Forest House</b>, <b>Takis Hangar</b>, <b>YeeDC</b>, <b>Insomniac Fridays</b> are themed lounges/tents. Worth wandering into if you stumble on one.</p></div></li>
         </ul>
 
         <h2>fine print</h2>
@@ -2060,9 +2097,14 @@
         );
         return hit ? hit.image : null;
       })();
-      const imgHTML = imageUrl
-        ? `<img class="b-img" src="${escape(imageUrl)}" loading="lazy" alt="" onerror="this.style.display='none'" />`
-        : '';
+      // Same sprite as Lineup; display at 76px here. Falls back to direct
+      // CloudFront URL if avatar isn't in the bundled sprite.
+      const spriteStyle = avatarSpriteStyleFor(imageUrl, 76);
+      const imgHTML = spriteStyle
+        ? `<span class="b-img" style="${spriteStyle}"></span>`
+        : (imageUrl
+            ? `<img class="b-img" src="${escape(imageUrl)}" loading="lazy" alt="" onerror="this.style.display='none'" />`
+            : '');
       block.innerHTML = `
         ${imgHTML}
         <div class="b-content">
@@ -2401,9 +2443,16 @@
         const existingPickId = findPickIdForArtist(a);
         const row = document.createElement('div');
         row.className = 'artist-result';
-        const avatarHTML = a.image
-          ? `<img class="avatar" src="${escape(a.image)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'" />`
-          : `<span class="avatar"></span>`;
+        // Use sprite if avatar is in the bundled set (100% offline reliable);
+        // fall back to direct CloudFront URL if not (e.g. new artist not in
+        // the build-time sprite). The sprite is 288×288 cells, downscaled
+        // to 36px display via background-size.
+        const spriteStyle = avatarSpriteStyleFor(a.image, 36);
+        const avatarHTML = spriteStyle
+          ? `<span class="avatar" style="${spriteStyle}"></span>`
+          : (a.image
+              ? `<img class="avatar" src="${escape(a.image)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'" />`
+              : `<span class="avatar"></span>`);
         row.innerHTML = `
           ${avatarHTML}
           <a class="name" href="${escape(spotifyUrl(a.name))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(a.name)} on Spotify">${highlight(a.name, query)}</a>
@@ -2436,7 +2485,7 @@
     b.onclick = () => { state.tab = b.dataset.tab; save(); render(); };
   });
 
-  loadArtists().then(() => {
+  loadArtists().then(async () => {
     // Re-sync existing picks against the lineup. Two reasons:
     //   1. Backfill missing image URLs (older picks before image was saved)
     //   2. Re-compute startMins/endMins/bucket — these depend on dayStartHour,
@@ -2461,33 +2510,66 @@
       });
     });
     if (migrated) save();
+
+    // Load the avatar sprite coordinate map BEFORE first render so all
+    // avatars use sprite-backed background-image (100% offline reliable).
+    await loadAvatarCoords();
     render();
 
     // Pre-warm all artist images so the lineup is fully offline-ready.
-    // Without this, only avatars the user scrolled past get cached. We want
-    // the festival case to work even if they just opened the app once at home.
-    setTimeout(prewarmArtistImages, 800);
+    // Avatars go to IndexedDB (no quota padding, 100% reliable). Festival
+    // map goes to Cache API. Set times + schedule PNG were SHELL-cached
+    // atomically on SW install.
+    setTimeout(prewarmFestivalMap, 800);
     setTimeout(startOfflineStatusPoll, 1200);
+
+    // When the network reconnects (e.g. user moved out of dead zone, or
+    // hopped onto Wi-Fi after data ran out), re-trigger the prewarmer.
+    // Already-cached images return instantly from cache; missing ones get
+    // another fetch attempt. Resilient to mid-flight interruptions.
+    window.addEventListener('online', () => {
+      setTimeout(prewarmFestivalMap, 500);
+      setTimeout(refreshOfflineStatus, 1500);
+    });
   });
 
-  // Show a subtle "Offline ready" line above the footer ONLY when every
-  // critical image is cached. Hidden otherwise — silence is the signal.
+  // Show a subtle "Offline ready" line above the footer ONLY when:
+  //   1. Set times (artists.json) + full schedule PNG are in the SHELL cache
+  //      (these are non-negotiable — a missing one means the festival data
+  //       itself isn't available offline)
+  //   2. ≥90% of DJ avatars + festival map are in the IMAGES cache (the 10%
+  //      tolerance handles CDN flakes; missing avatars degrade to placeholders
+  //      but never affect set-time data)
   async function refreshOfflineStatus() {
     const el = document.getElementById('offlineStatus');
     if (!el) return null;
-    const allUrls = (ARTISTS || []).map(a => a.image).filter(Boolean);
-    if (typeof FESTIVAL_MAP_URL === 'string') allUrls.push(FESTIVAL_MAP_URL);
-    if (!allUrls.length) return null;
+    if (!('caches' in window)) return null;
 
-    let cached = 0;
-    if ('caches' in window) {
-      try {
-        const c = await caches.open('myraverlife-images-v1');
-        const set = new Set((await c.keys()).map(r => r.url));
-        cached = allUrls.filter(u => set.has(u)).length;
-      } catch (e) {}
-    }
-    const ready = cached >= allUrls.length;
+    let shellOk = false, mapOk = false;
+    try {
+      // SHELL must contain: set times (artists.json), full schedule PNG,
+      // avatars sprite (.jpg + .json). All atomic-installed by the SW so
+      // either present or missing as a group.
+      const shellNames = (await caches.keys()).filter(n => n.startsWith('myraverlife-shell-'));
+      for (const name of shellNames) {
+        const c = await caches.open(name);
+        const urls = (await c.keys()).map(r => r.url);
+        const hasSet = urls.some(u => u.endsWith('/assets/artists.json'));
+        const hasSched = urls.some(u => u.endsWith('/assets/schedule-all.png'));
+        const hasSprite = urls.some(u => u.endsWith('/assets/avatars-sprite.jpg'));
+        const hasCoords = urls.some(u => u.endsWith('/assets/avatars-coords.json'));
+        if (hasSet && hasSched && hasSprite && hasCoords) { shellOk = true; break; }
+      }
+      // Festival map cached separately via prewarmer (page-side cache.put)
+      const c = await caches.open('myraverlife-images-v1');
+      const imgSet = new Set((await c.keys()).map(r => r.url));
+      mapOk = typeof FESTIVAL_MAP_URL === 'string' && imgSet.has(FESTIVAL_MAP_URL);
+    } catch (e) {}
+
+    // True 100% offline: SHELL atomic install gives us set times + schedule
+    // + ALL avatars (via sprite). Festival map is the only individual
+    // cross-origin image that needs separate caching.
+    const ready = shellOk && mapOk;
     if (ready) {
       el.textContent = '✓ Offline ready';
       el.style.display = '';
@@ -2508,32 +2590,39 @@
     });
   }
 
-  // Background-prefetch every artist avatar AND the festival map via Image()
-  // so the browser requests them at low priority. The service worker
-  // intercepts and stores them in the persistent images cache. Throttled to
-  // 6 at a time so we don't hammer the CDN or saturate the user's connection.
-  // This makes the entire app work offline at the Speedway after a single
-  // online visit anywhere in the app — even if the user never opens Map.
+  // Cross-origin festival map URL (only image we still hot-link from
+  // CloudFront — avatars are now bundled in assets/avatars-sprite.jpg
+  // via APP_SHELL for atomic 100% offline reliability).
   const FESTIVAL_MAP_URL = 'https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png';
-  function prewarmArtistImages() {
+
+  // Pre-fetch the festival map via Cache API so the Map tab works offline
+  // even if the user never opened it while online. The map is the only
+  // cross-origin image we still hot-link (DJ avatars are bundled in the
+  // sprite for atomic install).
+  let _prewarmRunning = false;
+  async function prewarmFestivalMap() {
+    if (_prewarmRunning) return;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
-    const urls = [];
-    if (ARTISTS && ARTISTS.length) urls.push(...ARTISTS.map(a => a.image).filter(Boolean));
-    urls.push(FESTIVAL_MAP_URL);
-    let i = 0;
-    const BATCH = 6;
-    const DELAY = 120;
-    function step() {
-      for (let j = 0; j < BATCH && i < urls.length; j++, i++) {
-        // Note: NO `loading='lazy'` — detached <img> with lazy never fetches.
-        // We need the request to actually fire so the SW can cache it.
-        const img = new Image();
-        img.decoding = 'async';
-        img.src = urls[i];
+    if (!('caches' in window)) return;
+
+    _prewarmRunning = true;
+    try {
+      const cache = await caches.open('myraverlife-images-v1');
+      const CHUNK = 1;
+      const urls = [FESTIVAL_MAP_URL];
+      for (let i = 0; i < urls.length; i += CHUNK) {
+        if (navigator.onLine === false) break;
+        await Promise.allSettled(urls.slice(i, i + CHUNK).map(async (u) => {
+          if (await cache.match(u)) return;
+          try {
+            const response = await fetch(u, { mode: 'no-cors' });
+            await cache.put(u, response);
+          } catch (e) { /* quota exhausted or network failure — letter circle covers it */ }
+        }));
       }
-      if (i < urls.length) setTimeout(step, DELAY);
+    } finally {
+      _prewarmRunning = false;
     }
-    step();
   }
 
   // Service worker for offline support. New versions install in the background

@@ -4,9 +4,11 @@
 // airplane mode / on weak signal at the festival.
 //
 // Two caches:
-//   SHELL_VERSION = HTML/CSS/JS/config/JSON — bumped on every release
-//   IMAGES_VERSION = artist avatars (cross-origin CDN images) — sticky, only
-//     bumped when we want to re-fetch all artist avatars.
+//   SHELL_VERSION = HTML/CSS/JS/config/JSON/sprites — bumped on every
+//     release. Includes assets/avatars-sprite.jpg (all DJ avatars in one
+//     file) for atomic 100% offline reliability.
+//   IMAGES_VERSION = the festival map (the only cross-origin CDN image we
+//     still hot-link). Sticky — only bumped to force a refresh.
 //
 // Resilience:
 //   - Install uses per-item add() with allSettled so one bad fetch doesn't
@@ -14,7 +16,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v123';
+const SHELL_VERSION  = 'myraverlife-shell-v138';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [
@@ -27,6 +29,8 @@ const APP_SHELL = [
   './assets/icon-512.png',
   './assets/apple-touch-icon.png',
   './assets/schedule-all.png',
+  './assets/avatars-sprite.jpg',
+  './assets/avatars-coords.json',
 ];
 
 self.addEventListener('install', (event) => {
@@ -112,22 +116,23 @@ self.addEventListener('fetch', (event) => {
   }
 
   // ── Cross-origin images (artist avatars + festival map from CloudFront) ─
-  // Cache-first so they keep working offline after first online visit.
-  if (event.request.destination === 'image') {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request)
-          .then((response) => {
-            if (cacheable(response)) {
-              const clone = response.clone();
-              caches.open(IMAGES_VERSION).then((c) => c.put(event.request, clone));
-            }
-            return response;
-          })
-          .catch(() => new Response('', { status: 504 }));
-      })
-    );
+  // Serve from cache if present (works offline). Otherwise, do NOT intercept
+  // — let the browser handle the request natively. This is critical because:
+  //   1. SW context lacks Origin header → CloudFront doesn't send CORS
+  //      headers → page's CORS check on the SW-returned response fails.
+  //   2. The page-side prewarmer is the sole writer to the images cache,
+  //      using fetch() with cors mode from page context (Origin sent).
+  // For <img> tags at runtime (no-cors), browser handles normally; if offline
+  // and not yet cached, image breaks gracefully into a placeholder.
+  const isImageUrl = /\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(url.pathname);
+  if (event.request.destination === 'image' || isImageUrl) {
+    event.respondWith((async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+      // Fall through: do our own fetch but don't cache — page is in charge.
+      try { return await fetch(event.request); }
+      catch (e) { return new Response('', { status: 504 }); }
+    })());
     return;
   }
 

@@ -581,7 +581,7 @@
     "stage": "forestHOUSE",
     "start": "3:00am",
     "end": "4:00am",
-    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+    "image": null
   },
   {
     "name": "Porter Robinson (DJ Set)",
@@ -1893,7 +1893,7 @@
     "stage": "forestHOUSE",
     "start": "7:00pm",
     "end": "7:45pm",
-    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+    "image": null
   },
   {
     "name": "AR/CO",
@@ -2773,7 +2773,7 @@
     "stage": "electrolitHOUSE",
     "start": "2:30am",
     "end": "4:00am",
-    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+    "image": null
   },
   {
     "name": "Rooler",
@@ -3125,7 +3125,7 @@
     "stage": "picnicCAR",
     "start": "7:00pm",
     "end": "8:15pm",
-    "image": "https://d3vhc53cl8e8km.cloudfront.net/"
+    "image": null
   },
   {
     "name": "Nightstalker with MC Dino",

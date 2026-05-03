@@ -7,4 +7,6 @@ assets/_make_icon.py
 assets/_import_official_settimes.py
 assets/_update_map_url.py
 assets/_regen_schedules.js
+assets/_generate_avatars_sprite.js
+assets/_generate_avatar_bundle.js
 assets/artists.json.backup
