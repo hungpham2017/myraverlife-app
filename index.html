@@ -1479,7 +1479,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v154</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v155</p>
 </footer>
 
 <nav class="tabs">
@@ -1876,6 +1876,17 @@
         const zy = fRe * wi + fIm * wr + zAy;
         return { left: zx / MAP_IMG_W * 100, top: zy / MAP_IMG_H * 100 };
       },
+      // Compass: convert real-world heading (0=N, 90=E, cw) to the cone's
+      // CSS rotate value (cw from screen-up). Accounts for the map's
+      // rotation so the cone points where the user actually faces ON THE
+      // MAP, not where it'd face on a north-up map.
+      headingToScreenAngle(heading) {
+        const H = heading * Math.PI / 180;
+        const e = Math.sin(H), n = Math.cos(H);
+        const sx = fRe * e + fIm * n;
+        const sy = fIm * e - fRe * n;
+        return Math.atan2(sx, -sy) * 180 / Math.PI;
+      },
     };
   }
 
@@ -1941,6 +1952,17 @@
           top:  baseTop  + dTopSum  / totalW,
         };
       },
+      // Compass: convert real-world heading (0=N, 90=E, cw) to the cone's
+      // CSS rotate value (cw from screen-up). Uses the affine transform's
+      // linear part directly; (left%, top%) is screen-y-down so we flip
+      // the y component to get screen-up.
+      headingToScreenAngle(heading) {
+        const H = heading * Math.PI / 180;
+        const e = Math.sin(H), n = Math.cos(H);
+        const mx = aL * e + bL * n;
+        const my = aT * e + bT * n;
+        return Math.atan2(mx, -my) * 180 / Math.PI;
+      },
     };
   }
 
@@ -1952,9 +1974,8 @@
   // Festival "center" for distance calc — Downtown EDC plaza (anchor 1).
   const FESTIVAL_CENTER_GPS = SPEEDWAY_ANCHORS[0].gps;
 
-  // Map image's true heading (deg from north). 0 = north-up. EDC's official
-  // map is roughly north-up; tune if the compass arrow points wrong on-site.
-  const MAP_ROTATION_DEG = 0;
+  // (Map rotation is now derived from the calibration anchors, not
+  // hardcoded — see _xform.headingToScreenAngle below.)
 
   // Haversine distance in meters between two GPS points.
   function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -2149,7 +2170,7 @@
       requestAnimationFrame(() => {
         conePending = false;
         const cone = document.getElementById('userPinCone');
-        if (cone) cone.style.transform = `rotate(${smoothedHeading - MAP_ROTATION_DEG}deg)`;
+        if (cone) cone.style.transform = `rotate(${_xform.headingToScreenAngle(smoothedHeading)}deg)`;
       });
     }
   }
