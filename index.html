@@ -1404,7 +1404,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v147</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v148</p>
 </footer>
 
 <nav class="tabs">
@@ -2012,6 +2012,17 @@
     const picks = state.picks[state.night] || [];
     main.innerHTML = '';
     main.appendChild(renderTimeline(picks));
+
+    // Auto-scroll to the first pick so users immediately see WHEN their
+    // night starts, not always the empty 5pm hour. Pure DOM operation,
+    // fully offline. Block: 'center' shows the first pick in the middle
+    // of the viewport with context above (lead-up hour) and below.
+    if (picks.length > 0) {
+      requestAnimationFrame(() => {
+        const firstBlock = document.querySelector('.timeline-block');
+        if (firstBlock) firstBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   }
 
   // Pixels per minute on the timeline. 1.7 = ~102px/hour.
