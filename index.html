@@ -1404,7 +1404,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v150</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v151</p>
 </footer>
 
 <nav class="tabs">
@@ -1768,27 +1768,28 @@
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        // Tolerance ~200m around the festival bounding box. Outside that,
-        // user isn't at the Speedway — don't pin them to a misleading
-        // map edge. Show a clear "not at venue yet" message instead.
-        const TOL = 0.002;
-        const onMap = (
-          latitude >= MAP_BOUNDS.south - TOL &&
-          latitude <= MAP_BOUNDS.north + TOL &&
-          longitude >= MAP_BOUNDS.west - TOL &&
-          longitude <= MAP_BOUNDS.east + TOL
+        // ~1.1 km of slack around the festival bounds. Within this, show
+        // the pin (clamped to map edge if just outside the rendered map
+        // — useful for users in parking lots, gates, walking up). Beyond
+        // this, the user is genuinely far from the festival; just hide
+        // the pin silently without any scary text message.
+        const FAR_TOL = 0.01;
+        const tooFar = (
+          latitude < MAP_BOUNDS.south - FAR_TOL ||
+          latitude > MAP_BOUNDS.north + FAR_TOL ||
+          longitude < MAP_BOUNDS.west - FAR_TOL ||
+          longitude > MAP_BOUNDS.east + FAR_TOL
         );
-        if (!onMap) {
-          // Hide any old pin, tell user clearly
+        if (tooFar) {
           const pin = document.getElementById('userPin');
           if (pin) pin.style.display = 'none';
-          setMapStatus('Not at the Speedway yet');
-          setTimeout(() => setMapStatus(''), 2800);
+          setMapStatus('');
           return;
         }
         const p = gpsToMapPercent(latitude, longitude);
+        // placePin clamps 0-100%, so out-of-map-but-close coords land on
+        // the nearest map edge — visually meaningful "you're nearby."
         placePin(p.left, p.top);
-        // If zoomed in, recenter the view so the pin is visible.
         if (mapZoom.panToImagePct) mapZoom.panToImagePct(p.left, p.top);
         setMapStatus('');
         startCompass();
