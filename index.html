@@ -1479,7 +1479,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v156</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v157</p>
 </footer>
 
 <nav class="tabs">
@@ -2121,21 +2121,6 @@
 
   function startCompass() {
     if (compassAttached) return;
-    // ?heading=<deg> overrides the device compass with a fixed real-world
-    // heading (0=N, 90=E, 180=S, 270=W). For desktop browser testing
-    // since DevTools' Sensors panel doesn't fire absolute orientation
-    // events. Cone rotates once and stays put. On phones, just don't
-    // pass the param and the real compass takes over.
-    const headingOverride = new URLSearchParams(window.location.search).get('heading');
-    if (headingOverride != null) {
-      const h = parseFloat(headingOverride);
-      if (!isNaN(h)) {
-        const cone = document.getElementById('userPinCone');
-        if (cone) cone.style.transform = `rotate(${_xform.headingToScreenAngle(h)}deg)`;
-        compassAttached = true;
-        return;
-      }
-    }
     // iOS 13+ requires explicit permission via user gesture (the GPS button).
     const Req = window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission;
     if (typeof Req === 'function') {
