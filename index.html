@@ -1404,7 +1404,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v146</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v147</p>
 </footer>
 
 <nav class="tabs">
@@ -2632,27 +2632,30 @@
     }
   }
 
-  // Service worker for offline support. Defenses against stale-cache
-  // problems (especially iOS Safari, which caches sw.js aggressively):
-  //   1. updateViaCache: 'none' → browser never uses HTTP cache for sw.js,
-  //      always fetches fresh. Safari detects new SWs much faster.
-  //   2. Force registration.update() on visibility → checks for new SW
-  //      whenever the user comes back to the app.
-  //   3. Auto-reload on controllerchange → when a new SW takes over, the
-  //      page reloads itself once so the user sees the latest version
-  //      without needing to manually refresh.
+  // Service worker for offline support. Aggressive update strategy
+  // because iOS Safari otherwise caches sw.js for hours/days. We trigger
+  // a check on every reasonable signal:
+  //   1. updateViaCache: 'none' — browser never uses HTTP cache for sw.js
+  //   2. After registration → immediate update() check
+  //   3. On every page load → registration.update()
+  //   4. On every visibility-to-visible (user returns to app)
+  //   5. On every 'online' event (network reconnects)
+  //   6. Auto-reload on controllerchange when new SW takes over
   if ('serviceWorker' in navigator) {
+    function checkForUpdate() {
+      navigator.serviceWorker.getRegistration()
+        .then(reg => reg && reg.update())
+        .catch(() => {});
+    }
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+        .then(() => checkForUpdate())
         .catch(err => console.warn('Service worker registration failed:', err));
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        navigator.serviceWorker.getRegistration()
-          .then(reg => reg && reg.update())
-          .catch(() => {});
-      }
+      if (document.visibilityState === 'visible') checkForUpdate();
     });
+    window.addEventListener('online', checkForUpdate);
     let _swRefreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (_swRefreshing) return;
