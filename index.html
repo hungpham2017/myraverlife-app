@@ -1404,7 +1404,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v148</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v149</p>
 </footer>
 
 <nav class="tabs">
@@ -1734,6 +1734,16 @@
     main.appendChild(wrap);
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
     wrap.querySelector('#gpsBtn').onclick = (e) => { e.stopPropagation(); locateUser(); };
+
+    // Auto-show the user's pin on Map tab open IF they've already granted
+    // geolocation permission. First-time visitors still need to tap the
+    // GPS button (which triggers the permission prompt). After grant,
+    // the pin is always there immediately on every Map tab visit.
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' })
+        .then(p => { if (p.state === 'granted') locateUser(); })
+        .catch(() => {});
+    }
   }
 
   // ── GPS "you are here" ──────────────────────────────────────────────────
