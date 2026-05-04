@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>myraverlife · map calibration (DEV ONLY)</title>
+<style>
+  :root {
+    --bg: #1a1d24;
+    --panel: #242831;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --accent: #ff4fa3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, system-ui, sans-serif;
+    max-width: 900px;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+  .note {
+    background: rgba(255, 79, 163, 0.1);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    margin: 12px 0 20px;
+    font-size: 13px;
+    line-height: 1.5;
+    border-radius: 4px;
+  }
+  .note b { color: var(--accent); }
+  .url-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .url-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .url-row input {
+    flex: 1; padding: 6px 10px;
+    background: var(--panel); color: var(--text);
+    border: 1px solid #3a3f4b; border-radius: 4px;
+    font-family: ui-monospace, monospace; font-size: 11px;
+  }
+  .url-row button {
+    padding: 6px 12px; background: var(--accent); color: white;
+    border: 0; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px;
+  }
+  .map-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    user-select: none;
+    background: var(--panel);
+    border-radius: 6px;
+    overflow: hidden;
+    touch-action: none;
+  }
+  .map-img { display: block; width: 100%; height: auto; }
+  .pin {
+    position: absolute;
+    width: 28px; height: 28px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 0 0 3px white, 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 10;
+    touch-action: none;
+  }
+  .pin::after {
+    content: '';
+    position: absolute;
+    inset: 0; margin: auto;
+    width: 4px; height: 4px;
+    background: white;
+    border-radius: 50%;
+  }
+  .pin:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.15); }
+  .pin .label {
+    position: absolute;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.85);
+    color: white;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .anchors { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .anchor-card {
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    column-gap: 10px;
+    row-gap: 8px;
+    align-items: center;
+  }
+  .anchor-swatch { width: 14px; height: 14px; border-radius: 50%; grid-row: 1 / span 2; align-self: center; }
+  .anchor-row1 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .anchor-name { font-weight: 600; font-size: 14px; }
+  .pct-readout { font-family: ui-monospace, monospace; font-size: 11px; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; }
+  .anchor-row2 { display: flex; gap: 8px; align-items: center; font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); }
+  .anchor-row2 input { flex: 1; min-width: 0; padding: 5px 8px; background: var(--bg); color: var(--text); border: 1px solid #3a3f4b; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 11px; }
+  .anchor-row2 input.needs-gps { border-color: var(--accent); }
+  .code-block {
+    margin-top: 20px;
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .code-block h3 { margin: 0 0 10px; font-size: 13px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    background: #14171c;
+    color: var(--text);
+    border: 1px solid #3a3f4b;
+    border-radius: 4px;
+    padding: 10px;
+    resize: vertical;
+  }
+  .copy-btn { margin-top: 10px; padding: 10px 18px; background: var(--accent); color: white; border: 0; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .copy-btn.copied { background: #2ea043; }
+  .reset-btn { margin-left: 8px; padding: 10px 18px; background: transparent; color: var(--muted); border: 1px solid #3a3f4b; border-radius: 4px; cursor: pointer; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>myraverlife · map calibration</h1>
+<p class="sub">DEV-only tool. Not linked from the app. 5 anchors: 2 verified landmarks (Downtown EDC, Gate C/D) + 3 oval cardinal extremes (top, bottom, east).</p>
+
+<div class="note">
+  <b>Workflow:</b> Drag each colored pin to its exact spot on the festival
+  map. For the 3 oval pins (Top/Bottom/East), grab their GPS from Google
+  Maps satellite view of the LVMS racetrack edges (right-click → copy
+  lat/lng) and paste into the lat/lng inputs. The mapPct values update
+  live as you drag. When done, copy the generated <code>SPEEDWAY_ANCHORS</code>
+  block and paste it into <code>index.html</code>.
+</div>
+
+<div class="url-row">
+  <label>Map URL:</label>
+  <input type="text" id="mapUrl">
+  <button id="loadBtn">Load</button>
+</div>
+
+<div class="map-wrap" id="wrap">
+  <img class="map-img" id="map" alt="festival map" draggable="false">
+</div>
+
+<div class="anchors" id="anchorList"></div>
+
+<div class="code-block">
+  <h3>Paste this into <code>SPEEDWAY_ANCHORS</code> in index.html</h3>
+  <textarea id="code" readonly></textarea>
+  <button class="copy-btn" id="copyBtn">Copy to clipboard</button>
+  <button class="reset-btn" id="resetBtn">Reset to defaults</button>
+</div>
+
+<script>
+  const DEFAULT_MAP_URL = 'https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png';
+  const STORAGE_KEY = 'myraverlife-calibration-v4';
+
+  // 5 anchors with their verified GPS values baked in. GPS values are
+  // PERMANENT (the physical points don't move year to year). Only mapPct
+  // gets recalibrated each year by dragging pins on the new festival map.
+  const DEFAULTS = {
+    downtown:   { name: 'Downtown EDC', color: '#3a7afe', lat: 36.272914,          lng: -115.011007,          left: 36.46, top: 54.37 },
+    gateCD:     { name: 'Gate C/D',     color: '#ff5050', lat: 36.27498535179921,  lng: -115.01313780128011,  left:  9.30, top: 53.64 },
+    ovalTop:    { name: 'Oval Top',     color: '#2ea043', lat: 36.27481793053691,  lng: -115.00627038603729,  left: 41.84, top:  9.46 },
+    ovalBottom: { name: 'Oval Bottom',  color: '#f59e0b', lat: 36.269574134943305, lng: -115.01424058659038,  left: 42.07, top: 96.56 },
+    ovalEast:   { name: 'Oval East',    color: '#a855f7', lat: 36.27065185384524,  lng: -115.00866203499909,  left: 73.07, top: 54.26 },
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const wrap = $('wrap'), mapImg = $('map'), urlInput = $('mapUrl');
+  const anchorList = $('anchorList'), codeArea = $('code');
+  const copyBtn = $('copyBtn'), resetBtn = $('resetBtn');
+
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const state = {
+    mapUrl: saved.mapUrl || DEFAULT_MAP_URL,
+    anchors: {},
+  };
+  Object.entries(DEFAULTS).forEach(([k, def]) => {
+    state.anchors[k] = { ...def, ...(saved.anchors && saved.anchors[k]) };
+  });
+
+  function persist() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ mapUrl: state.mapUrl, anchors: state.anchors }));
+  }
+
+  // Render pins.
+  const pins = {};
+  function renderPins() {
+    wrap.querySelectorAll('.pin').forEach(p => p.remove());
+    Object.entries(state.anchors).forEach(([key, a]) => {
+      const pin = document.createElement('div');
+      pin.className = 'pin';
+      pin.style.background = a.color;
+      pin.style.left = a.left + '%';
+      pin.style.top  = a.top  + '%';
+      pin.dataset.key = key;
+      const label = document.createElement('div');
+      label.className = 'label';
+      // Show short name in pin label.
+      label.textContent = a.name.split('(')[0].trim();
+      pin.appendChild(label);
+      pin.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        dragging = key;
+        pin.setPointerCapture && pin.setPointerCapture(e.pointerId);
+      });
+      wrap.appendChild(pin);
+      pins[key] = pin;
+    });
+  }
+
+  function renderCards() {
+    anchorList.innerHTML = '';
+    Object.entries(state.anchors).forEach(([key, a]) => {
+      const needsGps = a.lat == null || a.lng == null;
+      const card = document.createElement('div');
+      card.className = 'anchor-card';
+      card.innerHTML = `
+        <div class="anchor-swatch" style="background:${a.color}"></div>
+        <div class="anchor-row1">
+          <div class="anchor-name">${a.name}</div>
+          <span class="pct-readout" id="pct-${key}">left: ${a.left.toFixed(2)}%, top: ${a.top.toFixed(2)}%</span>
+        </div>
+        <div class="anchor-row2" style="grid-column:2">
+          <span>lat:</span>
+          <input type="text" data-key="${key}" data-field="lat"
+                 value="${a.lat ?? ''}" class="${needsGps ? 'needs-gps' : ''}"
+                 placeholder="paste lat from Google Maps">
+          <span>lng:</span>
+          <input type="text" data-key="${key}" data-field="lng"
+                 value="${a.lng ?? ''}" class="${needsGps ? 'needs-gps' : ''}"
+                 placeholder="paste lng from Google Maps">
+        </div>
+      `;
+      anchorList.appendChild(card);
+    });
+    anchorList.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const k = e.target.dataset.key, f = e.target.dataset.field;
+        const v = e.target.value.trim();
+        state.anchors[k][f] = v === '' ? null : parseFloat(v);
+        persist();
+        updateCode();
+      });
+    });
+  }
+
+  function updateReadout(key) {
+    const a = state.anchors[key];
+    const el = $(`pct-${key}`);
+    if (el) el.textContent = `left: ${a.left.toFixed(2)}%, top: ${a.top.toFixed(2)}%`;
+  }
+
+  function updateCode() {
+    const lines = Object.values(state.anchors).map(a => {
+      const lat = a.lat == null ? 'NEEDS_GPS' : a.lat;
+      const lng = a.lng == null ? 'NEEDS_GPS' : a.lng;
+      // Use short name in the generated code (strip parenthetical descriptions).
+      const shortName = a.name.split('(')[0].trim();
+      return `  { name: '${shortName.replace(/'/g, "\\'")}', mapPct: { left: ${a.left.toFixed(2)}, top: ${a.top.toFixed(2)} }, gps: { lat: ${lat}, lng: ${lng} } },`;
+    }).join('\n');
+    codeArea.value = `const SPEEDWAY_ANCHORS = [\n${lines}\n];`;
+  }
+
+  // Drag.
+  let dragging = null;
+  document.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const rect = mapImg.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const x = (e.clientX - rect.left) / rect.width  * 100;
+    const y = (e.clientY - rect.top)  / rect.height * 100;
+    state.anchors[dragging].left = Math.max(0, Math.min(100, x));
+    state.anchors[dragging].top  = Math.max(0, Math.min(100, y));
+    const pin = pins[dragging];
+    if (pin) {
+      pin.style.left = state.anchors[dragging].left + '%';
+      pin.style.top  = state.anchors[dragging].top  + '%';
+    }
+    updateReadout(dragging);
+    updateCode();
+  });
+  document.addEventListener('pointerup', () => {
+    if (dragging) persist();
+    dragging = null;
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(codeArea.value);
+    copyBtn.textContent = 'Copied ✓';
+    copyBtn.classList.add('copied');
+    setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; copyBtn.classList.remove('copied'); }, 1500);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!confirm('Reset all anchors to defaults? Your edits will be lost.')) return;
+    Object.keys(DEFAULTS).forEach(k => { state.anchors[k] = { ...DEFAULTS[k] }; });
+    persist();
+    renderPins();
+    renderCards();
+    updateCode();
+  });
+
+  $('loadBtn').addEventListener('click', () => {
+    state.mapUrl = urlInput.value.trim() || DEFAULT_MAP_URL;
+    mapImg.src = state.mapUrl;
+    persist();
+  });
+
+  // Init.
+  urlInput.value = state.mapUrl;
+  mapImg.src = state.mapUrl;
+  renderPins();
+  renderCards();
+  updateCode();
+</script>
+
+</body>
+</html>

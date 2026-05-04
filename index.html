@@ -328,6 +328,39 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  /* Centered "you're not at the venue" message — overlay above the map.
+     Cute, elegant, reassures user that GPS is working and they'll see
+     their pin once they arrive. */
+  .map-far-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(14, 16, 24, 0.88);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 84%;
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid rgba(255, 90, 160, 0.35);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .map-far-msg .map-far-sub {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.1px;
+  }
   .map-img {
     width: 100%;
     height: auto;
@@ -1052,6 +1085,48 @@
   .timeline-block .b-del:hover { color: var(--text); }
   .timeline-block .b-del:active { transform: scale(1.25); }
 
+  /* Live "NOW" marker — solid accent-color hairline + matching pill,
+     anchored to the left gutter so the pill never overlaps DJ blocks. */
+  .timeline-now {
+    position: absolute;
+    left: 52px;
+    right: 0;
+    height: 1px;
+    background: var(--accent);
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 0 3px rgba(255, 79, 163, 0.35);
+  }
+  .timeline-now-pill {
+    position: absolute;
+    top: -9px;
+    right: 100%;            /* anchor right edge to line's left edge */
+    margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px 3px 6px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 2px 6px rgba(255, 79, 163, 0.4);
+  }
+  .timeline-now-pill::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: white;
+    animation: tlNowDot 1.6s ease-in-out infinite;
+  }
+  @keyframes tlNowDot {
+    0%, 100% { opacity: 1;   transform: scale(1);   }
+    50%      { opacity: 0.4; transform: scale(0.6); }
+  }
+
   /* Help page — full content sections */
   .help-page { padding: 4px 0 16px; }
   .help-page h1 {
@@ -1404,7 +1479,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v151</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v154</p>
 </footer>
 
 <nav class="tabs">
@@ -1684,21 +1759,225 @@
     `;
   }
 
-  // GPS bounding box of the festival on the map image (corners of map.png).
-  // Approximations from Las Vegas Motor Speedway location — tune as needed.
-  const MAP_BOUNDS = {
-    north: 36.2790,
-    south: 36.2660,
-    west:  -115.0210,
-    east:  -115.0030,
-  };
+  // ── MAP CALIBRATION (2-anchor precise) ─────────────────────────────────
+  // Two verified-precise points anchor the entire GPS ↔ map transform:
+  //   1. Downtown EDC (central plaza, small footprint, easy to pinpoint).
+  //   2. Gate C/D (permanent LVMS entrance gate, west side of property).
+  //      Distance + direction from anchor 1 locks scale + orientation.
+  //
+  // Both GPS values were verified directly from Google Maps (right-click
+  // → coordinates), not estimated from satellite eyeballing. Two precise
+  // anchors beats four fuzzy ones because the math is an EXACT fit
+  // through both points — no least-squares averaging.
+  //
+  // Why these two specifically:
+  //   • Downtown EDC is Insomniac's branded central plaza, placed at
+  //     the natural geometric center of the LVMS infield. The same
+  //     spot every year.
+  //   • Gate C/D is permanent LVMS infrastructure (the road entrance
+  //     building on the west side). Won't move in 2026 or any future
+  //     year — concrete, lit, surveyed.
+  //
+  // The math: two independent 1-D linear fits (top%↔lat, left%↔lng).
+  // Handles non-uniform stretching (Insomniac's portrait map squishes
+  // the wide-but-short LVMS oval into a tall rectangle). Assumes the
+  // map is approximately north-up — confirmed visually on the 2025 map
+  // (Gate C/D shows upper-left of Downtown EDC, matching its real NW
+  // position).
+  //
+  // YEARLY UPDATE WHEN A NEW MAP DROPS:
+  //   • GPS values: do NOT change. Both points are at the same physical
+  //     spot every year (Downtown EDC plaza + concrete LVMS gate).
+  //   • mapPct values: re-eyeball where each anchor lands on the new
+  //     image and update.
+  const SPEEDWAY_ANCHORS = [
+    { name: 'Downtown EDC', mapPct: { left: 36.46, top: 54.37 }, gps: { lat: 36.272914,          lng: -115.011007          } },
+    { name: 'Gate C/D',     mapPct: { left:  9.30, top: 53.64 }, gps: { lat: 36.27498535179921,  lng: -115.01313780128011  } },
+    { name: 'Oval Top',     mapPct: { left: 41.84, top:  9.46 }, gps: { lat: 36.27481793053691,  lng: -115.00627038603729  } },
+    { name: 'Oval Bottom',  mapPct: { left: 42.07, top: 96.56 }, gps: { lat: 36.269574134943305, lng: -115.01424058659038  } },
+    { name: 'Oval East',    mapPct: { left: 73.07, top: 54.26 }, gps: { lat: 36.27065185384524,  lng: -115.00866203499909  } },
+  ];
+
+  // Festival map's pixel dimensions. Only used by the 2-anchor similarity
+  // fallback to convert mapPct → isotropic pixels (so rotation is
+  // well-defined). The ≥3-anchor affine path doesn't need them — it works
+  // on (lat, lng) and (left%, top%) directly.
+  const MAP_IMG_W = 1080;
+  const MAP_IMG_H = 1350;
+
+  // Convert real-world GPS to local meters (east, north) relative to a ref.
+  function gpsToLocalMeters(lat, lng, refLat, refLng) {
+    const M_PER_DEG_LAT = 111320;
+    const M_PER_DEG_LNG = 111320 * Math.cos(refLat * Math.PI / 180);
+    return {
+      east:  (lng - refLng) * M_PER_DEG_LNG,
+      north: (lat - refLat) * M_PER_DEG_LAT,
+    };
+  }
+
+  // ── Math helpers ────────────────────────────────────────────────────────
+  // Solve a 3×3 linear system M·β = b via Cramer's rule. Used by the
+  // affine least-squares fitter below.
+  function solve3x3(M, b) {
+    const det = (m) =>
+      m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+      m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+      m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    const D = det(M);
+    const M0 = [[b[0], M[0][1], M[0][2]], [b[1], M[1][1], M[1][2]], [b[2], M[2][1], M[2][2]]];
+    const M1 = [[M[0][0], b[0], M[0][2]], [M[1][0], b[1], M[1][2]], [M[2][0], b[2], M[2][2]]];
+    const M2 = [[M[0][0], M[0][1], b[0]], [M[1][0], M[1][1], b[1]], [M[2][0], M[2][1], b[2]]];
+    return [det(M0) / D, det(M1) / D, det(M2) / D];
+  }
+
+  // Least-squares fit y = β₀·x₁ + β₁·x₂ + β₂. Solved via the normal
+  // equations Xᵀ·X·β = Xᵀ·y, where X = [x₁, x₂, 1].
+  function fitLinear3(x1s, x2s, ys) {
+    let s11 = 0, s12 = 0, s1 = 0, s22 = 0, s2 = 0;
+    let sy1 = 0, sy2 = 0, sy = 0;
+    const n = x1s.length;
+    for (let i = 0; i < n; i++) {
+      const a = x1s[i], b = x2s[i], y = ys[i];
+      s11 += a * a; s12 += a * b; s1 += a;
+      s22 += b * b; s2 += b;
+      sy1 += a * y; sy2 += b * y; sy += y;
+    }
+    return solve3x3([[s11, s12, s1], [s12, s22, s2], [s1, s2, n]], [sy1, sy2, sy]);
+  }
+
+  // ── 2-anchor similarity transform (rotation + uniform scale + translation)
+  // Used when SPEEDWAY_ANCHORS has exactly 2 entries. Exact fit at both
+  // anchors, but assumes uniform scale — won't capture map non-uniform
+  // stretching (which Insomniac's portrait artwork has). Adding a 3rd
+  // anchor switches us to affine least-squares (see below) which does.
+  // Math via complex multiplication:
+  //   z_pixel = factor * w_meters + offset
+  //   factor = (a + b·i) encodes scale + rotation
+  //   w_meters = east + (-north)·i  (screen-y-down convention)
+  function fitSimilarity(anchors) {
+    const A = anchors[0], B = anchors[1];
+    const refLat = A.gps.lat, refLng = A.gps.lng;
+    const zAx = A.mapPct.left / 100 * MAP_IMG_W;
+    const zAy = A.mapPct.top  / 100 * MAP_IMG_H;
+    const zBx = B.mapPct.left / 100 * MAP_IMG_W;
+    const zBy = B.mapPct.top  / 100 * MAP_IMG_H;
+    const mB = gpsToLocalMeters(B.gps.lat, B.gps.lng, refLat, refLng);
+    const wRe = mB.east, wIm = -mB.north;
+    const dzRe = zBx - zAx, dzIm = zBy - zAy;
+    const denom = wRe * wRe + wIm * wIm;
+    const fRe = (dzRe * wRe + dzIm * wIm) / denom;
+    const fIm = (dzIm * wRe - dzRe * wIm) / denom;
+    return {
+      kind: 'similarity',
+      transform(lat, lng) {
+        const m = gpsToLocalMeters(lat, lng, refLat, refLng);
+        const wr = m.east, wi = -m.north;
+        const zx = fRe * wr - fIm * wi + zAx;
+        const zy = fRe * wi + fIm * wr + zAy;
+        return { left: zx / MAP_IMG_W * 100, top: zy / MAP_IMG_H * 100 };
+      },
+    };
+  }
+
+  // ── Multi-anchor affine least-squares (≥3 anchors) + IDW residual correction
+  // Stage 1: fits the 6-parameter affine transform from local meters
+  // (relative to anchor[0]) to map percent:
+  //   left% = aL·east + bL·north + cL
+  //   top%  = aT·east + bT·north + cT
+  // Two independent 3-param least-squares fits via normal equations.
+  // Handles rotation + non-uniform scale + skew. Operates in METERS
+  // (not raw lat/lng) for numerical conditioning.
+  //
+  // Stage 2: inverse-distance-weighted residual correction so each
+  // anchor's pin lands EXACTLY on its dragged mapPct. The festival
+  // map has non-linear distortion (artistic stretching) that an affine
+  // fit can't fully capture — leaving residuals up to ~5% at some
+  // anchors. IDW takes those residuals and smoothly interpolates them
+  // between anchors, collapsing to the exact residual at each anchor
+  // (zero error there) and fading out far away (where pure affine
+  // takes over).
+  function fitAffine(anchors) {
+    const refLat = anchors[0].gps.lat;
+    const refLng = anchors[0].gps.lng;
+    const meters = anchors.map(a => gpsToLocalMeters(a.gps.lat, a.gps.lng, refLat, refLng));
+    const easts  = meters.map(m => m.east);
+    const norths = meters.map(m => m.north);
+    const lefts  = anchors.map(a => a.mapPct.left);
+    const tops   = anchors.map(a => a.mapPct.top);
+    const [aL, bL, cL] = fitLinear3(easts, norths, lefts);
+    const [aT, bT, cT] = fitLinear3(easts, norths, tops);
+
+    // Per-anchor residuals: how far the affine fit misses each anchor.
+    const residuals = anchors.map((a, i) => ({
+      east:  easts[i],
+      north: norths[i],
+      dLeft: a.mapPct.left - (aL * easts[i] + bL * norths[i] + cL),
+      dTop:  a.mapPct.top  - (aT * easts[i] + bT * norths[i] + cT),
+    }));
+
+    return {
+      kind: 'affine',
+      transform(lat, lng) {
+        const m = gpsToLocalMeters(lat, lng, refLat, refLng);
+        const baseLeft = aL * m.east + bL * m.north + cL;
+        const baseTop  = aT * m.east + bT * m.north + cT;
+
+        // IDW (1/d²) weighted residual correction.
+        let totalW = 0, dLeftSum = 0, dTopSum = 0;
+        for (const r of residuals) {
+          const dx = m.east - r.east;
+          const dy = m.north - r.north;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 25) {  // within 5m of an anchor → snap to it exactly
+            return { left: baseLeft + r.dLeft, top: baseTop + r.dTop };
+          }
+          const w = 1 / d2;
+          totalW   += w;
+          dLeftSum += w * r.dLeft;
+          dTopSum  += w * r.dTop;
+        }
+        return {
+          left: baseLeft + dLeftSum / totalW,
+          top:  baseTop  + dTopSum  / totalW,
+        };
+      },
+    };
+  }
+
+  // Pick the right model based on how many anchors we have.
+  const _xform = SPEEDWAY_ANCHORS.length >= 3
+    ? fitAffine(SPEEDWAY_ANCHORS)
+    : fitSimilarity(SPEEDWAY_ANCHORS);
+
+  // Festival "center" for distance calc — Downtown EDC plaza (anchor 1).
+  const FESTIVAL_CENTER_GPS = SPEEDWAY_ANCHORS[0].gps;
+
   // Map image's true heading (deg from north). 0 = north-up. EDC's official
   // map is roughly north-up; tune if the compass arrow points wrong on-site.
   const MAP_ROTATION_DEG = 0;
 
+  // Haversine distance in meters between two GPS points.
+  function haversineMeters(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180, Δλ = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(Δφ/2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+  // US-friendly format: feet under a quarter mile, miles otherwise.
+  function formatImperialDistance(m) {
+    const ft = m * 3.28084;
+    if (ft < 1320) return Math.round(ft / 50) * 50 + ' ft';
+    const mi = m / 1609.344;
+    if (mi < 10)   return mi.toFixed(1) + ' mi';
+    if (mi < 100)  return Math.round(mi) + ' mi';
+    return Math.round(mi / 10) * 10 + ' mi';
+  }
+
+  // GPS → map-percent. Dispatches to whichever transform the
+  // anchor-count picked (similarity for 2, affine for ≥3).
   function gpsToMapPercent(lat, lng) {
-    const top  = ((MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south)) * 100;
-    const left = ((lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west))   * 100;
+    const { left, top } = _xform.transform(lat, lng);
     const inBounds = top >= 0 && top <= 100 && left >= 0 && left <= 100;
     return { left, top, inBounds };
   }
@@ -1718,6 +1997,7 @@
             <span class="user-pin-dot"></span>
           </div>
         </div>
+        <div class="map-far-msg" id="mapFarMsg" style="display:none"></div>
         <div class="map-zoom-controls">
           <button type="button" class="map-zoom-btn" id="gpsBtn"     aria-label="Find my location">📍</button>
           <button type="button" class="map-zoom-btn" data-zoom="in"  aria-label="Zoom in">⊕</button>
@@ -1768,25 +2048,33 @@
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        // ~1.1 km of slack around the festival bounds. Within this, show
-        // the pin (clamped to map edge if just outside the rendered map
-        // — useful for users in parking lots, gates, walking up). Beyond
-        // this, the user is genuinely far from the festival; just hide
-        // the pin silently without any scary text message.
-        const FAR_TOL = 0.01;
+        // tooFar = pin would land more than ~30% of the map's dimensions
+        // beyond any edge. That gives ~1km of slack around the festival
+        // bounds (the rotated map covers ~1km × 1.4km of real area at
+        // 0.98 px/m, so 30% ≈ 300-400m). Within this slack, show the
+        // pin (clamped to map edge if just outside — useful for users
+        // in parking lots, gates, walking up). Beyond this, hide the
+        // pin silently and show the cute distance message instead.
+        const p = gpsToMapPercent(latitude, longitude);
+        const FAR_PCT = 30;
         const tooFar = (
-          latitude < MAP_BOUNDS.south - FAR_TOL ||
-          latitude > MAP_BOUNDS.north + FAR_TOL ||
-          longitude < MAP_BOUNDS.west - FAR_TOL ||
-          longitude > MAP_BOUNDS.east + FAR_TOL
+          p.left < -FAR_PCT || p.left > 100 + FAR_PCT ||
+          p.top  < -FAR_PCT || p.top  > 100 + FAR_PCT
         );
+        const farMsg = document.getElementById('mapFarMsg');
         if (tooFar) {
           const pin = document.getElementById('userPin');
           if (pin) pin.style.display = 'none';
+          if (farMsg) {
+            const distM = haversineMeters(latitude, longitude, FESTIVAL_CENTER_GPS.lat, FESTIVAL_CENTER_GPS.lng);
+            farMsg.innerHTML = `You're ${formatImperialDistance(distM)} from the Speedway ✨<br><span class="map-far-sub">Your pin lands here when you arrive</span>`;
+            farMsg.style.display = '';
+          }
           setMapStatus('');
           return;
         }
-        const p = gpsToMapPercent(latitude, longitude);
+        // On or near the festival — hide the far-away message.
+        if (farMsg) farMsg.style.display = 'none';
         // placePin clamps 0-100%, so out-of-map-but-close coords land on
         // the nearest map edge — visually meaningful "you're nearby."
         placePin(p.left, p.top);
@@ -2093,7 +2381,37 @@
     return layouts;
   }
 
+  // Module-level interval for the live NOW marker. Cleared + reset on
+  // every renderTimeline call so day-switching doesn't leak intervals.
+  let _nowLineInterval = null;
+
+  // Add / update / remove the "NOW" line based on whether the displayed
+  // day matches the currently-active festival night. Self-cleans the
+  // interval if the timeline is no longer in the DOM (user switched tab).
+  function updateNowLine() {
+    const tl = document.querySelector('.timeline');
+    if (!tl) {
+      if (_nowLineInterval) { clearInterval(_nowLineInterval); _nowLineInterval = null; }
+      return;
+    }
+    const ctx = currentFestivalContext();
+    let line = tl.querySelector('.timeline-now');
+    if (!ctx || ctx.dayId !== selectedDay) {
+      if (line) line.remove();
+      return;
+    }
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'timeline-now';
+      line.innerHTML = '<span class="timeline-now-pill"></span>';
+      tl.appendChild(line);
+    }
+    line.style.top = (ctx.nowMins * TIMELINE_PPM) + 'px';
+    line.querySelector('.timeline-now-pill').textContent = formatMins(ctx.nowMins);
+  }
+
   function renderTimeline(picks) {
+    if (_nowLineInterval) { clearInterval(_nowLineInterval); _nowLineInterval = null; }
     const wrap = document.createElement('div');
     wrap.className = 'timeline';
     const totalHeight = FESTIVAL_LENGTH_MINS * TIMELINE_PPM + 12;
@@ -2164,6 +2482,12 @@
       block.querySelector('.b-del').onclick = () => deletePick(pick.id);
       blocksArea.appendChild(block);
     });
+
+    // Kick off the live NOW marker. Defer the first call so the wrap is
+    // appended to the DOM by the time updateNowLine queries for it.
+    setTimeout(updateNowLine, 0);
+    _nowLineInterval = setInterval(updateNowLine, 60000);
+
     return wrap;
   }
 
