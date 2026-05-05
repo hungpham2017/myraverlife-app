@@ -191,12 +191,18 @@
       margin-top: 4px; padding: 14px 16px 6px;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px;
+      max-height: 50vh; overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .ff-following h4 {
       margin: 0 0 8px;
       font-size: 11px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted);
       display: flex; align-items: baseline; gap: 7px;
+      position: sticky; top: 0;
+      background: var(--surface);
+      padding: 4px 0 6px;
+      z-index: 1;
     }
     .ff-following h4 .count {
       font-size: 13px; font-weight: 800;
@@ -496,6 +502,43 @@
     if (!trimmed) return '?';
     return trimmed.slice(0, 2).toUpperCase();
   }
+
+  // ── Fun DJ name picker ────────────────────────────────────────────────
+  // Pre-fills the "add friend" prompt with a random artist name from the
+  // EDC lineup. User can keep it (it's fun) or type their friend's real
+  // name over it. assets/artists.json is in the SW shell cache so this
+  // works offline.
+  let _djNamesCache = null;
+  async function loadDjNames() {
+    if (_djNamesCache) return _djNamesCache;
+    try {
+      const r = await fetch('./assets/artists.json');
+      if (!r.ok) { _djNamesCache = []; return _djNamesCache; }
+      const data = await r.json();
+      // Strip B2B / VS / & collabs to keep names short and avatar initials
+      // clean. Dedupe across days/stages.
+      const seen = new Set();
+      const names = [];
+      for (const a of (Array.isArray(data) ? data : [])) {
+        let n = String(a && a.name || '').trim();
+        if (!n) continue;
+        n = n.split(/\s+(?:B2B|VS|&|\+|x)\s+/i)[0].trim();
+        if (!n || n.length > 20) continue;
+        const key = n.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        names.push(n);
+      }
+      _djNamesCache = names;
+    } catch (e) {
+      _djNamesCache = [];
+    }
+    return _djNamesCache;
+  }
+  function pickRandomDjName(names) {
+    if (!names || !names.length) return '';
+    return names[Math.floor(Math.random() * names.length)];
+  }
   // Distance helpers — kept here so findfriend.js doesn't depend on
   // index.html's main app scope.
   function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -583,7 +626,11 @@
       modal.appendChild(actions);
       backdrop.appendChild(modal);
       document.body.appendChild(backdrop);
-      setTimeout(() => { (inputEl || ok).focus(); }, 30);
+      setTimeout(() => {
+        const target = inputEl || ok;
+        target.focus();
+        if (inputEl && inputEl.value) inputEl.select();
+      }, 30);
     });
   }
   function ffAlert(message) {
@@ -816,7 +863,10 @@
   async function addFriendByQrid(mainEl, qrid) {
     if (qrid === state.myQRid) { await ffAlert(`That's your own code.`); return; }
     if (state.following.some(f => f.qrid === qrid)) { await ffAlert('Already following them.'); return; }
-    const name = await ffPrompt(`Add this friend?<br><span style="font-family:ui-monospace,monospace;font-size:13px;color:var(--muted)">${formatId(qrid)}</span>`, {
+    const djNames = await loadDjNames();
+    const suggestion = pickRandomDjName(djNames);
+    const name = await ffPrompt(`Add this friend?<br><span style="font-family:ui-monospace,monospace;font-size:13px;color:var(--muted)">${formatId(qrid)}</span><br><span style="font-size:12px;color:var(--muted)">Tip: keep the random DJ name or type your own.</span>`, {
+      defaultValue: suggestion,
       placeholder: 'Their name (e.g., Lina)',
       primaryLabel: 'Add',
     });

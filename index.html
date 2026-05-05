@@ -338,12 +338,13 @@
     -webkit-user-select: none;
     user-select: none;
   }
-  /* "You're not at the venue" message — same visual language as the
-     friend bottom sheet (dark glass, 14px corners, slide-up animation). */
+  /* "You're not at the venue" message — anchored inside the map area
+     (not the viewport) so it sits at the bottom of the map, not the
+     bottom of the screen. Same visual language as the friend sheet. */
   .map-far-msg {
-    position: fixed;
+    position: absolute;
     left: 50%;
-    bottom: calc(78px + env(safe-area-inset-bottom));
+    bottom: 12px;
     transform: translateX(-50%);
     background: rgba(14, 16, 24, 0.94);
     backdrop-filter: blur(14px) saturate(160%);
@@ -356,7 +357,7 @@
     color: #fff;
     text-align: center;
     line-height: 1.3;
-    max-width: calc(100% - 32px);
+    max-width: calc(100% - 24px);
     box-shadow: 0 6px 22px rgba(0,0,0,0.42);
     z-index: 30;
     pointer-events: none;
@@ -481,13 +482,13 @@
     50%      { transform: scale(calc(var(--pin-scale, 1) * 1.18));         }
   }
 
-  /* Friend tap → bottom sheet. Pinned above the tab bar so it's always
-     fully visible regardless of map scroll/zoom. Same visual language
-     as .map-far-msg: dark glass, 14px corners, soft drop shadow. */
+  /* Friend tap → bottom sheet. Pinned at the bottom of the MAP area
+     (not the viewport) so it sits cleanly inside the map frame. Same
+     visual language as .map-far-msg. */
   .friend-sheet {
-    position: fixed;
+    position: absolute;
     left: 50%;
-    bottom: calc(78px + env(safe-area-inset-bottom));
+    bottom: 12px;
     transform: translateX(-50%);
     background: rgba(14, 16, 24, 0.94);
     backdrop-filter: blur(14px) saturate(160%);
@@ -500,7 +501,7 @@
     gap: 11px;
     color: var(--text);
     z-index: 30;
-    width: calc(100% - 32px);
+    width: calc(100% - 24px);
     max-width: 380px;
     box-shadow: 0 6px 22px rgba(0,0,0,0.42);
     animation: friendSheetIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
@@ -528,7 +529,11 @@
   .friend-sheet-sub {
     font-size: 11.5px; color: var(--muted); margin-top: 3px;
     font-variant-numeric: tabular-nums;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; overflow: hidden;
+  }
+  .friend-sheet-sub > span:last-child {
+    overflow: hidden; text-overflow: ellipsis;
   }
 
   /* Directional cone — anchored at the dot center, extends "up" by default,
@@ -1573,7 +1578,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v179</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v180</p>
 </footer>
 
 <nav class="tabs">
@@ -2214,23 +2219,28 @@
     const initial = (friend.initial || (friend.name || '?').slice(0, 2)).toUpperCase();
     const name = friend.name || friend.initial || 'Friend';
 
-    // Distance from user (if known) + freshness, in compact form.
+    // Match the Friends tab row format exactly: colored freshness
+    // bullet + "last seen X · 200 ft from you". Single source of truth
+    // for how a friend's status is presented.
+    const fresh = window.findFriends.freshnessLabel(data.ts);
     let distLine = '';
-    if (typeof window._lastUserPos === 'object' && window._lastUserPos) {
+    if (typeof window._lastUserPos === 'object' && window._lastUserPos
+        && typeof data.lat === 'number' && typeof data.lng === 'number') {
       const distM = haversineMeters(
         window._lastUserPos.lat, window._lastUserPos.lng,
         data.lat, data.lng
       );
-      distLine = formatImperialDistance(distM) + ' · ';
+      distLine = ' · ' + formatImperialDistance(distM) + ' from you';
     }
-    // Strip "last seen " prefix here; the position context makes it obvious.
-    const freshText = window.findFriends.freshnessLabel(data.ts).text.replace(/^last seen /, '');
 
     sheet.innerHTML = `
       <div class="friend-sheet-init" style="background:${color}">${escape(initial)}</div>
       <div class="friend-sheet-meta">
         <div class="friend-sheet-name">${escape(name)}</div>
-        <div class="friend-sheet-sub">${distLine}${escape(freshText)}</div>
+        <div class="friend-sheet-sub">
+          <span class="ff-fresh-bullet ${fresh.cls}"></span>
+          <span>${escape(fresh.text + distLine)}</span>
+        </div>
       </div>
     `;
     wrap.appendChild(sheet);
