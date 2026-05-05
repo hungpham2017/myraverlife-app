@@ -881,8 +881,17 @@
         { primaryLabel: 'New code', danger: true }
       );
       if (!ok) return;
+      const oldQRid = state.myQRid;
       state.myQRid = genQRid();
       saveState();
+      // Best-effort: clear the old /loc entry so stragglers stop seeing
+      // a stale "last seen" position. Silent on failure (user can just
+      // wait for it to age out via freshness label).
+      if (fbDb && fbAuthed && window.fb) {
+        try { window.fb.remove(window.fb.ref(fbDb, 'loc/' + oldQRid)).catch(() => {}); } catch (e) {}
+      }
+      // Immediately publish the new id so anyone re-scanning sees us right away.
+      if (fbAuthed) publishMyLocation();
       render(mainEl);
     };
   }
