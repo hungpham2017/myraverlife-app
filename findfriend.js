@@ -174,7 +174,7 @@
         window.fb.set(window.fb.ref(fbDb, path), {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-          ts: Date.now(),
+          ts: pos.timestamp || Date.now(),
         }).then(() => {
           console.log('[fb] published my location to /' + path);
         }).catch((e) => {
