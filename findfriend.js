@@ -73,12 +73,20 @@
   // positions are visible IMMEDIATELY on refresh, even before Firebase
   // reconnects (festival weak-signal scenario).
   const LOCATIONS_KEY = 'myraverlife-friend-locations-v1';
+  // Auto-purge cached friend locations older than 48h. Privacy on lost
+  // or borrowed phones — stale data shouldn't linger forever.
+  const FRIEND_DATA_TTL_MS = 48 * 60 * 60 * 1000;
   const friendData = (function () {
     try {
       const raw = localStorage.getItem(LOCATIONS_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return {};
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      const cutoff = Date.now() - FRIEND_DATA_TTL_MS;
+      Object.keys(parsed).forEach(k => {
+        if (!parsed[k] || !parsed[k].ts || parsed[k].ts < cutoff) delete parsed[k];
+      });
+      return parsed;
+    } catch (e) { return {}; }
   })(); // qrid → {lat, lng, ts}
   function persistFriendData() {
     try {
