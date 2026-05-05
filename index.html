@@ -1578,7 +1578,7 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v180</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v181</p>
 </footer>
 
 <nav class="tabs">
@@ -1821,6 +1821,14 @@
     if (state.tab === 'friends') {
       planControls.style.display = 'none';
       window.findFriends.render(main);
+      // Quietly fetch GPS so the friend list + map sheet can show
+      // "X ft from you" alongside "last seen X". Only auto-locates if
+      // permission was already granted — no permission prompt here.
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' })
+          .then(p => { if (p.state === 'granted') locateUser(false); })
+          .catch(() => {});
+      }
       return;
     }
     if (state.tab === 'help') {
@@ -2282,6 +2290,8 @@
         const { latitude, longitude } = pos.coords;
         // Stash for friend-distance calc in the bottom sheet.
         window._lastUserPos = { lat: latitude, lng: longitude };
+        // Notify Friends tab list to rerender with fresh distance values.
+        window.dispatchEvent(new CustomEvent('myraver-userpos-update'));
         const p = gpsToMapPercent(latitude, longitude);
         const FAR_PCT = 30;
         const tooFar = (
