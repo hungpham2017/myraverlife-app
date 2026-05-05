@@ -16,7 +16,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v157';
+const SHELL_VERSION  = 'myraverlife-shell-v160';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [
@@ -24,6 +24,7 @@ const APP_SHELL = [
   './index.html',
   './manifest.json',
   './festival.config.js',
+  './findfriend.js',
   './assets/artists.json',
   './assets/icon-192.png',
   './assets/icon-512.png',

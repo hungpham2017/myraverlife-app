@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1018" />
 <script src="./festival.config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-database-compat.js"></script>
+<script src="./findfriend.js"></script>
 <link rel="manifest" href="./manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="My Raver Life" />
@@ -439,7 +443,9 @@
     100% { transform: scale(2.4); opacity: 0; }
   }
   /* Directional cone — anchored at the dot center, extends "up" by default,
-     rotated to phone heading. Uses conic-gradient for the beam shape. */
+     rotated to phone heading. Uses conic-gradient for the beam shape.
+     60° symmetric spread (matches Google/Apple Maps), opaque enough to
+     read clearly against colorful festival-map photos. */
   .user-pin-cone {
     position: absolute;
     inset: -16px;
@@ -450,9 +456,8 @@
       conic-gradient(
         from 330deg,
         transparent 0deg,
-        rgba(0, 212, 255, 0.55) 18deg,
-        rgba(0, 212, 255, 0.05) 30deg,
-        transparent 30deg
+        rgba(0, 212, 255, 0.8) 30deg,
+        transparent 60deg
       );
     transform-origin: center center;
     pointer-events: none;
@@ -1479,13 +1484,14 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v157</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v160</p>
 </footer>
 
 <nav class="tabs">
   <button class="tab active" data-tab="lineup">Lineup</button>
   <button class="tab" data-tab="plan">My Schedule</button>
   <button class="tab" data-tab="map">Map</button>
+  <button class="tab" data-tab="friends">Friends</button>
   <button class="tab" data-tab="help">Help</button>
 </nav>
 
@@ -1716,6 +1722,11 @@
     if (state.tab === 'map') {
       planControls.style.display = 'none';
       renderMap();
+      return;
+    }
+    if (state.tab === 'friends') {
+      planControls.style.display = 'none';
+      window.findFriends.render(main);
       return;
     }
     if (state.tab === 'help') {
@@ -2121,6 +2132,20 @@
 
   function startCompass() {
     if (compassAttached) return;
+    // ?heading=<deg> overrides the device compass with a fixed real-world
+    // heading (0=N, 90=E, 180=S, 270=W). For desktop browser testing
+    // (verifying calibration math after recalibrating the map). On
+    // phones, just don't pass the param and the real compass takes over.
+    const headingOverride = new URLSearchParams(window.location.search).get('heading');
+    if (headingOverride != null) {
+      const h = parseFloat(headingOverride);
+      if (!isNaN(h)) {
+        const cone = document.getElementById('userPinCone');
+        if (cone) cone.style.transform = `rotate(${_xform.headingToScreenAngle(h)}deg)`;
+        compassAttached = true;
+        return;
+      }
+    }
     // iOS 13+ requires explicit permission via user gesture (the GPS button).
     const Req = window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission;
     if (typeof Req === 'function') {
