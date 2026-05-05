@@ -8,6 +8,8 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-database-compat.js"></script>
+<script src="./vendor/qrcode.min.js"></script>
+<script src="./vendor/qr-scanner.min.js"></script>
 <script src="./findfriend.js"></script>
 <link rel="manifest" href="./manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -274,14 +276,18 @@
   .tab {
     background: none; border: none;
     color: var(--muted);
-    padding: 9px 22px;
-    font-size: 13.5px;
-    letter-spacing: 0.6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    letter-spacing: 0.4px;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
     border-radius: 999px;
     transition: color 180ms ease, background 180ms ease;
+    white-space: nowrap;
+  }
+  @media (max-width: 380px) {
+    .tab { padding: 9px 9px; font-size: 12.5px; letter-spacing: 0.2px; }
   }
   .tab.active {
     color: var(--text);
@@ -332,38 +338,30 @@
     -webkit-user-select: none;
     user-select: none;
   }
-  /* Centered "you're not at the venue" message — overlay above the map.
-     Cute, elegant, reassures user that GPS is working and they'll see
-     their pin once they arrive. */
+  /* Compact "you're not at the venue" pill — small bottom-floating
+     reassurance that GPS works and the pin will appear at arrival.
+     Only shown on manual GPS button tap (auto-locate stays silent). */
   .map-far-msg {
     position: absolute;
-    top: 50%;
+    bottom: 14px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(14, 16, 24, 0.88);
+    transform: translateX(-50%);
+    background: rgba(14, 16, 24, 0.92);
     color: #fff;
-    padding: 14px 20px;
-    border-radius: 14px;
-    font-size: 14px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.2px;
     text-align: center;
-    line-height: 1.4;
-    max-width: 84%;
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
-    border: 1px solid rgba(255, 90, 160, 0.35);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    line-height: 1.35;
+    max-width: calc(100% - 32px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 90, 160, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     z-index: 20;
     pointer-events: none;
-  }
-  .map-far-msg .map-far-sub {
-    display: inline-block;
-    margin-top: 6px;
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.1px;
+    white-space: nowrap;
   }
   .map-img {
     width: 100%;
@@ -412,14 +410,17 @@
      Counter-scaled in JS so it stays the same on-screen size at any zoom. */
   .user-pin {
     position: absolute;
-    width: 18px;
-    height: 18px;
-    margin-left: -9px;
-    margin-top: -9px;
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
     pointer-events: none;
     z-index: 6;
     transform-origin: center center;
     transition: transform 0.05s linear;
+    /* Counter-scale on map zoom so pin stays same on-screen size. The
+       --pin-scale var is set on .map-zoom-target by setupMapZoom. */
+    transform: scale(var(--pin-scale, 1));
   }
   .user-pin-dot {
     position: absolute;
@@ -442,6 +443,97 @@
     0%   { transform: scale(0.6); opacity: 0.55; }
     100% { transform: scale(2.4); opacity: 0; }
   }
+  /* Friend pins — small colored dots on the map. Smaller than user's
+     pin so the "you are here" stays the visual anchor. Strong contrast
+     (white border + dark outline + drop shadow + colored glow) so they
+     pop against the busy colorful festival artwork. */
+  .friend-pin {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.45),
+      0 2px 6px rgba(0,0,0,0.4),
+      0 0 12px 1px var(--ff-glow, rgba(0,212,255,0.55));
+    transition: transform 0.12s ease;
+    /* Counter-scale on map zoom so pin stays same on-screen size. */
+    transform: scale(var(--pin-scale, 1));
+  }
+  .friend-pin:active { transform: scale(calc(var(--pin-scale, 1) * 0.88)); }
+  .friend-pin.fresh {
+    animation: friendPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes friendPulse {
+    0%, 100% { transform: scale(var(--pin-scale, 1));                      }
+    50%      { transform: scale(calc(var(--pin-scale, 1) * 1.18));         }
+  }
+
+  /* Friend tap → bottom sheet. Floats above map, doesn't move with zoom. */
+  .friend-sheet {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    background: rgba(14, 16, 24, 0.94);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px 16px 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+    z-index: 14;
+    max-width: calc(100% - 32px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+    animation: friendSheetIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  @keyframes friendSheetIn {
+    from { opacity: 0; transform: translate(-50%, 12px); }
+    to   { opacity: 1; transform: translate(-50%, 0);   }
+  }
+  .friend-sheet-init {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12.5px; font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px 1px var(--ff-glow, rgba(0,212,255,0.5));
+  }
+  .friend-sheet-meta { flex: 1; min-width: 0; }
+  .friend-sheet-name { font-size: 14.5px; font-weight: 700; line-height: 1.2; }
+  .friend-sheet-sub {
+    font-size: 11.5px; color: var(--muted); margin-top: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .friend-sheet-close {
+    background: rgba(255,255,255,0.06);
+    border: 0; color: var(--muted);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px; line-height: 1;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .friend-sheet-close:active { background: rgba(255,255,255,0.12); }
+
   /* Directional cone — anchored at the dot center, extends "up" by default,
      rotated to phone heading. Uses conic-gradient for the beam shape.
      60° symmetric spread (matches Google/Apple Maps), opaque enough to
@@ -1484,14 +1576,14 @@
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v160</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v177</p>
 </footer>
 
 <nav class="tabs">
   <button class="tab active" data-tab="lineup">Lineup</button>
-  <button class="tab" data-tab="plan">My Schedule</button>
-  <button class="tab" data-tab="map">Map</button>
+  <button class="tab" data-tab="plan">Schedule</button>
   <button class="tab" data-tab="friends">Friends</button>
+  <button class="tab" data-tab="map">Map</button>
   <button class="tab" data-tab="help">Help</button>
 </nav>
 
@@ -1744,13 +1836,25 @@
 
         <h2>how to use</h2>
         <ul class="help-list">
-          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>Open the site at least once on Wi-Fi before you lose signal. After that it works without internet.</p></div></li>
-          <li><span class="help-ico">♥</span><div><b>Build your night</b><p>In <b>Lineup</b>, tap a DJ's heart to add them to your <b>Schedule</b>. Tap again to remove.</p></div></li>
-          <li><span class="help-ico">🔍</span><div><b>Find an artist or stage</b><p>In <b>Lineup</b>, type an artist (<i>"John Summit"</i>) or a stage (<i>"kinetic"</i>).</p></div></li>
-          <li><span class="help-ico">🎧</span><div><b>Listen before the show</b><p>Tap any DJ's name to find their music.</p></div></li>
-          <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>In <b>Lineup</b>, tap <b>Now</b>.</p></div></li>
-          <li><span class="help-ico">🎯</span><div><b>Browse one stage at a time</b><p>In <b>Lineup</b>, set sort to <b>Stage</b>, then tap a stage header.</p></div></li>
-          <li><span class="help-ico">📍</span><div><b>See where you are on the map</b><p>On the <b>Map</b>, tap 📍.</p></div></li>
+          <li><span class="help-ico">♥</span><div><b>Build your night</b><p>
+            Tap a DJ's ♥ to save them to your <b>Schedule</b><br>
+            Tap their name to hear their music<br>
+            Search by name (<i>"John Summit"</i>) or stage (<i>"kineticFIELD"</i>) to find them fast
+          </p></div></li>
+          <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>
+            In <b>Lineup</b>, tap <b>Now</b>
+          </p></div></li>
+          <li><span class="help-ico">👯</span><div><b>Find your friends on the map</b><p>
+            In <b>Friends</b>, share your code with the group<br>
+            Once they add you, you'll see each other as colored dots on the <b>Map</b><br>
+            Tap 📍 for your own pin<br>
+            Shows <b>last-seen</b> positions (not live tracking)<br>
+            Even a brief weak signal is enough to update
+          </p></div></li>
+          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>
+            Open the site on Wi-Fi at least once before the festival<br>
+            Works offline after that
+          </p></div></li>
         </ul>
 
         <h2>tips</h2>
@@ -1761,7 +1865,13 @@
 
         <h2>fine print</h2>
         <p class="help-fineprint">
-          Fan-made tool. Set times can change last-minute, the app can break, your phone can die. <b>Don't rely on it alone.</b> Check stage signage and the official Insomniac app. We're not responsible for missed sets, getting lost, lost devices, or anything else that happens while using this app. Use at your own risk.
+          Fan-made tool. Set times change, apps break, phones die. <b>Don't rely on it alone.</b> Check stage signage and the official Insomniac app. We're not responsible for missed sets, lost devices, or anything else. Use at your own risk.
+        </p>
+        <p class="help-fineprint" style="margin-top:10px">
+          <b>Friends:</b> Your code grants location access to anyone who has it. Tracking without consent is prohibited and your sole responsibility. We are not liable for misuse (harassment, stalking, surveillance) or for how anyone else uses a code you share. By using, you accept these terms.
+        </p>
+        <p class="help-fineprint" style="margin-top:10px">
+          <b>Data:</b> No personal info collected. Anonymous analytics used. Location is sent to third-party services only when you use Friends, keyed by a random code not tied to you. We are not responsible for third-party data handling.
         </p>
         <p class="help-fineprint" style="margin-top:10px">
           <b>Privacy.</b> Hearts and notes are saved only on your phone, never sent anywhere. The site uses Google Analytics for traffic stats (pageviews, browser, country). Nothing personal is collected.
@@ -2028,6 +2138,7 @@
             <span class="user-pin-pulse"></span>
             <span class="user-pin-dot"></span>
           </div>
+          <div class="friend-pins" id="friendPins"></div>
         </div>
         <div class="map-far-msg" id="mapFarMsg" style="display:none"></div>
         <div class="map-zoom-controls">
@@ -2045,18 +2156,100 @@
 
     main.appendChild(wrap);
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
-    wrap.querySelector('#gpsBtn').onclick = (e) => { e.stopPropagation(); locateUser(); };
+    // Manual GPS click → show "not at EDC" message if applicable.
+    wrap.querySelector('#gpsBtn').onclick = (e) => { e.stopPropagation(); locateUser(true); };
 
-    // Auto-show the user's pin on Map tab open IF they've already granted
-    // geolocation permission. First-time visitors still need to tap the
-    // GPS button (which triggers the permission prompt). After grant,
-    // the pin is always there immediately on every Map tab visit.
+    // Render friends-on-map immediately if any are followed.
+    renderFriendPins();
+    // Re-render when any friend's location updates (event from findfriend.js).
+    window.addEventListener('myraver-friend-update', renderFriendPins);
+
+    // Auto-locate quietly if already granted — no "not at EDC" overlay.
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' })
-        .then(p => { if (p.state === 'granted') locateUser(); })
+        .then(p => { if (p.state === 'granted') locateUser(false); })
         .catch(() => {});
     }
   }
+
+  // ── Friend dots on map ─────────────────────────────────────────────────
+  // Default-on whenever the user is following someone (they've already
+  // opted in by scanning a code). Each friend's last-known location maps
+  // to a colored dot via the same gpsToMapPercent calibration as the
+  // user's own pin. Dots inside the zoom-target so they pan/zoom with
+  // the map. Tap → bottom sheet with name + last seen.
+  function renderFriendPins() {
+    const container = document.getElementById('friendPins');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!window.findFriends) return;
+    const following = window.findFriends.getFollowing();
+    following.forEach(f => {
+      const data = window.findFriends.getFriendData(f.qrid);
+      if (!data || data.lat == null) return;
+      const p = gpsToMapPercent(data.lat, data.lng);
+      // Skip friends whose location is way off the map (off-property).
+      if (p.left < -10 || p.left > 110 || p.top < -10 || p.top > 110) return;
+      const color = window.findFriends.colorForInitial(f.initial || (f.name || '?').slice(0, 2));
+      const initial = (f.initial || (f.name || '?').slice(0, 2)).toUpperCase();
+      const fresh = (Date.now() - (data.ts || 0)) < 2 * 60 * 1000;
+      const pin = document.createElement('div');
+      pin.className = 'friend-pin' + (fresh ? ' fresh' : '');
+      pin.style.left = Math.max(0, Math.min(100, p.left)) + '%';
+      pin.style.top  = Math.max(0, Math.min(100, p.top))  + '%';
+      pin.style.background = color;
+      pin.style.setProperty('--ff-glow', color);
+      pin.dataset.qrid = f.qrid;
+      pin.textContent = initial;
+      pin.onclick = (e) => { e.stopPropagation(); showFriendSheet(f, data, color); };
+      container.appendChild(pin);
+    });
+  }
+
+  function showFriendSheet(friend, data, color) {
+    closeFriendSheet();
+    const wrap = document.querySelector('.map-img-container');
+    if (!wrap) return;
+    const sheet = document.createElement('div');
+    sheet.className = 'friend-sheet';
+    sheet.id = 'friendSheet';
+    sheet.style.setProperty('--ff-glow', color);
+    const initial = (friend.initial || (friend.name || '?').slice(0, 2)).toUpperCase();
+    const name = friend.name || friend.initial || 'Friend';
+
+    // Distance from user (if known) + freshness, in compact form.
+    let distLine = '';
+    if (typeof window._lastUserPos === 'object' && window._lastUserPos) {
+      const distM = haversineMeters(
+        window._lastUserPos.lat, window._lastUserPos.lng,
+        data.lat, data.lng
+      );
+      distLine = formatImperialDistance(distM) + ' · ';
+    }
+    // Strip "last seen " prefix here; the position context makes it obvious.
+    const freshText = window.findFriends.freshnessLabel(data.ts).text.replace(/^last seen /, '');
+
+    sheet.innerHTML = `
+      <div class="friend-sheet-init" style="background:${color}">${escape(initial)}</div>
+      <div class="friend-sheet-meta">
+        <div class="friend-sheet-name">${escape(name)}</div>
+        <div class="friend-sheet-sub">${distLine}${escape(freshText)}</div>
+      </div>
+      <button type="button" class="friend-sheet-close" aria-label="Close">×</button>
+    `;
+    wrap.appendChild(sheet);
+    sheet.querySelector('.friend-sheet-close').onclick = closeFriendSheet;
+    // Auto-close after 6s if no interaction.
+    sheet._autoClose = setTimeout(closeFriendSheet, 6000);
+  }
+  function closeFriendSheet() {
+    const sheet = document.getElementById('friendSheet');
+    if (sheet) {
+      if (sheet._autoClose) clearTimeout(sheet._autoClose);
+      sheet.remove();
+    }
+  }
+
 
   // ── GPS "you are here" ──────────────────────────────────────────────────
   let userHeading = null;
@@ -2070,23 +2263,20 @@
     }
   }
 
-  function locateUser() {
+  function locateUser(manual) {
     if (!navigator.geolocation) {
-      setMapStatus('GPS not available');
-      setTimeout(() => setMapStatus(''), 2200);
+      if (manual) {
+        setMapStatus('GPS not available');
+        setTimeout(() => setMapStatus(''), 2200);
+      }
       return;
     }
-    setMapStatus('finding you…');
+    if (manual) setMapStatus('finding you…');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        // tooFar = pin would land more than ~30% of the map's dimensions
-        // beyond any edge. That gives ~1km of slack around the festival
-        // bounds (the rotated map covers ~1km × 1.4km of real area at
-        // 0.98 px/m, so 30% ≈ 300-400m). Within this slack, show the
-        // pin (clamped to map edge if just outside — useful for users
-        // in parking lots, gates, walking up). Beyond this, hide the
-        // pin silently and show the cute distance message instead.
+        // Stash for friend-distance calc in the bottom sheet.
+        window._lastUserPos = { lat: latitude, lng: longitude };
         const p = gpsToMapPercent(latitude, longitude);
         const FAR_PCT = 30;
         const tooFar = (
@@ -2097,10 +2287,15 @@
         if (tooFar) {
           const pin = document.getElementById('userPin');
           if (pin) pin.style.display = 'none';
-          if (farMsg) {
+          // Only show the "not at EDC" overlay when user explicitly tapped
+          // the GPS button. Auto-locate stays silent so the map isn't
+          // covered with a notification on every visit.
+          if (manual && farMsg) {
             const distM = haversineMeters(latitude, longitude, FESTIVAL_CENTER_GPS.lat, FESTIVAL_CENTER_GPS.lng);
-            farMsg.innerHTML = `You're ${formatImperialDistance(distM)} from the Speedway ✨<br><span class="map-far-sub">Your pin lands here when you arrive</span>`;
+            farMsg.textContent = `You're ${formatImperialDistance(distM)} from the Speedway`;
             farMsg.style.display = '';
+            // Auto-fade after a few seconds so it doesn't linger.
+            setTimeout(() => { if (farMsg) farMsg.style.display = 'none'; }, 4000);
           }
           setMapStatus('');
           return;
@@ -2222,9 +2417,9 @@
       clamp();
       target.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
       mapZoom.scale = scale; mapZoom.tx = tx; mapZoom.ty = ty;
-      // Counter-scale GPS pin so it stays constant on-screen (Google Maps style)
-      const pin = document.getElementById('userPin');
-      if (pin) pin.style.transform = `scale(${1 / scale})`;
+      // Counter-scale ALL pins (user + friends) via CSS var so they stay
+      // constant on-screen size, like Google Maps. Cascades to descendants.
+      target.style.setProperty('--pin-scale', 1 / scale);
     }
     function reset() { scale = 1; tx = 0; ty = 0; apply(); }
 
@@ -3051,6 +3246,34 @@
   //   4. On every visibility-to-visible (user returns to app)
   //   5. On every 'online' event (network reconnects)
   //   6. Auto-reload on controllerchange when new SW takes over
+  // Deeplink: ?friend=<code> from a QR scan or shared link prompts to add
+  // that friend, then strips the param so it doesn't re-fire on reload.
+  (function handleFriendDeeplink() {
+    const params = new URLSearchParams(window.location.search);
+    const friendCode = params.get('friend');
+    if (!friendCode) return;
+    function stripParam() {
+      params.delete('friend');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      history.replaceState(null, '', newUrl);
+    }
+    setTimeout(async () => {
+      if (!window.findFriends) return;
+      if (friendCode === window.findFriends.getMyQRid()) {
+        stripParam();
+        return;
+      }
+      const name = await window.findFriends.prompt(
+        'A friend invited you. What\'s their name?',
+        { placeholder: 'e.g., Lina', primaryLabel: 'Add' }
+      );
+      stripParam();
+      if (!name) return;
+      const ok = window.findFriends.addFriendFromUrl(friendCode, name);
+      if (ok) await window.findFriends.alert(`<b>${name}</b> added. Open Friends to see them.`);
+    }, 50);
+  })();
+
   if ('serviceWorker' in navigator) {
     function checkForUpdate() {
       navigator.serviceWorker.getRegistration()
