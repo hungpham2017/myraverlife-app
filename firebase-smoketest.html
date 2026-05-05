@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Firebase modular SDK smoketest</title>
+<style>
+  body { font: 14px/1.5 ui-monospace, Menlo, monospace; background: #0e1018; color: #e8e8e8; padding: 24px; max-width: 720px; margin: 0 auto; }
+  h1 { color: #ec4899; font-size: 18px; }
+  pre { background: #1a1d28; padding: 14px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+  .ok { color: #5dd07a; }
+  .fail { color: #ff6b6b; }
+  .step { color: #888; }
+</style>
+</head>
+<body>
+<h1>Firebase modular SDK smoketest</h1>
+<p>Validates that the locally-vendored modular Firebase SDK works under any CSP (zero <code>eval</code>) and can talk to RTDB.</p>
+<pre id="log"></pre>
+
+<script type="module">
+import { initializeApp } from './vendor/firebase/firebase-app.js';
+import { getAuth, signInAnonymously } from './vendor/firebase/firebase-auth.js';
+import { getDatabase, ref, set, get } from './vendor/firebase/firebase-database.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAuXsmFF6qVT89be78TbFO0u8ld6j0NaFg',
+  authDomain: 'myraverlife.firebaseapp.com',
+  databaseURL: 'https://myraverlife-default-rtdb.firebaseio.com',
+  projectId: 'myraverlife',
+  storageBucket: 'myraverlife.firebasestorage.app',
+  messagingSenderId: '753386582338',
+  appId: '1:753386582338:web:00414de877a07a82e8d8db',
+};
+
+const logEl = document.getElementById('log');
+function log(line, cls) {
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = line + '\n';
+  logEl.appendChild(span);
+}
+
+window.addEventListener('error', (e) => {
+  log('UNCAUGHT: ' + (e.message || e) + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''), 'fail');
+});
+window.addEventListener('unhandledrejection', (e) => {
+  log('UNHANDLED: ' + (e.reason && (e.reason.stack || e.reason.message || e.reason)), 'fail');
+});
+
+(async () => {
+  try {
+    log('1. initializeApp()…', 'step');
+    const app = initializeApp(FIREBASE_CONFIG);
+    log('   app created: ' + app.name);
+
+    log('2. signInAnonymously()…', 'step');
+    const auth = getAuth(app);
+    const cred = await signInAnonymously(auth);
+    log('   uid: ' + cred.user.uid);
+
+    log('3. getDatabase() + write a test value…', 'step');
+    const db = getDatabase(app);
+    const path = 'smoketest/' + cred.user.uid;
+    const value = { ts: Date.now(), msg: 'hello from smoketest' };
+    await set(ref(db, path), value);
+    log('   wrote to /' + path);
+
+    log('4. read it back…', 'step');
+    const snap = await get(ref(db, path));
+    const got = snap.val();
+    log('   got: ' + JSON.stringify(got));
+    if (!got || got.msg !== value.msg) throw new Error('round-trip mismatch');
+
+    log('');
+    log('✅ ALL GOOD — modular Firebase works in this environment.', 'ok');
+    log('   No eval. No CSP issues. RTDB read/write confirmed.');
+  } catch (e) {
+    log('');
+    log('❌ FAILED: ' + (e && (e.stack || e.message || e)), 'fail');
+  }
+})();
+</script>
+</body>
+</html>
