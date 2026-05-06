@@ -675,21 +675,26 @@
     render(mainEl);
   }
 
-  // Show host's QR + code in a modal so others can scan to join.
+  // Show host's QR + code. X-close in top-right is the only way out
+  // (no Done button — the X is enough).
   async function onShowInvite() {
     const code = formatId(state.myQRid);
     const shareUrl = `https://myraver.life/?friend=${state.myQRid}`;
     const qrSvg = renderQRSvg(shareUrl);
-    await showModal({
-      message: `
-        <div style="text-align:center;">
+    return new Promise((resolve) => {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'ff-modal-backdrop';
+      backdrop.innerHTML = `
+        <div class="ff-modal" style="text-align:center;">
+          <button class="ff-modal-x" type="button" aria-label="Close">×</button>
           <div style="width:140px;height:140px;background:#fff;border-radius:10px;padding:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,0.22);">${qrSvg}</div>
           <div style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;letter-spacing:2px;margin:6px 0;">${code}</div>
           <p style="font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.45;">Friends scan this QR or paste the code to join your group.</p>
         </div>
-      `,
-      primaryLabel: 'Done',
-      primaryOnly: true,
+      `;
+      document.body.appendChild(backdrop);
+      backdrop.querySelector('.ff-modal-x').onclick = () => { backdrop.remove(); resolve(); };
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) { backdrop.remove(); resolve(); } });
     });
   }
 
