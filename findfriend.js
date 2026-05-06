@@ -143,6 +143,7 @@
         startPublishLoop();  // F.4 + F.10: publish now + every 30s
         attachPublishTriggers();  // F.10: republish on online + visibility
         trySubscribeAllFriends();  // F.6
+        watchConnection();  // pill tracks .info/connected, not just auth
         maybeRerender();  // refresh status pill
       } else {
         firebaseStatus = 'bad';
@@ -203,6 +204,21 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && fbAuthed) publishMyLocation();
     });
+  }
+  // Subscribe to RTDB's .info/connected so the status pill reflects real
+  // connection state, not just initial auth success. Without this, the pill
+  // stays green "syncing" forever even after the WebSocket dies.
+  let _connWatchAttached = false;
+  function watchConnection() {
+    if (_connWatchAttached) return;
+    if (!fbAuthed || !fbApp || !window.fb) return;
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    _connWatchAttached = true;
+    window.fb.onValue(window.fb.ref(fbDb, '.info/connected'), (snap) => {
+      firebaseStatus = snap.val() === true ? 'ok' : 'bad';
+      maybeRerender();
+    });
+    console.log('[fb] watching .info/connected');
   }
   // F.6: subscribe to ALL friends. Idempotent (skip already-subscribed),
   // and clean up subs for friends the user has removed. No UI changes —
