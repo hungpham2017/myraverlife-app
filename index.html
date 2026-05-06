@@ -479,13 +479,12 @@ window.dispatchEvent(new Event('firebase-ready'));
     transform: scale(var(--pin-scale, 1));
   }
   .friend-pin:active { transform: scale(calc(var(--pin-scale, 1) * 0.88)); }
-  /* Fresh friends (last data <2 min ago) gently breathe — visual "alive"
-     signal. Stale friends stay static so users can tell at a glance
-     who's actively pinging vs who went silent. */
-  .friend-pin.fresh {
+  /* All friend pins gently breathe so they stand out against the
+     colorful festival map. Offline pins still breathe, just dimmed. */
+  .friend-pin {
     animation: friendPulse 2.5s ease-in-out infinite;
   }
-  .friend-pin.offline { opacity: 0.55; }
+  .friend-pin.offline { opacity: 0.7; }
   @keyframes friendPulse {
     0%, 100% { transform: scale(var(--pin-scale, 1));                       }
     50%      { transform: scale(calc(var(--pin-scale, 1) * 1.15));          }
@@ -518,12 +517,14 @@ window.dispatchEvent(new Event('firebase-ready'));
     to   { opacity: 1; transform: translate(-50%, 0);   }
   }
   .friend-sheet-init {
-    width: 32px; height: 32px;
+    width: 48px; height: 48px;
     border-radius: 50%;
-    border: 2px solid #fff;
+    border: 2.5px solid #fff;
     display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 11.5px; font-weight: 800;
+    color: white; font-size: 17px; font-weight: 800;
     flex-shrink: 0;
+    letter-spacing: -0.3px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   .friend-sheet-meta { flex: 1; min-width: 0; overflow: hidden; }
   .friend-sheet-name {
@@ -540,6 +541,65 @@ window.dispatchEvent(new Event('firebase-ready'));
     vertical-align: middle;
     transform: translateY(-1px);
   }
+  /* v210: pin variant of friend-sheet — top-aligned for multi-line messages. */
+  .friend-sheet-pin { align-items: flex-start; }
+  .friend-sheet-pin .friend-sheet-init { margin-top: 2px; }
+  .friend-sheet-pin .friend-sheet-meta { overflow: visible; }
+  .friend-sheet-pin .friend-sheet-name { white-space: normal; }
+  .friend-sheet-pin-msg {
+    white-space: normal !important;
+    line-height: 1.55 !important;
+    color: var(--text) !important;
+    font-size: 13.5px !important;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.15px;
+    margin-top: 6px !important;
+    padding-left: 9px;
+    border-left: 2px solid rgba(118, 224, 192, 0.4);
+    word-wrap: break-word;
+    /* Safety net: cap to 4 lines if somehow longer than the 100-char input */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .friend-sheet-pin-age {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+  .friend-sheet-remove {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 126, 181, 0.4);
+    background: transparent;
+    color: #ff7eb5;
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    align-self: center;
+  }
+  .friend-sheet-remove:hover { border-color: #ff7eb5; }
+  .friend-sheet-remove:active { transform: scale(0.96); }
+  .friend-sheet-x {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+    font-size: 15px; line-height: 1; font-weight: 400;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .friend-sheet-x:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  .friend-sheet-x:active { transform: scale(0.92); }
   /* Directional cone — anchored at the dot center, extends "up" by default,
      rotated to phone heading. Uses conic-gradient for the beam shape. */
   .user-pin-cone {
@@ -608,6 +668,131 @@ window.dispatchEvent(new Event('firebase-ready'));
     -webkit-tap-highlight-color: transparent;
   }
   .map-zoom-btn:active { background: var(--accent); border-color: var(--accent); }
+
+  /* v210: legend at top of map — mini shapes match the real dot/pin look. */
+  .map-legend {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(15, 18, 25, 0.7);
+    padding: 5px 12px;
+    border-radius: 999px;
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    letter-spacing: 0.3px;
+    pointer-events: none;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .map-legend .legend-shape {
+    display: inline-block;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+  .map-legend .legend-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7eb5, #76e0c0);
+    border: 1.5px solid #fff;
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.4);
+  }
+  .map-legend .legend-pin-mini {
+    width: 10px; height: 10px;
+    border-radius: 50% 50% 50% 0;
+    background: linear-gradient(135deg, #76e0c0, #ff7eb5);
+    border: 1.5px solid #fff;
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.4);
+    transform: rotate(-45deg);
+    margin-bottom: 1px;
+  }
+  .map-legend .legend-sep {
+    opacity: 0.5;
+    margin: 0 2px;
+  }
+
+  /* v210: persistent drop/remove pill at bottom-center. Cute + transparent. */
+  .map-droppin-btn {
+    position: absolute;
+    left: 50%; bottom: 14px;
+    transform: translateX(-50%);
+    z-index: 6;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(118, 224, 192, 0.4);
+    background: rgba(15, 18, 25, 0.65);
+    color: #76e0c0;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    transition: transform 0.08s ease, filter 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .map-droppin-btn:hover {
+    border-color: #76e0c0;
+    filter: brightness(1.15);
+  }
+  .map-droppin-btn:active { transform: translateX(-50%) scale(0.95); }
+  .map-droppin-btn.is-remove {
+    border-color: rgba(255, 126, 181, 0.4);
+    color: #ff7eb5;
+  }
+  .map-droppin-btn.is-remove:hover {
+    border-color: #ff7eb5;
+  }
+
+  /* v210: meeting pin = classic teardrop (rotated rounded square). Tip
+     touches lat/lng. Universal "marker" shape — clearly different from
+     the round breathing friend dots. */
+  .meeting-pin {
+    position: absolute;
+    width: 28px; height: 38px;
+    margin-left: -14px; margin-top: -38px; /* tip = bottom-center = lat/lng */
+    z-index: 6;
+    cursor: pointer;
+    pointer-events: auto;
+    transform: scale(var(--pin-scale, 1));
+    transform-origin: 50% 100%;
+    /* tiny ground shadow under tip */
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.45));
+  }
+  .meeting-pin .meeting-pin-shape {
+    width: 28px; height: 28px;
+    border-radius: 50% 50% 50% 0;
+    background: var(--mp-color, #76e0c0);
+    border: 2px solid #fff;
+    box-shadow:
+      0 0 0 1.5px rgba(0,0,0,0.5);
+    transform: rotate(-45deg);
+    position: relative;
+    margin: 5px 0 0 0;
+  }
+  .meeting-pin .meeting-pin-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    color: #fff;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+    white-space: nowrap;
+  }
+  .meeting-pin.dragging {
+    transform: scale(calc(var(--pin-scale, 1) * 1.18));
+    z-index: 10;
+  }
+  .meeting-pin.dragging .meeting-pin-shape {
+    box-shadow:
+      0 0 0 1.5px rgba(0,0,0,0.55),
+      0 8px 18px rgba(0,0,0,0.5);
+  }
 
   .map-zoom-target {
     transform-origin: center center;
@@ -1582,13 +1767,13 @@ window.dispatchEvent(new Event('firebase-ready'));
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v207</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v210</p>
 </footer>
 
 <nav class="tabs">
   <button class="tab active" data-tab="lineup">Lineup</button>
   <button class="tab" data-tab="plan">Schedule</button>
-  <button class="tab" data-tab="friends">Friends</button>
+  <button class="tab" data-tab="friends">Crew</button>
   <button class="tab" data-tab="map">Map</button>
   <button class="tab" data-tab="help">Help</button>
 </nav>
@@ -1825,14 +2010,9 @@ window.dispatchEvent(new Event('firebase-ready'));
     if (state.tab === 'friends') {
       planControls.style.display = 'none';
       if (window.findFriends) window.findFriends.render(main);
-      // Auto-fetch GPS so the friends list can show "X ft from you"
-      // alongside "last seen". Only if permission already granted —
-      // no permission prompt here.
-      if (navigator.permissions) {
-        navigator.permissions.query({ name: 'geolocation' })
-          .then(p => { if (p.state === 'granted') locateUser(); })
-          .catch(() => {});
-      }
+      // Auto-fetch GPS so distances are populated. Browser handles the
+      // permission prompt on first call; no-op (silent error) if denied.
+      locateUser();
       return;
     }
     if (state.tab === 'help') {
@@ -1851,30 +2031,32 @@ window.dispatchEvent(new Event('firebase-ready'));
         <h2>how to use</h2>
         <ul class="help-list">
           <li><span class="help-ico">♥</span><div><b>Build your night</b><p>
+            In <b>Lineup</b>, tap <b>Now</b> to see who's on stage right now<br>
             Tap a DJ's ♥ to save them to your <b>Schedule</b><br>
             Tap their name to hear their music<br>
             Search by name (<i>"John Summit"</i>) or stage (<i>"kineticFIELD"</i>) to find them fast
           </p></div></li>
-          <li><span class="help-ico">🔴</span><div><b>See who's playing right now</b><p>
-            In <b>Lineup</b>, tap <b>Now</b>
+          <li><span class="help-ico">👯</span><div><b>Find your crew</b><p>
+            In <b>Crew</b>, tap <b>Host</b> (share your QR) or <b>Join</b> (scan a friend's)<br>
+            Everyone shows as a pulsing <b>circle</b> on the <b>Map</b> · dimmed when offline<br>
+            Last-seen times sync whenever you have signal, even briefly
           </p></div></li>
-          <li><span class="help-ico">👯</span><div><b>Find your friends on the map</b><p>
-            In <b>Friends</b>, share your code with the group<br>
-            Once they add you, you'll see each other as colored dots on the <b>Map</b><br>
-            Tap 📍 for your own pin<br>
-            Shows <b>last-seen</b> positions (not live tracking)<br>
-            Even a brief weak signal is enough to update
+          <li><span class="help-ico">📍</span><div><b>Mark a meeting spot</b><p>
+            On <b>Map</b>, tap <b>📍 Drop a pin</b> · add a short message (e.g., "BAR · 11pm")<br>
+            Pins are <b>teardrops</b> in your color, visible to your group<br>
+            <b>Drag</b> to move · tap to <b>Remove</b> · stays until you clear it
           </p></div></li>
           <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>
-            Open the site on Wi-Fi at least once before the festival<br>
-            Works offline after that
+            Open on Wi-Fi once before the festival<br>
+            <b>Fully offline:</b> Schedule, Map, hearts<br>
+            <b>Needs signal:</b> live Crew + new pins · cached shows meanwhile · syncs the moment signal returns
           </p></div></li>
         </ul>
 
         <h2>tips</h2>
         <ul class="help-list">
           <li><span class="help-ico">🎪</span><div><b>The 9 main stages</b><p style="line-height:1.65"><b style="color:#ff5aa0">kineticFIELD</b>: mainstage. House, EDM, big-room headliners.<br><b style="color:#2cc8ff">circuitGROUNDS</b>: techno + house (Fri d&amp;b / bass burst).<br><b style="color:#d39bff">cosmicMEADOW</b>: bass, alt, future, live sets.<br><b style="color:#5cff3a">neonGARDEN</b>: techno (some house early).<br><b style="color:#ff95dd">stereoBLOOM</b>: house, tech house, groove.<br><b style="color:#a3e635">bionicJUNGLE</b>: house, techno, disco / funk.<br><b style="color:#8b8dff">quantumVALLEY</b>: trance, progressive, melodic.<br><b style="color:#2dd4c0">bassPOD</b>: dubstep, d&amp;b, riddim. Pure bass.<br><b style="color:#ff5560">wasteLAND</b>: hardstyle, hardcore.</p></div></li>
-          <li><span class="help-ico">🚐</span><div><b>Pop-ups + art cars</b><p>Smaller side stops scattered around, often with their own vibe. <b>BeatBox</b> + <b>PicnicPlaytime</b> are roving art cars (they move). <b>Casa Bacardí</b>, <b>Electrolit House</b>, <b>Forest House</b>, <b>Takis Hangar</b>, <b>YeeDC</b>, <b>Insomniac Fridays</b> are themed lounges/tents. Worth wandering into if you stumble on one.</p></div></li>
+          <li><span class="help-ico">🚐</span><div><b>Pop-ups + art cars</b><p>Smaller side venues scattered around, often with their own vibe. <b>BeatBox</b> + <b>PicnicPlaytime</b> are roving art cars (they move). <b>Casa Bacardí</b>, <b>Electrolit House</b>, <b>Forest House</b>, <b>Takis Hangar</b>, <b>YeeDC</b>, <b>Insomniac Fridays</b> are themed lounges/tents. Worth wandering into if you stumble on one.</p></div></li>
         </ul>
 
         <h2>fine print</h2>
@@ -1882,10 +2064,10 @@ window.dispatchEvent(new Event('firebase-ready'));
           Fan-made tool. Set times change, apps break, phones die. <b>Don't rely on it alone.</b> Check stage signage and the official Insomniac app. We're not responsible for missed sets, lost devices, or anything else. Use at your own risk.
         </p>
         <p class="help-fineprint" style="margin-top:10px">
-          <b>Friends:</b> Your code grants location access to anyone who has it. Tracking without consent is prohibited and your sole responsibility. We are not liable for misuse (harassment, stalking, surveillance) or for how anyone else uses a code you share. By using, you accept these terms.
+          <b>Crew:</b> Anyone in your group can see your last-seen location and any pin you drop. Tracking without consent is prohibited and your sole responsibility. We are not liable for misuse (harassment, stalking, surveillance) or for how anyone in a group you joined uses your data. By using, you accept these terms.
         </p>
         <p class="help-fineprint" style="margin-top:10px">
-          <b>Data:</b> No personal info collected. Anonymous analytics used. Location is sent to third-party services only when you use Friends, keyed by a random code not tied to you. We are not responsible for third-party data handling.
+          <b>Data:</b> No personal info collected. Anonymous analytics used. Your location and pin messages are sent to third-party services only when you're in a group, keyed by a random code not tied to you. We are not responsible for third-party data handling.
         </p>
         <p class="help-fineprint" style="margin-top:10px">
           <b>Privacy.</b> Hearts and notes are saved only on your phone, never sent anywhere. The site uses Google Analytics for traffic stats (pageviews, browser, country). Nothing personal is collected.
@@ -2138,6 +2320,32 @@ window.dispatchEvent(new Event('firebase-ready'));
     return { left, top, inBounds };
   }
 
+  // map-percent → GPS, via Newton's method on the forward transform.
+  // Used when the user drags a pin and we need to store the new GPS.
+  // Converges in ~5-8 iterations for any point inside or near the map.
+  function mapPercentToGps(targetLeft, targetTop) {
+    let lat = SPEEDWAY_ANCHORS[0].gps.lat;
+    let lng = SPEEDWAY_ANCHORS[0].gps.lng;
+    for (let i = 0; i < 30; i++) {
+      const pred = gpsToMapPercent(lat, lng);
+      const dLeft = targetLeft - pred.left;
+      const dTop  = targetTop  - pred.top;
+      if (Math.abs(dLeft) < 0.001 && Math.abs(dTop) < 0.001) break;
+      const eps = 0.0001;
+      const pLat = gpsToMapPercent(lat + eps, lng);
+      const pLng = gpsToMapPercent(lat, lng + eps);
+      const dLeft_dLat = (pLat.left - pred.left) / eps;
+      const dTop_dLat  = (pLat.top  - pred.top)  / eps;
+      const dLeft_dLng = (pLng.left - pred.left) / eps;
+      const dTop_dLng  = (pLng.top  - pred.top)  / eps;
+      const det = dLeft_dLat * dTop_dLng - dLeft_dLng * dTop_dLat;
+      if (Math.abs(det) < 1e-10) break;
+      lat += (dTop_dLng * dLeft - dLeft_dLng * dTop) / det;
+      lng += (-dTop_dLat * dLeft + dLeft_dLat * dTop) / det;
+    }
+    return { lat, lng };
+  }
+
   function renderMap() {
     main.innerHTML = '';
     const wrap = document.createElement('div');
@@ -2154,14 +2362,21 @@ window.dispatchEvent(new Event('firebase-ready'));
           </div>
           <!-- F.8: friend pins live inside zoom-target so they pan/zoom with the map. -->
           <div id="friendPins"></div>
+          <!-- v210: meeting pins (deliberate markers, stick + ball). -->
+          <div id="meetingPins"></div>
+        </div>
+        <div class="map-legend">
+          <span class="legend-shape legend-dot"></span>friend
+          <span class="legend-sep">·</span>
+          <span class="legend-shape legend-pin-mini"></span>pin
         </div>
         <div class="map-far-msg" id="mapFarMsg" style="display:none"></div>
         <div class="map-zoom-controls">
-          <button type="button" class="map-zoom-btn" id="gpsBtn"     aria-label="Find my location">📍</button>
           <button type="button" class="map-zoom-btn" data-zoom="in"  aria-label="Zoom in">⊕</button>
           <button type="button" class="map-zoom-btn" data-zoom="out" aria-label="Zoom out">⊖</button>
           <button type="button" class="map-zoom-btn" data-zoom="reset" aria-label="Reset zoom">↺</button>
         </div>
+        <button type="button" id="dropPinBtn" class="map-droppin-btn" style="display:none">📍 Drop pin here</button>
         <div class="map-status" id="mapStatus" aria-live="polite"></div>
       </div>
       <p class="map-note">
@@ -2171,21 +2386,207 @@ window.dispatchEvent(new Event('firebase-ready'));
 
     main.appendChild(wrap);
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
-    wrap.querySelector('#gpsBtn').onclick = (e) => { e.stopPropagation(); locateUser(); };
 
     // F.8: render friend pins now + whenever data updates.
     renderFriendPins();
     window.addEventListener('myraver-friend-update', renderFriendPins);
 
-    // Auto-show the user's pin on Map tab open IF they've already granted
-    // geolocation permission. First-time visitors still need to tap the
-    // GPS button (which triggers the permission prompt). After grant,
-    // the pin is always there immediately on every Map tab visit.
-    if (navigator.permissions) {
-      navigator.permissions.query({ name: 'geolocation' })
-        .then(p => { if (p.state === 'granted') locateUser(); })
-        .catch(() => {});
+    // v210: render meeting pins + show drop button if in a group.
+    renderMeetingPins();
+    window.addEventListener('myraver-pins-update', renderMeetingPins);
+    setupDropPinButton();
+
+    // Auto-fetch GPS on Map tab open. Browser handles the permission
+    // prompt for first-timers; silent error if denied.
+    locateUser();
+  }
+
+  // v210: persistent map button. Toggles between Drop and Remove based
+  // on whether the user already has a pin. Always one tap to act.
+  function setupDropPinButton() {
+    const btn = document.getElementById('dropPinBtn');
+    if (!btn) return;
+    function refresh() {
+      const inGroup = window.findFriends && window.findFriends.inGroup && window.findFriends.inGroup();
+      const myPin = window.findFriends.getMyPin && window.findFriends.getMyPin();
+      if (!inGroup) { btn.style.display = 'none'; return; }
+      btn.style.display = '';
+      if (myPin) {
+        btn.textContent = '❌ Remove my pin';
+        btn.dataset.action = 'remove';
+        btn.classList.add('is-remove');
+      } else {
+        btn.textContent = '📍 Drop a pin';
+        btn.dataset.action = 'drop';
+        btn.classList.remove('is-remove');
+      }
     }
+    refresh();
+    window.addEventListener('myraver-pins-update', refresh);
+    window.addEventListener('myraver-friend-update', refresh);
+    btn.onclick = async () => {
+      if (!window.findFriends || !window.findFriends.inGroup()) return;
+      if (btn.dataset.action === 'remove') {
+        const ok = await window.findFriends.confirm('Remove your pin?', { primaryLabel: 'Remove', danger: true });
+        if (ok) await window.findFriends.removeMyPin();
+      } else {
+        const message = await window.findFriends.prompt(
+          'Drop a pin here',
+          {
+            placeholder: 'Short message · e.g., BAR · 11pm meetup',
+            primaryLabel: 'Drop',
+            maxLength: 100,
+          }
+        );
+        if (!message) return;
+        const ok = await window.findFriends.dropMyPin(message);
+        if (!ok) console.warn('[pin] drop failed');
+      }
+    };
+  }
+
+  // v210: render all meeting pins for the current group. Stick + ball,
+  // colored by dropper. Uses gpsToMapPercent like friend pins.
+  function renderMeetingPins() {
+    const container = document.getElementById('meetingPins');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!window.findFriends || !window.findFriends.getPins) return;
+    const pins = window.findFriends.getPins();
+    pins.forEach(p => {
+      const pos = gpsToMapPercent(p.lat, p.lng);
+      if (pos.left < -10 || pos.left > 110 || pos.top < -10 || pos.top > 110) return;
+      const el = document.createElement('div');
+      el.className = 'meeting-pin' + (p.isMine ? ' is-mine' : '');
+      el.style.setProperty('--mp-color', p.color);
+      el.style.left = Math.max(0, Math.min(100, pos.left)) + '%';
+      el.style.top  = Math.max(0, Math.min(100, pos.top))  + '%';
+      el.dataset.qrid = p.qrid;
+      el.innerHTML = `
+        <div class="meeting-pin-shape">
+          <div class="meeting-pin-text">${(p.initial || '?').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+        </div>
+      `;
+      // Non-mine pins: simple click. Mine: drag handler distinguishes tap vs drag.
+      if (p.isMine) {
+        attachPinDrag(el, p);
+      } else {
+        el.onclick = (e) => { e.stopPropagation(); showPinSheet(p); };
+      }
+      container.appendChild(el);
+    });
+  }
+
+  // v210: tap pin → bottom sheet, same style as friend-dot tap. Longer
+  // message wraps cleanly. Owner gets a Remove button at the right.
+  function showPinSheet(pin) {
+    closeFriendSheet();
+    const wrap = document.querySelector('.map-img-container');
+    if (!wrap) return;
+    const sheet = document.createElement('div');
+    sheet.className = 'friend-sheet friend-sheet-pin';
+    sheet.id = 'friendSheet';
+    const safe = (s) => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const ageMin = Math.max(0, Math.floor((Date.now() - (pin.ts || 0)) / 60000));
+    const ageText = ageMin < 1 ? 'just now' : (ageMin < 60 ? ageMin + ' min ago' : Math.floor(ageMin / 60) + ' hr ago');
+    sheet.innerHTML = `
+      <div class="friend-sheet-init" style="background:${pin.color}">${safe(pin.initial)}</div>
+      <div class="friend-sheet-meta">
+        <div class="friend-sheet-name">${safe(pin.name)}${pin.isMine ? ' <span style="font-size:11px;color:var(--muted);font-weight:400">(you)</span>' : ''}</div>
+        <div class="friend-sheet-sub friend-sheet-pin-msg">${safe(pin.message)}</div>
+        <div class="friend-sheet-pin-age">dropped ${ageText}</div>
+      </div>
+      ${pin.isMine ? '<button class="friend-sheet-remove" id="pinRemoveBtn" type="button">Remove</button>' : ''}
+      <button class="friend-sheet-x" id="pinSheetX" type="button" aria-label="Close">×</button>
+    `;
+    wrap.appendChild(sheet);
+    sheet.querySelector('#pinSheetX').onclick = (e) => { e.stopPropagation(); closeFriendSheet(); };
+    if (pin.isMine) {
+      sheet.querySelector('#pinRemoveBtn').onclick = async (e) => {
+        e.stopPropagation();
+        const ok = await window.findFriends.confirm('Remove your pin?', { primaryLabel: 'Remove', danger: true });
+        if (ok) await window.findFriends.removeMyPin();
+        closeFriendSheet();
+      };
+    } else {
+      sheet._autoClose = setTimeout(closeFriendSheet, 5000);
+    }
+  }
+
+  // v210: own pin drag handler. Distinguishes tap (open sheet) from drag
+  // (move + save). Threshold = 6px of movement.
+  function attachPinDrag(el, pin) {
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let pinPctLeft = 0, pinPctTop = 0;
+    let movedPx = 0;
+    const target = document.getElementById('mapZoomTarget');
+
+    function onStart(clientX, clientY, e) {
+      if (e) e.preventDefault();
+      dragging = true;
+      startX = clientX;
+      startY = clientY;
+      movedPx = 0;
+      pinPctLeft = parseFloat(el.style.left) || 0;
+      pinPctTop  = parseFloat(el.style.top)  || 0;
+      el.classList.add('dragging');
+    }
+    function onMove(clientX, clientY) {
+      if (!dragging) return;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      movedPx = Math.max(movedPx, Math.sqrt(dx * dx + dy * dy));
+      const rect = target.getBoundingClientRect();
+      const dxPct = (dx / rect.width)  * 100;
+      const dyPct = (dy / rect.height) * 100;
+      el.style.left = (pinPctLeft + dxPct) + '%';
+      el.style.top  = (pinPctTop  + dyPct) + '%';
+    }
+    async function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');
+      if (movedPx < 6) {
+        // Tap, not drag — restore position and open the info sheet.
+        el.style.left = pinPctLeft + '%';
+        el.style.top  = pinPctTop  + '%';
+        showPinSheet(pin);
+        return;
+      }
+      const newPctLeft = parseFloat(el.style.left);
+      const newPctTop  = parseFloat(el.style.top);
+      const gps = mapPercentToGps(newPctLeft, newPctTop);
+      if (gps && window.findFriends && window.findFriends.updateMyPinPosition) {
+        await window.findFriends.updateMyPinPosition(gps.lat, gps.lng);
+      }
+    }
+
+    // touch
+    el.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      onStart(t.clientX, t.clientY, e);
+    }, { passive: false });
+    el.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      onMove(t.clientX, t.clientY);
+      e.preventDefault();
+    }, { passive: false });
+    el.addEventListener('touchend', onEnd);
+    el.addEventListener('touchcancel', onEnd);
+
+    // mouse (desktop testing)
+    el.addEventListener('mousedown', (e) => {
+      onStart(e.clientX, e.clientY, e);
+      const moveHandler = (ev) => onMove(ev.clientX, ev.clientY);
+      const upHandler = () => {
+        document.removeEventListener('mousemove', moveHandler);
+        document.removeEventListener('mouseup', upHandler);
+        onEnd();
+      };
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('mouseup', upHandler);
+    });
   }
 
   // F.8: render colored dots on the map, one per friend with known location.
@@ -2253,8 +2654,10 @@ window.dispatchEvent(new Event('firebase-ready'));
         <div class="friend-sheet-name">${safeName}</div>
         <div class="friend-sheet-sub">${safeText}</div>
       </div>
+      <button class="friend-sheet-x" id="friendSheetX" type="button" aria-label="Close">×</button>
     `;
     wrap.appendChild(sheet);
+    sheet.querySelector('#friendSheetX').onclick = (e) => { e.stopPropagation(); closeFriendSheet(); };
     sheet._autoClose = setTimeout(closeFriendSheet, 5000);
   }
   function closeFriendSheet() {

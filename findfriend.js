@@ -30,7 +30,7 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (e) {}
-    return { myQRid: null, following: [] };
+    return {};
   }
   function saveState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -47,11 +47,21 @@
     return id.match(/.{1,4}/g).join('-');
   }
 
+  // v210 schema: { myQRid, myName, currentGroup, groupMembers }
+  // - currentGroup: null = idle (not in any group), myQRid = hosting,
+  //   any other qrid = member of that user's group.
+  // - myQRid is the persistent device identity for /loc and /presence.
+  // - myName is set when user takes their first Host or Join action.
+  // - groupMembers caches the current group's members for offline render.
+  // Migration from earlier schema: drop legacy `following` array.
   const state = loadState();
-  if (!state.myQRid) {
-    state.myQRid = genQRid();
-    saveState();
-  }
+  if (!state.myQRid) state.myQRid = genQRid();
+  if (typeof state.myName !== 'string') state.myName = null;
+  if (state.currentGroup === undefined) state.currentGroup = null;
+  if (!state.groupMembers || typeof state.groupMembers !== 'object') state.groupMembers = {};
+  if (!state.pins || typeof state.pins !== 'object') state.pins = {};
+  if (state.following) delete state.following;
+  saveState();
 
   // ── F.2: Firebase init (no auth, no RTDB yet) ─────────────────────────
   // Idempotent. Called on Friends-tab open. window.fb is set by the
@@ -98,13 +108,17 @@
       localStorage.setItem(LOCATIONS_KEY, JSON.stringify(out));
     } catch (e) {}
   }
-  // Prune cached locations for friends the user has since unfollowed
-  // (state.following is the source of truth; locations cache shouldn't
-  // outlive its friend).
+  // Prune cached locations for qrids no longer in current group.
+  // When idle (no group), prune everything.
   (function pruneOrphans() {
     let mutated = false;
+    const valid = new Set();
+    if (state.currentGroup) {
+      valid.add(state.currentGroup);  // host
+      Object.keys(state.groupMembers || {}).forEach(q => valid.add(q));
+    }
     Object.keys(friendData).forEach(qrid => {
-      if (!state.following.some(f => f.qrid === qrid)) {
+      if (!valid.has(qrid)) {
         delete friendData[qrid];
         mutated = true;
       }
@@ -142,7 +156,7 @@
         console.log('[fb] auth OK, uid=' + cred.user.uid);
         startPublishLoop();  // F.4 + F.10: publish now + every 30s
         attachPublishTriggers();  // F.10: republish on online + visibility
-        trySubscribeAllFriends();  // F.6
+        subscribeCurrentGroup();  // v210: subscribe to current group's circle
         watchConnection();  // pill tracks .info/connected, not just auth
         maybeRerender();  // refresh status pill
       } else {
@@ -166,6 +180,7 @@
   let publishTimer = null;
   const PUBLISH_INTERVAL_MS = 30000;
   function publishMyLocation() {
+    if (!state.currentGroup) return;  // idle, no audience expected
     if (!fbAuthed || !fbApp || !window.fb) return;
     if (!navigator.geolocation) return;
     if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
@@ -219,77 +234,462 @@
       firebaseStatus = connected ? 'ok' : 'bad';
       maybeRerender();
       if (connected) {
-        // Re-arm presence on every reconnect — Firebase clears onDisconnect
-        // handlers when the socket dies, so they must be re-registered.
-        const presRef = window.fb.ref(fbDb, 'presence/' + state.myQRid);
-        window.fb.onDisconnect(presRef)
-          .set({ online: false, lastOffline: window.fb.serverTimestamp() })
-          .then(() => window.fb.set(presRef, { online: true }))
-          .catch((e) => console.warn('[fb] presence setup failed:', e));
+        writePresence();
+        // Post-reconnect: if I'm a member and haven't confirmed the host
+        // exists, validate now. Catches phantom groups that were joined
+        // with bad codes while offline (where pre-validation was skipped).
+        if (state.currentGroup && state.currentGroup !== state.myQRid && _hostSeenForGroup !== state.currentGroup) {
+          if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+          const hostRef = window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.currentGroup);
+          let resolved = false;
+          const validateOnce = (s) => {
+            if (resolved) return;
+            resolved = true;
+            try { window.fb.off(hostRef, 'value', validateOnce); } catch (e) {}
+            if (!s.val() && state.currentGroup && _hostSeenForGroup !== state.currentGroup) {
+              // Phantom — bump to idle.
+              console.log('[fb] post-reconnect: host missing, bumping phantom group to idle');
+              const oldHost = state.currentGroup;
+              state.currentGroup = null;
+              state.groupMembers = {};
+              state.pins = {};
+              saveState();
+              if (currentGroupSub) { try { currentGroupSub(); } catch (e) {} currentGroupSub = null; }
+              if (meetingsSub) { try { meetingsSub(); } catch (e) {} meetingsSub = null; }
+              tearDownAllMemberSubs();
+              try { window.fb.remove(window.fb.ref(fbDb, 'circles/' + oldHost + '/' + state.myQRid)); } catch (e) {}
+              try { window.fb.remove(window.fb.ref(fbDb, 'meetings/' + oldHost + '/' + state.myQRid)); } catch (e) {}
+              ffAlert(`Group not found.<br>The code didn't match any active group.`);
+              maybeRerender();
+            }
+          };
+          window.fb.onValue(hostRef, validateOnce);
+          setTimeout(() => { if (!resolved) { try { window.fb.off(hostRef, 'value', validateOnce); } catch (e) {} } }, 3000);
+        }
       }
     });
     console.log('[fb] watching .info/connected');
   }
-  // F.6: subscribe to ALL friends. Idempotent (skip already-subscribed),
-  // and clean up subs for friends the user has removed. No UI changes —
-  // F.7 wires data into the visible UI.
-  const fbSubs = {}; // qrid → unsubscribe fn (loc)
-  const fbPresenceSubs = {}; // qrid → unsubscribe fn (presence)
-  function trySubscribeAllFriends() {
+  // Write /presence/<self> with onDisconnect. Called from .info/connected
+  // (covers reconnects) AND from subscribeCurrentGroup (covers idle→in-group
+  // transitions when .info/connected was already 'true'). Idempotent enough.
+  function writePresence() {
+    if (!fbAuthed || !fbApp || !window.fb) return;
+    if (!state.currentGroup) return;  // idle: no presence
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    const presRef = window.fb.ref(fbDb, 'presence/' + state.myQRid);
+    window.fb.onDisconnect(presRef)
+      .set({ online: false, lastOffline: window.fb.serverTimestamp() })
+      .then(() => window.fb.set(presRef, { online: true }))
+      .catch((e) => console.warn('[fb] presence setup failed:', e));
+  }
+  // v210: subscribe to current group's /circles/<host>. The host writes
+  // themselves at /circles/<host>/<host>; members write at /circles/<host>/<self>.
+  // When the host wipes their /circles/<host> (disband / regen / join elsewhere),
+  // the snapshot becomes empty → members detect dissolution and bump to idle.
+  let currentGroupSub = null;
+  let meetingsSub = null;          // unsubscribe fn for /meetings/<currentGroup>
+  const memberLocSubs = {};       // qrid → unsubscribe fn (loc)
+  const memberPresenceSubs = {};  // qrid → unsubscribe fn (presence)
+  // Tracks when I last wrote/deleted my own pin locally. Used to ignore
+  // older /meetings snapshots that would otherwise stomp my optimistic
+  // update with stale server data during the brief sync window.
+  let _myPinActionTs = 0;
+  // Track which group's host we've confirmed exists. Module-level so it
+  // survives subscribeCurrentGroup re-calls in the same session — without
+  // this, a re-subscribe after the host left can write us back into a
+  // phantom group and never trigger dissolution.
+  let _hostSeenForGroup = null;
+
+  function tearDownAllMemberSubs() {
+    Object.values(memberLocSubs).forEach(fn => { try { fn(); } catch (e) {} });
+    Object.values(memberPresenceSubs).forEach(fn => { try { fn(); } catch (e) {} });
+    Object.keys(memberLocSubs).forEach(k => delete memberLocSubs[k]);
+    Object.keys(memberPresenceSubs).forEach(k => delete memberPresenceSubs[k]);
+  }
+
+  function subscribeCurrentGroup() {
     if (!fbAuthed || !fbApp || !window.fb) return;
     if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-    // Subscribe to any friend we don't already have a sub for.
-    state.following.forEach(f => {
-      if (!fbSubs[f.qrid]) {
-        const path = 'loc/' + f.qrid;
-        const r = window.fb.ref(fbDb, path);
+
+    // Tear down any prior subs (group switch needs a clean slate).
+    if (currentGroupSub) { try { currentGroupSub(); } catch (e) {} currentGroupSub = null; }
+    if (meetingsSub) { try { meetingsSub(); } catch (e) {} meetingsSub = null; }
+    tearDownAllMemberSubs();
+
+    if (!state.currentGroup) return;  // idle: no group, no subs
+
+    // Write self into the group with current name. Host writes themselves too
+    // so members can render the host with their name.
+    const myMemberRef = window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid);
+    window.fb.set(myMemberRef, {
+      name: state.myName || '?',
+      isHost: state.currentGroup === state.myQRid,
+      ts: Date.now(),
+    }).catch(e => console.warn('[fb] write self to circle failed:', e));
+
+    // Also (re-)write presence: idle→in-group transitions don't hit the
+    // .info/connected handler, so presence wouldn't be set otherwise.
+    writePresence();
+
+    // Subscribe to circle members.
+    const groupRef = window.fb.ref(fbDb, 'circles/' + state.currentGroup);
+    // Reset _hostSeenForGroup if we're now subscribed to a different group.
+    if (_hostSeenForGroup !== state.currentGroup) _hostSeenForGroup = null;
+    const handler = (snap) => {
+      const v = snap.val() || {};
+
+      // Group-dissolved detection (members only): only fire AFTER we've
+      // confirmed the host's entry exists for THIS group at some point.
+      // _hostSeenForGroup persists across subscribe calls in the same
+      // session, so a re-subscribe after the host leaves still detects.
+      const iAmMember = state.currentGroup !== state.myQRid;
+      if (iAmMember && v[state.currentGroup]) _hostSeenForGroup = state.currentGroup;
+      if (iAmMember && _hostSeenForGroup === state.currentGroup && !v[state.currentGroup]) {
+        console.log('[fb] group dissolved by host — bumping to idle');
+        const oldHost = state.currentGroup;
+        const oldHostName = (state.groupMembers[oldHost] && state.groupMembers[oldHost].name) || 'The host';
+        state.currentGroup = null;
+        state.groupMembers = {};
+        _hostSeenForGroup = null;
+        saveState();
+        if (currentGroupSub) { try { currentGroupSub(); } catch (e) {} currentGroupSub = null; }
+        tearDownAllMemberSubs();
+        // Race recovery: if subscribeCurrentGroup just wrote our entry into
+        // the now-dissolved group's path, remove it.
+        try { window.fb.remove(window.fb.ref(fbDb, 'circles/' + oldHost + '/' + state.myQRid)); } catch (e) {}
+        ffAlert(escapeHTML(oldHostName) + ' ended the group.');
+        maybeRerender();
+        return;
+      }
+
+      // Build groupMembers from snapshot (excluding self).
+      state.groupMembers = {};
+      Object.keys(v).forEach(qrid => {
+        if (qrid === state.myQRid) return;
+        const e = v[qrid] || {};
+        state.groupMembers[qrid] = {
+          name: e.name || '?',
+          initial: deriveInitial(e.name || '?'),
+          isHost: !!e.isHost,
+        };
+      });
+      saveState();
+
+      // Subscribe per-member /loc + /presence (idempotent).
+      Object.keys(state.groupMembers).forEach(qrid => {
+        if (!memberLocSubs[qrid]) {
+          const locRef = window.fb.ref(fbDb, 'loc/' + qrid);
+          const locHandler = (s) => {
+            const lv = s.val();
+            if (lv && typeof lv.lat === 'number' && typeof lv.lng === 'number') {
+              friendData[qrid] = friendData[qrid] || {};
+              friendData[qrid].lat = lv.lat;
+              friendData[qrid].lng = lv.lng;
+              friendData[qrid].ts = lv.ts || Date.now();
+              persistFriendData();
+              maybeRerender();
+              window.dispatchEvent(new CustomEvent('myraver-friend-update', {
+                detail: { qrid, lat: lv.lat, lng: lv.lng, ts: lv.ts },
+              }));
+            }
+          };
+          window.fb.onValue(locRef, locHandler);
+          memberLocSubs[qrid] = () => window.fb.off(locRef, 'value', locHandler);
+        }
+        if (!memberPresenceSubs[qrid]) {
+          const presRef = window.fb.ref(fbDb, 'presence/' + qrid);
+          const presHandler = (s) => {
+            const pv = s.val();
+            friendData[qrid] = friendData[qrid] || {};
+            friendData[qrid].online = !!(pv && pv.online === true);
+            maybeRerender();
+          };
+          window.fb.onValue(presRef, presHandler);
+          memberPresenceSubs[qrid] = () => window.fb.off(presRef, 'value', presHandler);
+        }
+      });
+      // Drop subs for members no longer in the group.
+      Object.keys(memberLocSubs).forEach(qrid => {
+        if (!state.groupMembers[qrid]) {
+          try { memberLocSubs[qrid](); } catch (e) {}
+          delete memberLocSubs[qrid];
+        }
+      });
+      Object.keys(memberPresenceSubs).forEach(qrid => {
+        if (!state.groupMembers[qrid]) {
+          try { memberPresenceSubs[qrid](); } catch (e) {}
+          delete memberPresenceSubs[qrid];
+        }
+      });
+
+      maybeRerender();
+    };
+    window.fb.onValue(groupRef, handler);
+    currentGroupSub = () => window.fb.off(groupRef, 'value', handler);
+    console.log('[fb] subscribed to /circles/' + state.currentGroup);
+
+    // Subscribe to all pins (meetings) under this group's host.
+    const meetingsRef = window.fb.ref(fbDb, 'meetings/' + state.currentGroup);
+    const meetingsHandler = (snap) => {
+      const v = snap.val() || {};
+      const newPins = {};
+      Object.keys(v).forEach(qrid => {
+        const e = v[qrid] || {};
+        if (typeof e.lat === 'number' && typeof e.lng === 'number' && typeof e.message === 'string') {
+          newPins[qrid] = { lat: e.lat, lng: e.lng, message: e.message, ts: e.ts || Date.now(), by: e.by || '' };
+        }
+      });
+      // Race-protect my own entry: if I just dropped/removed locally and the
+      // snapshot's ts is older than my last action, prefer my local state.
+      const mySnap = newPins[state.myQRid];
+      const snapTs = mySnap ? (mySnap.ts || 0) : 0;
+      if (_myPinActionTs && _myPinActionTs > snapTs) {
+        if (state.pins[state.myQRid]) {
+          newPins[state.myQRid] = state.pins[state.myQRid];
+        } else {
+          delete newPins[state.myQRid];
+        }
+      }
+      state.pins = newPins;
+      saveState();
+      maybeRerender();
+      window.dispatchEvent(new CustomEvent('myraver-pins-update'));
+    };
+    window.fb.onValue(meetingsRef, meetingsHandler);
+    meetingsSub = () => window.fb.off(meetingsRef, 'value', meetingsHandler);
+    console.log('[fb] subscribed to /meetings/' + state.currentGroup);
+  }
+
+  // ── Pin actions ──────────────────────────────────────────────────────
+  function getMyPin() {
+    return state.pins[state.myQRid] || null;
+  }
+  // Drop or move a pin. Optimistic local update first, then cloud sync.
+  // Same pattern as group state changes — UI doesn't wait on the network.
+  async function dropMyPin(message, lat, lng) {
+    if (!state.currentGroup) { console.warn('[pin] cannot drop pin while idle'); return false; }
+    if (typeof message !== 'string' || !message.trim()) return false;
+    if (lat == null || lng == null) {
+      const pos = window._lastUserPos;
+      if (!pos) {
+        await ffAlert(`Need your GPS to drop a pin here.<br>Tap Map and allow location, then try again.`);
+        return false;
+      }
+      lat = pos.lat; lng = pos.lng;
+    }
+    const cleanMsg = message.trim().slice(0, 100);
+    const data = { lat, lng, message: cleanMsg, ts: Date.now(), by: state.myName || '?' };
+
+    // 1. Optimistic local — UI updates instantly. Tracks ts so older
+    // server snapshots can't stomp this.
+    _myPinActionTs = data.ts;
+    state.pins[state.myQRid] = data;
+    saveState();
+    maybeRerender();
+    window.dispatchEvent(new CustomEvent('myraver-pins-update'));
+
+    // 2. Cloud sync (Firebase queues + retries on reconnect if offline).
+    if (!fbAuthed || !fbApp || !window.fb) return true;  // local saved, cloud will retry
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid);
+    window.fb.set(ref, data).catch(e => console.warn('[pin] drop cloud sync failed:', e));
+    return true;
+  }
+  async function removeMyPin() {
+    console.log('[pin] removeMyPin called. currentGroup=', state.currentGroup, ' myQRid=', state.myQRid);
+    if (!state.currentGroup) { console.warn('[pin] cannot remove: no current group'); return; }
+
+    // 1. Optimistic local — pin disappears from UI instantly. Stamp the
+    // action so older snapshots can't restore the deleted pin.
+    _myPinActionTs = Date.now();
+    delete state.pins[state.myQRid];
+    saveState();
+    maybeRerender();
+    window.dispatchEvent(new CustomEvent('myraver-pins-update'));
+
+    // 2. Cloud sync (queues in memory if offline, retries on reconnect).
+    if (!fbAuthed || !fbApp || !window.fb) return;
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    const path = 'meetings/' + state.currentGroup + '/' + state.myQRid;
+    window.fb.remove(window.fb.ref(fbDb, path))
+      .then(() => console.log('[pin] removed /' + path))
+      .catch(e => console.warn('[pin] remove cloud sync failed:', e));
+  }
+  async function updateMyPinPosition(lat, lng) {
+    const cur = getMyPin();
+    if (!cur) return false;
+    return dropMyPin(cur.message, lat, lng);
+  }
+
+  // ── State transitions ─────────────────────────────────────────────────
+  // host new group: idle/host/member → host with fresh qrid + name.
+  async function hostNewGroup(mainEl) {
+    if (state.currentGroup === state.myQRid) {
+      // Already hosting; create new = end old.
+      const ok = await ffConfirm(
+        `Start a new group? This ends your current group for everyone.`,
+        { primaryLabel: 'Continue', danger: true }
+      );
+      if (!ok) return;
+      if (fbDb && fbAuthed && window.fb) {
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'presence/' + state.myQRid)); } catch (e) {}
+      }
+    } else if (state.currentGroup) {
+      // Member of someone else's group.
+      const ok = await ffConfirm(
+        `Leave your current group to host a new one?`,
+        { primaryLabel: 'Continue' }
+      );
+      if (!ok) return;
+      if (fbDb && fbAuthed && window.fb) {
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+      }
+    }
+    const name = await ffPrompt(
+      'Choose your display name:',
+      { placeholder: 'Your name', primaryLabel: 'Host group', defaultValue: state.myName || '', maxLength: 24 }
+    );
+    if (!name) return;
+    state.myName = name;
+    state.myQRid = genQRid();  // fresh identity for fresh group
+    state.currentGroup = state.myQRid;
+    state.groupMembers = {};
+    state.pins = {};
+    saveState();
+    subscribeCurrentGroup();
+    if (fbAuthed) publishMyLocation();
+    render(mainEl);
+  }
+
+  // join group: any → member of target.
+  async function joinGroupFlow(mainEl, targetQrid) {
+    if (targetQrid === state.myQRid) { await ffAlert(`That's your own code.`); return; }
+    if (targetQrid === state.currentGroup) { await ffAlert(`You're already in this group.`); return; }
+
+    // Pre-validate ONLY when online. Offline users at the festival can
+    // still trust their scan (they're literally pointing at a friend's
+    // phone). Their join will sync to cloud when signal returns; if the
+    // code was fake, they'll see no one until signal anyway.
+    if (firebaseStatus === 'ok' && fbAuthed && fbApp && window.fb) {
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      const hostExists = await new Promise((resolve) => {
+        let resolved = false;
+        const hostRef = window.fb.ref(fbDb, 'circles/' + targetQrid + '/' + targetQrid);
         const handler = (snap) => {
-          const v = snap.val();
-          console.log('[fb] data from /' + path + ':', v);
-          if (v && typeof v.lat === 'number' && typeof v.lng === 'number') {
-            // Merge instead of overwrite so presence-side fields (online) survive.
-            friendData[f.qrid] = friendData[f.qrid] || {};
-            friendData[f.qrid].lat = v.lat;
-            friendData[f.qrid].lng = v.lng;
-            friendData[f.qrid].ts = v.ts || Date.now();
-            persistFriendData();  // F.11: cache for next refresh / offline
-            maybeRerender();  // F.7: paint freshness label
-            // F.8: notify map (or any other consumer) that friend's location updated.
-            window.dispatchEvent(new CustomEvent('myraver-friend-update', {
-              detail: { qrid: f.qrid, lat: v.lat, lng: v.lng, ts: v.ts },
-            }));
-          }
+          if (resolved) return;
+          resolved = true;
+          try { window.fb.off(hostRef, 'value', handler); } catch (e) {}
+          resolve(!!snap.val());
         };
-        window.fb.onValue(r, handler);
-        fbSubs[f.qrid] = () => window.fb.off(r, 'value', handler);
-        console.log('[fb] subscribed to /' + path);
+        window.fb.onValue(hostRef, handler);
+        setTimeout(() => {
+          if (resolved) return;
+          resolved = true;
+          try { window.fb.off(hostRef, 'value', handler); } catch (e) {}
+          resolve(false);
+        }, 3000);
+      });
+      if (!hostExists) {
+        await ffAlert(`Group not found.<br>The code might be wrong or the host has ended the group.`);
+        return;
       }
-      // Presence sub. Lives in friendData[qrid].online (in-memory only,
-      // never persisted — on cold reload we don't know friend's state until
-      // the first presence event fires).
-      if (!fbPresenceSubs[f.qrid]) {
-        const ppath = 'presence/' + f.qrid;
-        const pr = window.fb.ref(fbDb, ppath);
-        const phandler = (snap) => {
-          const v = snap.val();
-          friendData[f.qrid] = friendData[f.qrid] || {};
-          friendData[f.qrid].online = !!(v && v.online === true);
-          maybeRerender();
-        };
-        window.fb.onValue(pr, phandler);
-        fbPresenceSubs[f.qrid] = () => window.fb.off(pr, 'value', phandler);
-        console.log('[fb] subscribed to /' + ppath);
+    }
+
+    if (!state.myName) {
+      const name = await ffPrompt(
+        'Choose your display name:',
+        { placeholder: 'Your name', primaryLabel: 'Continue', maxLength: 24 }
+      );
+      if (!name) return;
+      state.myName = name;
+      saveState();
+    }
+
+    if (state.currentGroup === state.myQRid) {
+      // Hosting: joining ends our group.
+      const ok = await ffConfirm(
+        `Join this group? Your current group will end for everyone.`,
+        { primaryLabel: 'Join', danger: true }
+      );
+      if (!ok) return;
+      if (fbDb && fbAuthed && window.fb) {
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.myQRid)); } catch (e) {}
       }
-    });
-    // Drop subs for friends no longer in the list.
-    Object.keys(fbSubs).forEach(qrid => {
-      if (!state.following.some(f => f.qrid === qrid)) {
-        try { fbSubs[qrid](); } catch (e) {}
-        delete fbSubs[qrid];
-        try { fbPresenceSubs[qrid] && fbPresenceSubs[qrid](); } catch (e) {}
-        delete fbPresenceSubs[qrid];
-        console.log('[fb] unsubscribed /loc/' + qrid + ' (friend removed)');
+    } else if (state.currentGroup) {
+      const ok = await ffConfirm(
+        `Leave your current group to join this one?`,
+        { primaryLabel: 'Join' }
+      );
+      if (!ok) return;
+      if (fbDb && fbAuthed && window.fb) {
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
       }
+    }
+
+    state.currentGroup = targetQrid;
+    state.groupMembers = {};
+    state.pins = {};
+    saveState();
+    subscribeCurrentGroup();
+    if (fbAuthed) publishMyLocation();
+    render(mainEl);
+  }
+
+  // leave (member) or end (host) the current group → idle.
+  async function leaveOrEndGroup(mainEl) {
+    if (!state.currentGroup) return;
+    const isHost = state.currentGroup === state.myQRid;
+    const hostName = isHost
+      ? (state.myName || 'your')
+      : ((state.groupMembers[state.currentGroup] && state.groupMembers[state.currentGroup].name) || 'this');
+    const msg = isHost
+      ? `Leave the group? Members will lose this group entirely.`
+      : `Leave <b>${escapeHTML(hostName)}'s group</b>?`;
+    const ok = await ffConfirm(msg, { primaryLabel: 'Leave', danger: true });
+    if (!ok) return;
+    if (fbDb && fbAuthed && window.fb) {
+      if (isHost) {
+        // Wipe entire group + all its pins.
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.myQRid)); } catch (e) {}
+      } else {
+        try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        // Member leaving: drop their own pin from this group.
+        try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+      }
+      try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + state.myQRid)); } catch (e) {}
+      try { await window.fb.remove(window.fb.ref(fbDb, 'presence/' + state.myQRid)); } catch (e) {}
+    }
+    state.currentGroup = null;
+    state.groupMembers = {};
+    state.pins = {};
+    saveState();
+    subscribeCurrentGroup();  // tears down all subs
+    render(mainEl);
+  }
+
+  // Show host's QR + code in a modal so others can scan to join.
+  async function onShowInvite() {
+    const code = formatId(state.myQRid);
+    const shareUrl = `https://myraver.life/?friend=${state.myQRid}`;
+    const qrSvg = renderQRSvg(shareUrl);
+    await showModal({
+      message: `
+        <div style="text-align:center;">
+          <div style="width:140px;height:140px;background:#fff;border-radius:10px;padding:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,0.22);">${qrSvg}</div>
+          <div style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;letter-spacing:2px;margin:6px 0;">${code}</div>
+          <p style="font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.45;">Friends scan this QR or paste the code to join your group.</p>
+        </div>
+      `,
+      primaryLabel: 'Done',
+      primaryOnly: true,
     });
   }
 
@@ -452,11 +852,28 @@
     .ff-modal {
       background: var(--bg); border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 18px 18px 14px;
+      padding: 22px 44px 14px 18px;
       width: 100%; max-width: 360px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       animation: ffModalIn 0.16s cubic-bezier(0.2, 0.8, 0.4, 1);
+      position: relative;
     }
+    .ff-modal-x {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 18px; line-height: 1; font-weight: 400;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .ff-modal-x:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+    .ff-modal-x:active { transform: scale(0.92); }
+    .ff-pin-modal { padding-right: 46px; padding-top: 18px; }
     @keyframes ffModalIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0);   }
@@ -480,19 +897,26 @@
       display: flex; gap: 8px; justify-content: flex-end;
     }
     .ff-modal-btn {
-      padding: 8px 16px; border-radius: 8px;
-      font-size: 14px; font-weight: 600;
-      border: 1px solid var(--border);
-      background: var(--surface); color: var(--text);
+      padding: 8px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.2px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: transparent; color: var(--text);
       cursor: pointer;
+      transition: border-color 0.12s ease, color 0.12s ease, filter 0.12s ease;
     }
+    .ff-modal-btn:hover { border-color: rgba(255,255,255,0.4); }
+    .ff-modal-btn:active { transform: scale(0.97); }
     .ff-modal-btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      border-color: transparent; color: #fff;
+      border-color: rgba(118, 224, 192, 0.5);
+      color: #76e0c0;
     }
+    .ff-modal-btn-primary:hover { border-color: #76e0c0; filter: brightness(1.1); }
     .ff-modal-btn-danger {
-      background: #c0392b; border-color: transparent; color: #fff;
+      border-color: rgba(255, 126, 181, 0.5);
+      color: #ff7eb5;
     }
+    .ff-modal-btn-danger:hover { border-color: #ff7eb5; filter: brightness(1.1); }
 
     /* ── Camera scanner (in-app modal) ── */
     .ff-scan-modal { padding: 14px 14px 12px; }
@@ -539,6 +963,180 @@
       font-size: 13.5px; font-weight: 600;
       cursor: pointer;
     }
+
+    /* ── v210: Idle state ── */
+    .ff-idle { text-align: center; padding-top: 60px; }
+    .ff-idle-title {
+      font-size: 22px; font-weight: 700; color: var(--text);
+      margin: 0 0 6px;
+    }
+    .ff-idle-sub {
+      font-size: 14px; color: var(--muted);
+      margin: 0 0 28px;
+    }
+    .ff-idle-actions {
+      display: flex; flex-direction: column; gap: 12px;
+      max-width: 320px; margin: 0 auto;
+    }
+    .ff-bigbtn {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      transition: transform 0.08s ease, border-color 0.12s ease, filter 0.12s ease;
+    }
+    .ff-bigbtn:hover { border-color: rgba(255,255,255,0.18); }
+    .ff-bigbtn:active { transform: scale(0.98); }
+    .ff-bigbtn-pink {
+      border-color: rgba(255, 126, 181, 0.35);
+    }
+    .ff-bigbtn-pink .ff-bigbtn-title {
+      color: #ff7eb5;
+      letter-spacing: 0.3px;
+    }
+    .ff-bigbtn-teal {
+      border-color: rgba(118, 224, 192, 0.35);
+    }
+    .ff-bigbtn-teal .ff-bigbtn-title {
+      color: #76e0c0;
+      letter-spacing: 0.3px;
+    }
+    .ff-bigbtn-title {
+      font-size: 16px; font-weight: 700;
+    }
+    .ff-bigbtn-sub {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+
+    /* ── v210: In-group state ── */
+    .ff-group-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .ff-group-title { flex: 1; min-width: 0; }
+    .ff-group-count {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      letter-spacing: 0.2px;
+    }
+    .ff-group-count-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ff-mapbtn {
+      border-color: rgba(118, 224, 192, 0.5);
+      background: transparent;
+      color: #76e0c0;
+    }
+    .ff-mapbtn:hover {
+      border-color: #76e0c0;
+      filter: brightness(1.12);
+    }
+    .ff-mapbtn, .ff-invite-btn {
+      height: 30px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      border: 1px solid;
+      transition: border-color 0.12s ease, filter 0.12s ease, color 0.12s ease;
+    }
+    .ff-mapbtn:active, .ff-invite-btn:active { transform: scale(0.96); }
+    .ff-invite-btn {
+      border-color: rgba(255, 126, 181, 0.5);
+      background: transparent;
+      color: #ff7eb5;
+    }
+    .ff-invite-btn:hover {
+      border-color: #ff7eb5;
+      filter: brightness(1.12);
+    }
+    .ff-status-row {
+      text-align: center; margin: 0 0 8px;
+    }
+    .ff-empty-host {
+      text-align: center;
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6;
+      padding: 24px 12px;
+      margin: 0;
+    }
+    .ff-empty-host b { color: var(--text); }
+
+    /* ── Pins section ── */
+    .ff-pins-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px 6px;
+      margin-bottom: 10px;
+    }
+    .ff-pins-title {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted);
+      display: flex; align-items: baseline; gap: 8px;
+      margin: 0 0 6px;
+    }
+    .ff-pins-count {
+      font-size: 13px; font-weight: 800; color: var(--text);
+    }
+    .ff-pin-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+    }
+    .ff-pin-row:last-child { border-bottom: 0; }
+    .ff-pin-msg {
+      font-size: 11.5px; color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ff-pins-empty {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 10px 0 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .ff-pins-empty:hover { color: var(--text); }
+    .ff-tag {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 3px;
+      letter-spacing: 0;
+    }
+    .ff-leave-btn {
+      width: 100%; margin-top: 14px;
+      padding: 10px;
+      font-size: 13px;
+    }
   `;
   document.head.appendChild(style);
 
@@ -566,6 +1164,15 @@
       backdrop.className = 'ff-modal-backdrop';
       const modal = document.createElement('div');
       modal.className = 'ff-modal';
+
+      // Always-available X close (top-right). Dismisses with null (cancel).
+      const closeX = document.createElement('button');
+      closeX.className = 'ff-modal-x';
+      closeX.type = 'button';
+      closeX.setAttribute('aria-label', 'Close');
+      closeX.textContent = '×';
+      closeX.onclick = () => { backdrop.remove(); resolve(null); };
+      modal.appendChild(closeX);
 
       const msg = document.createElement('div');
       msg.className = 'ff-modal-msg';
@@ -666,6 +1273,7 @@
   function freshnessLabel(ts) {
     if (!ts) return { text: 'waiting for first sync', cls: 'ff-fresh-grey' };
     const ago = Date.now() - ts;
+    if (ago < 0) return { text: 'last seen just now', cls: 'ff-fresh-green' };
     const m = Math.floor(ago / 60000);
     if (m < 1) return { text: 'last seen just now', cls: 'ff-fresh-green' };
     if (m < 2) return { text: 'last seen 1 min ago', cls: 'ff-fresh-green' };
@@ -673,7 +1281,9 @@
     if (m < 60) return { text: 'last seen ' + m + ' min ago', cls: 'ff-fresh-grey' };
     const h = Math.floor(m / 60);
     if (h < 24) return { text: 'last seen ' + h + (h === 1 ? ' hr' : ' hrs') + ' ago', cls: 'ff-fresh-grey' };
-    return { text: 'last seen ' + Math.floor(h / 24) + 'd ago', cls: 'ff-fresh-grey' };
+    const d = Math.floor(h / 24);
+    if (d <= 7) return { text: 'last seen ' + d + 'd ago', cls: 'ff-fresh-grey' };
+    return { text: 'no recent location', cls: 'ff-fresh-grey' };
   }
   // Distance helpers — kept here so findfriend.js doesn't depend on
   // index.html's scope. Tiny, copied from old friends branch.
@@ -696,10 +1306,19 @@
   // (render → onValue handler → maybeRerender → render → ... is impossible
   // because rendering doesn't trigger onValue events; data flows one-way
   // RTDB → handler → friendData → render).
+  // Coalesce rapid maybeRerender calls into one render per animation frame
+  // so the DOM isn't rewritten faster than the user can click.
+  let _renderScheduled = false;
   function maybeRerender() {
-    if (activeMainEl && activeMainEl.isConnected && activeMainEl.querySelector('.ff-page')) {
-      render(activeMainEl);
-    }
+    if (_renderScheduled) return;
+    if (!activeMainEl || !activeMainEl.isConnected) return;
+    _renderScheduled = true;
+    requestAnimationFrame(() => {
+      _renderScheduled = false;
+      if (activeMainEl && activeMainEl.isConnected && activeMainEl.querySelector('.ff-page')) {
+        render(activeMainEl);
+      }
+    });
   }
   // When user GPS resolves (from index.html's locateUser), rerender so
   // the friends list can show "X ft from you".
@@ -710,107 +1329,165 @@
 
   function render(mainEl) {
     activeMainEl = mainEl;
-    const code = formatId(state.myQRid);
 
-    // F.7: status pill labels.
-    const statusLabel = ({
-      ok: 'syncing', connecting: 'connecting...', bad: 'sync offline', idle: '',
-    })[firebaseStatus] || '';
-    const statusCls = ({
-      ok: 'ok', connecting: 'idle', bad: 'bad', idle: 'idle',
-    })[firebaseStatus] || 'idle';
+    // Boot Firebase + triggers regardless of state. Idempotent.
+    tryInitFirebase();
+    tryAuth();
+    attachPublishTriggers();
 
-    let followingHTML;
-    if (state.following.length === 0) {
-      followingHTML = `<p class="ff-following-empty">No one yet. Scan a friend's code to add them.</p>`;
-    } else {
-      const userPos = window._lastUserPos;
-      followingHTML = state.following.map((f, i) => {
-        const displayName = f.name || f.initial || '?';
-        const initial = f.initial || deriveInitial(displayName);
-        // F.7: freshness label from RTDB data (or "waiting for first sync").
-        const data = friendData[f.qrid] || {};
-        const fresh = freshnessLabel(data.ts);
-        // online === false means presence sub explicitly told us they're offline.
-        // undefined means we haven't received presence yet — assume online optimistically.
-        const offline = data.online === false;
-        const offlinePrefix = offline ? 'offline · ' : '';
-        // Distance from user (only if both points known).
-        let distLine = '';
-        if (userPos && data.lat != null) {
-          const distM = haversineMeters(userPos.lat, userPos.lng, data.lat, data.lng);
-          distLine = ' · ' + formatImperialDistance(distM) + ' from you';
-        }
-        return `
-          <div class="ff-friend-row${offline ? ' ff-offline' : ''}">
-            <div class="ff-friend-dot" style="background:${colorForInitial(initial)}">${escapeHTML(initial)}</div>
-            <div class="ff-friend-meta">
-              <div class="ff-friend-name">${escapeHTML(displayName)}</div>
-              <div class="ff-friend-sub">${escapeHTML(offlinePrefix + fresh.text + distLine)}</div>
-            </div>
-            <div class="ff-friend-x" data-remove="${i}" aria-label="Remove">✕</div>
+    // ── IDLE state: not in any group ──
+    if (!state.currentGroup) {
+      mainEl.innerHTML = `
+        <div class="ff-page ff-idle">
+          <h2 class="ff-idle-title">Find your crew</h2>
+          <p class="ff-idle-sub">Connect with friends at the festival.</p>
+          <div class="ff-idle-actions">
+            <button class="ff-bigbtn ff-bigbtn-pink" id="ff-host">
+              <span class="ff-bigbtn-title">Host a group</span>
+              <span class="ff-bigbtn-sub">Friends scan your QR to join your group</span>
+            </button>
+            <button class="ff-bigbtn ff-bigbtn-teal" id="ff-join">
+              <span class="ff-bigbtn-title">Join a group</span>
+              <span class="ff-bigbtn-sub">Scan a friend's QR to join their group</span>
+            </button>
           </div>
-        `;
-      }).join('');
+        </div>
+      `;
+      mainEl.querySelector('#ff-host').onclick = () => hostNewGroup(mainEl);
+      mainEl.querySelector('#ff-join').onclick = () => onScan(mainEl);
+      return;
     }
 
-    const shareUrl = `https://myraver.life/?friend=${state.myQRid}`;
-    const qrSvg = renderQRSvg(shareUrl);
-    mainEl.innerHTML = `
-      <div class="ff-page">
-        <div class="ff-qr-card">
-          <div class="ff-qr">${qrSvg}</div>
-          <div class="ff-code">${code}</div>
-          <p class="ff-hint">Friends scan the QR or paste this code to add you.</p>
-          ${statusLabel ? `<span class="ff-status ${statusCls}">● ${statusLabel}</span>` : ''}
+    // ── IN-GROUP state: unified list — host first, others alphabetical ──
+    const isHost = state.currentGroup === state.myQRid;
+    const memberQrids = Object.keys(state.groupMembers || {});
+    const totalMembers = 1 + memberQrids.length;
+    const countLabel = `${totalMembers} member${totalMembers === 1 ? '' : 's'}`;
+
+    // Build the unified list including self.
+    const allMembers = [{
+      qrid: state.myQRid,
+      name: state.myName || '?',
+      initial: deriveInitial(state.myName || '?'),
+      isHost: isHost,
+      isSelf: true,
+    }];
+    memberQrids.forEach(qrid => {
+      const m = state.groupMembers[qrid];
+      allMembers.push({
+        qrid,
+        name: m.name,
+        initial: m.initial,
+        isHost: m.isHost,
+        isSelf: false,
+      });
+    });
+    // Host first, then alphabetical by name.
+    allMembers.sort((a, b) => {
+      if (a.isHost !== b.isHost) return a.isHost ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    const userPos = window._lastUserPos;
+    const memberRows = allMembers.map(m => {
+      const data = m.isSelf ? null : (friendData[m.qrid] || {});
+      const offline = !m.isSelf && data && data.online === false;
+      const offlinePrefix = offline ? 'offline · ' : '';
+      const fresh = m.isSelf ? null : freshnessLabel(data ? data.ts : null);
+      let distLine = '';
+      if (!m.isSelf && userPos && data && data.lat != null) {
+        const distM = haversineMeters(userPos.lat, userPos.lng, data.lat, data.lng);
+        distLine = ' · ' + formatImperialDistance(distM);
+      }
+      // One tag at a time: "you" beats "host" (the [+ Invite] button already
+      // signals you're the host; no need to label yourself in the list too).
+      const tag = m.isSelf ? 'you' : (m.isHost ? 'host' : '');
+      const tagsHtml = tag ? `<span class="ff-tag">(${tag})</span>` : '';
+      const subText = m.isSelf ? '' : (offlinePrefix + fresh.text + distLine);
+      return `
+        <div class="ff-friend-row${offline ? ' ff-offline' : ''}${m.isSelf ? ' ff-friend-self' : ''}">
+          <div class="ff-friend-dot" style="background:${colorForInitial(m.initial)}">${escapeHTML(m.initial)}</div>
+          <div class="ff-friend-meta">
+            <div class="ff-friend-name">${escapeHTML(m.name)} ${tagsHtml}</div>
+            ${subText ? `<div class="ff-friend-sub">${escapeHTML(subText)}</div>` : ''}
+          </div>
         </div>
-        <div class="ff-actions">
-          <button class="ff-btn ff-btn-primary" id="ff-scan">Scan</button>
-          <button class="ff-btn" id="ff-share">Share</button>
-          <button class="ff-btn ff-btn-secondary" id="ff-replace">New</button>
-        </div>
-        <p class="ff-explainer">
-          Anyone with your code can see your <b>last-seen</b> location, not
-          live tracking. Even a brief window of weak signal is enough to update.
-        </p>
-        <div class="ff-following">
-          <h4>Following<span class="count">${state.following.length}</span></h4>
-          ${followingHTML}
-        </div>
+      `;
+    }).join('');
+
+    // Pins section — sorted with mine first, then by ts (newest first).
+    const pinEntries = Object.keys(state.pins).map(qrid => ({
+      qrid,
+      isMine: qrid === state.myQRid,
+      ...state.pins[qrid],
+    })).sort((a, b) => {
+      if (a.isMine !== b.isMine) return a.isMine ? -1 : 1;
+      return (b.ts || 0) - (a.ts || 0);
+    });
+    const pinsBody = pinEntries.length === 0
+      ? `<a class="ff-pins-empty" id="ff-pins-empty">No pins yet. Drop one on the Map →</a>`
+      : pinEntries.map(p => {
+          const m = p.isMine
+            ? { name: state.myName || '?', initial: deriveInitial(state.myName || '?') }
+            : (state.groupMembers[p.qrid] || { name: p.by || '?', initial: deriveInitial(p.by || '?') });
+          return `
+            <div class="ff-pin-row" data-pinqrid="${escapeHTML(p.qrid)}">
+              <div class="ff-friend-dot" style="background:${colorForInitial(m.initial)}">${escapeHTML(m.initial)}</div>
+              <div class="ff-friend-meta">
+                <div class="ff-friend-name">${escapeHTML(m.name)}${p.isMine ? ' <span class="ff-tag">(you)</span>' : ''}</div>
+                <div class="ff-pin-msg">${escapeHTML(p.message)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+    const pinsHTML = `
+      <div class="ff-pins-section">
+        <div class="ff-pins-title">📍 Pins${pinEntries.length > 0 ? `<span class="ff-pins-count">${pinEntries.length}</span>` : ''}</div>
+        ${pinsBody}
       </div>
     `;
 
-    mainEl.querySelector('#ff-scan').onclick = () => onScan(mainEl);
-    mainEl.querySelector('#ff-share').onclick = onShare;
-    mainEl.querySelector('#ff-replace').onclick = onReplace(mainEl);
+    mainEl.innerHTML = `
+      <div class="ff-page">
+        <div class="ff-group-header">
+          <div class="ff-group-title">
+            <button class="ff-mapbtn" id="ff-show-map">View map</button>
+          </div>
+          ${isHost ? `<button class="ff-invite-btn" id="ff-invite" aria-label="Invite people">+ Invite</button>` : ''}
+        </div>
+        ${pinsHTML}
+        <div class="ff-following">
+          <div class="ff-pins-title">👯 Crew<span class="ff-pins-count">${totalMembers}</span></div>
+          ${memberRows}
+        </div>
+        <button class="ff-btn ff-btn-secondary ff-leave-btn" id="ff-leave">Leave group</button>
+      </div>
+    `;
 
-    // F.2-F.10: init -> auth -> publish loop -> subscribe to all friends.
-    // All idempotent, all fire-and-forget. No await anywhere up the call stack.
-    tryInitFirebase();
-    tryAuth();
-    startPublishLoop();        // immediate publish + every 30s (idempotent)
-    attachPublishTriggers();   // republish on online + visibility (idempotent)
-    trySubscribeAllFriends();
-    mainEl.querySelectorAll('[data-remove]').forEach(el => {
-      el.onclick = async (e) => {
-        e.stopPropagation();
-        const i = +el.dataset.remove;
-        const f = state.following[i];
-        const displayName = f.name || f.initial || 'this friend';
-        const ok = await ffConfirm(
-          `Stop following <b>${escapeHTML(displayName)}</b>?`,
-          { primaryLabel: 'Remove', danger: true }
-        );
-        if (!ok) return;
-        // F.11: drop cached location data for the unfollowed friend.
-        if (fbSubs[f.qrid]) { try { fbSubs[f.qrid](); } catch (e) {} delete fbSubs[f.qrid]; }
-        delete friendData[f.qrid];
-        persistFriendData();
-        state.following.splice(i, 1);
-        saveState();
-        render(mainEl);
-      };
+    if (isHost) {
+      const inv = mainEl.querySelector('#ff-invite');
+      if (inv) inv.onclick = () => onShowInvite();
+    }
+    const mapLink = mainEl.querySelector('#ff-show-map');
+    const goToMap = (e) => {
+      if (e) e.preventDefault();
+      const mapTab = document.querySelector('button[data-tab="map"]');
+      if (mapTab) mapTab.click();
+    };
+    if (mapLink) mapLink.onclick = goToMap;
+    const emptyPins = mainEl.querySelector('#ff-pins-empty');
+    if (emptyPins) emptyPins.onclick = goToMap;
+    // Tapping a pin row jumps to Map and highlights — for now just go to map.
+    mainEl.querySelectorAll('.ff-pin-row').forEach(row => {
+      row.onclick = goToMap;
     });
+    mainEl.querySelector('#ff-leave').onclick = () => leaveOrEndGroup(mainEl);
+
+    // Start publishing (idempotent). Do NOT call subscribeCurrentGroup here —
+    // its set() write would trigger the onValue handler, which calls
+    // maybeRerender → render → subscribeCurrentGroup → loop. Subscription
+    // is owned by state transitions (host/join/leave) + tryAuth success.
+    startPublishLoop();
   }
 
   // ── Scan flow ─────────────────────────────────────────────────────────
@@ -828,19 +1505,6 @@
     const cleaned = s.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (cleaned.length >= ID_LENGTH_MIN && cleaned.length <= ID_LENGTH_MAX) return cleaned;
     return null;
-  }
-
-  async function addFriendByQrid(mainEl, qrid) {
-    if (qrid === state.myQRid) { await ffAlert(`That's your own code.`); return; }
-    if (state.following.some(f => f.qrid === qrid)) { await ffAlert('Already following them.'); return; }
-    const name = await ffPrompt(
-      `Add this friend?<br><span style="font-family:ui-monospace,monospace;font-size:13px;color:var(--muted)">${formatId(qrid)}</span>`,
-      { placeholder: 'Their name (e.g., John Summit)', primaryLabel: 'Add' }
-    );
-    if (!name) return;
-    state.following.push({ qrid, name, initial: deriveInitial(name) });
-    saveState();
-    render(mainEl);
   }
 
   // In-app camera scanner modal: opens back camera, scans QR live,
@@ -890,7 +1554,7 @@
         const qrid = extractQrid(text);
         if (!qrid) return;  // not our format — keep scanning
         close();
-        await addFriendByQrid(mainEl, qrid);
+        await joinGroupFlow(mainEl, qrid);
       }, {
         preferredCamera: 'environment',
         highlightScanRegion: false,
@@ -911,13 +1575,13 @@
 
   async function pasteFlow(mainEl) {
     const raw = await ffPrompt(
-      'Paste your friend\'s code:',
-      { placeholder: 'e.g., K3FQ72', primaryLabel: 'Add' }
+      `Paste the group's code:`,
+      { placeholder: 'e.g., K3FQ72', primaryLabel: 'Continue' }
     );
     if (!raw) return;
     const qrid = extractQrid(raw);
     if (!qrid) { await ffAlert(`That doesn't look like a valid code.`); return; }
-    addFriendByQrid(mainEl, qrid);
+    joinGroupFlow(mainEl, qrid);
   }
 
   // ── Share ─────────────────────────────────────────────────────────────
@@ -936,51 +1600,49 @@
     }
   }
 
-  // ── Replace QR id ─────────────────────────────────────────────────────
-  function onReplace(mainEl) {
-    return async () => {
-      const ok = await ffConfirm(
-        `Generate a new code? Friends with your old code won't see you anymore.`,
-        { primaryLabel: 'New code', danger: true }
-      );
-      if (!ok) return;
-      const oldQRid = state.myQRid;
-      state.myQRid = genQRid();
-      saveState();
-      // Best-effort: clear the old /loc entry so stragglers stop seeing
-      // a stale "last seen" position. Silent on failure (user can just
-      // wait for it to age out via freshness label).
-      if (fbDb && fbAuthed && window.fb) {
-        try { window.fb.remove(window.fb.ref(fbDb, 'loc/' + oldQRid)).catch(() => {}); } catch (e) {}
-      }
-      // Immediately publish the new id so anyone re-scanning sees us right away.
-      if (fbAuthed) publishMyLocation();
-      render(mainEl);
-    };
-  }
   // ── Public API ────────────────────────────────────────────────────────
   window.findFriends = {
     render,
     getMyQRid() { return state.myQRid; },
-    getFollowing() { return state.following.slice(); },
-    // F.8: map needs these to render friend pins.
+    // Returns current group members in the same shape index.html expects.
+    getFollowing() {
+      return Object.keys(state.groupMembers || {}).map(qrid => ({
+        qrid,
+        name: state.groupMembers[qrid].name,
+        initial: state.groupMembers[qrid].initial,
+      }));
+    },
     getFriendData(qrid) {
       const d = friendData[qrid];
-      if (!d) return null;
-      return { lat: d.lat, lng: d.lng, ts: d.ts };
+      if (!d || typeof d.lat !== 'number') return null;
+      return { lat: d.lat, lng: d.lng, ts: d.ts, online: d.online };
     },
+    // Pins (meetings) — read + write API for the Map tab.
+    getPins() {
+      // Returns array of { qrid, name, initial, color, lat, lng, message, ts, isMine }
+      return Object.keys(state.pins).map(qrid => {
+        const p = state.pins[qrid];
+        const isMine = qrid === state.myQRid;
+        const m = isMine ? null : state.groupMembers[qrid];
+        const name = isMine ? (state.myName || '?') : (m ? m.name : (p.by || '?'));
+        const initial = deriveInitial(name);
+        return {
+          qrid, name, initial, color: colorForInitial(initial),
+          lat: p.lat, lng: p.lng, message: p.message, ts: p.ts,
+          isMine,
+        };
+      });
+    },
+    getMyPin: () => {
+      const p = state.pins[state.myQRid];
+      return p ? { ...p, qrid: state.myQRid } : null;
+    },
+    dropMyPin,
+    removeMyPin,
+    updateMyPinPosition,
+    inGroup: () => !!state.currentGroup,
     colorForInitial,
-    freshnessLabel,  // F.9: bottom sheet uses same format as Friends tab
-    addFriendFromUrl(qrid, initial) {
-      const cleaned = String(qrid).toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (cleaned.length < ID_LENGTH_MIN || cleaned.length > ID_LENGTH_MAX) return false;
-      if (cleaned === state.myQRid) return false;
-      if (state.following.some(f => f.qrid === cleaned)) return false;
-      const init = (initial || '?').slice(0, 2).toUpperCase();
-      state.following.push({ qrid: cleaned, name: initial || '?', initial: init });
-      saveState();
-      return true;
-    },
+    freshnessLabel,
     alert: ffAlert,
     confirm: ffConfirm,
     prompt: ffPrompt,
