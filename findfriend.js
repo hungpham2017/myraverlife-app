@@ -215,45 +215,79 @@
     if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
     _connWatchAttached = true;
     window.fb.onValue(window.fb.ref(fbDb, '.info/connected'), (snap) => {
-      firebaseStatus = snap.val() === true ? 'ok' : 'bad';
+      const connected = snap.val() === true;
+      firebaseStatus = connected ? 'ok' : 'bad';
       maybeRerender();
+      if (connected) {
+        // Re-arm presence on every reconnect — Firebase clears onDisconnect
+        // handlers when the socket dies, so they must be re-registered.
+        const presRef = window.fb.ref(fbDb, 'presence/' + state.myQRid);
+        window.fb.onDisconnect(presRef)
+          .set({ online: false, lastOffline: window.fb.serverTimestamp() })
+          .then(() => window.fb.set(presRef, { online: true }))
+          .catch((e) => console.warn('[fb] presence setup failed:', e));
+      }
     });
     console.log('[fb] watching .info/connected');
   }
   // F.6: subscribe to ALL friends. Idempotent (skip already-subscribed),
   // and clean up subs for friends the user has removed. No UI changes —
   // F.7 wires data into the visible UI.
-  const fbSubs = {}; // qrid → unsubscribe fn
+  const fbSubs = {}; // qrid → unsubscribe fn (loc)
+  const fbPresenceSubs = {}; // qrid → unsubscribe fn (presence)
   function trySubscribeAllFriends() {
     if (!fbAuthed || !fbApp || !window.fb) return;
     if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
     // Subscribe to any friend we don't already have a sub for.
     state.following.forEach(f => {
-      if (fbSubs[f.qrid]) return;
-      const path = 'loc/' + f.qrid;
-      const r = window.fb.ref(fbDb, path);
-      const handler = (snap) => {
-        const v = snap.val();
-        console.log('[fb] data from /' + path + ':', v);
-        if (v && typeof v.lat === 'number' && typeof v.lng === 'number') {
-          friendData[f.qrid] = { lat: v.lat, lng: v.lng, ts: v.ts || Date.now() };
-          persistFriendData();  // F.11: cache for next refresh / offline
-          maybeRerender();  // F.7: paint freshness label
-          // F.8: notify map (or any other consumer) that friend's location updated.
-          window.dispatchEvent(new CustomEvent('myraver-friend-update', {
-            detail: { qrid: f.qrid, lat: v.lat, lng: v.lng, ts: v.ts },
-          }));
-        }
-      };
-      window.fb.onValue(r, handler);
-      fbSubs[f.qrid] = () => window.fb.off(r, 'value', handler);
-      console.log('[fb] subscribed to /' + path);
+      if (!fbSubs[f.qrid]) {
+        const path = 'loc/' + f.qrid;
+        const r = window.fb.ref(fbDb, path);
+        const handler = (snap) => {
+          const v = snap.val();
+          console.log('[fb] data from /' + path + ':', v);
+          if (v && typeof v.lat === 'number' && typeof v.lng === 'number') {
+            // Merge instead of overwrite so presence-side fields (online) survive.
+            friendData[f.qrid] = friendData[f.qrid] || {};
+            friendData[f.qrid].lat = v.lat;
+            friendData[f.qrid].lng = v.lng;
+            friendData[f.qrid].ts = v.ts || Date.now();
+            persistFriendData();  // F.11: cache for next refresh / offline
+            maybeRerender();  // F.7: paint freshness label
+            // F.8: notify map (or any other consumer) that friend's location updated.
+            window.dispatchEvent(new CustomEvent('myraver-friend-update', {
+              detail: { qrid: f.qrid, lat: v.lat, lng: v.lng, ts: v.ts },
+            }));
+          }
+        };
+        window.fb.onValue(r, handler);
+        fbSubs[f.qrid] = () => window.fb.off(r, 'value', handler);
+        console.log('[fb] subscribed to /' + path);
+      }
+      // Presence sub. Lives in friendData[qrid].online (in-memory only,
+      // never persisted — on cold reload we don't know friend's state until
+      // the first presence event fires).
+      if (!fbPresenceSubs[f.qrid]) {
+        const ppath = 'presence/' + f.qrid;
+        const pr = window.fb.ref(fbDb, ppath);
+        const phandler = (snap) => {
+          const v = snap.val();
+          friendData[f.qrid] = friendData[f.qrid] || {};
+          friendData[f.qrid].online = !!(v && v.online === true);
+          maybeRerender();
+        };
+        window.fb.onValue(pr, phandler);
+        fbPresenceSubs[f.qrid] = () => window.fb.off(pr, 'value', phandler);
+        console.log('[fb] subscribed to /' + ppath);
+      }
     });
     // Drop subs for friends no longer in the list.
     Object.keys(fbSubs).forEach(qrid => {
       if (!state.following.some(f => f.qrid === qrid)) {
         try { fbSubs[qrid](); } catch (e) {}
         delete fbSubs[qrid];
+        try { fbPresenceSubs[qrid] && fbPresenceSubs[qrid](); } catch (e) {}
+        delete fbPresenceSubs[qrid];
         console.log('[fb] unsubscribed /loc/' + qrid + ' (friend removed)');
       }
     });
@@ -368,6 +402,7 @@
       padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .ff-friend-row:last-child { border-bottom: 0; }
+    .ff-friend-row.ff-offline { opacity: 0.55; }
     .ff-friend-dot {
       width: 26px; height: 26px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -696,6 +731,10 @@
         // F.7: freshness label from RTDB data (or "waiting for first sync").
         const data = friendData[f.qrid] || {};
         const fresh = freshnessLabel(data.ts);
+        // online === false means presence sub explicitly told us they're offline.
+        // undefined means we haven't received presence yet — assume online optimistically.
+        const offline = data.online === false;
+        const offlinePrefix = offline ? 'offline · ' : '';
         // Distance from user (only if both points known).
         let distLine = '';
         if (userPos && data.lat != null) {
@@ -703,11 +742,11 @@
           distLine = ' · ' + formatImperialDistance(distM) + ' from you';
         }
         return `
-          <div class="ff-friend-row">
+          <div class="ff-friend-row${offline ? ' ff-offline' : ''}">
             <div class="ff-friend-dot" style="background:${colorForInitial(initial)}">${escapeHTML(initial)}</div>
             <div class="ff-friend-meta">
               <div class="ff-friend-name">${escapeHTML(displayName)}</div>
-              <div class="ff-friend-sub">${escapeHTML(fresh.text)}${escapeHTML(distLine)}</div>
+              <div class="ff-friend-sub">${escapeHTML(offlinePrefix + fresh.text + distLine)}</div>
             </div>
             <div class="ff-friend-x" data-remove="${i}" aria-label="Remove">✕</div>
           </div>

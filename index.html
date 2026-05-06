@@ -485,6 +485,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   .friend-pin.fresh {
     animation: friendPulse 2.5s ease-in-out infinite;
   }
+  .friend-pin.offline { opacity: 0.55; }
   @keyframes friendPulse {
     0%, 100% { transform: scale(var(--pin-scale, 1));                       }
     50%      { transform: scale(calc(var(--pin-scale, 1) * 1.15));          }
@@ -1581,7 +1582,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v206</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v207</p>
 </footer>
 
 <nav class="tabs">
@@ -2203,8 +2204,11 @@ window.dispatchEvent(new Event('firebase-ready'));
       const initial = (f.initial || (f.name || '?').slice(0, 2)).toUpperCase();
       const color = window.findFriends.colorForInitial(initial);
       const isFresh = data.ts && (Date.now() - data.ts) < 2 * 60 * 1000;
+      const isOnline = data.online !== false;
       const pin = document.createElement('div');
-      pin.className = 'friend-pin' + (isFresh ? ' fresh' : '');
+      pin.className = 'friend-pin'
+        + (isFresh && isOnline ? ' fresh' : '')
+        + (!isOnline ? ' offline' : '');
       pin.style.left = Math.max(0, Math.min(100, p.left)) + '%';
       pin.style.top  = Math.max(0, Math.min(100, p.top))  + '%';
       pin.style.background = color;
@@ -2232,6 +2236,8 @@ window.dispatchEvent(new Event('firebase-ready'));
     const fresh = window.findFriends.freshnessLabel
       ? window.findFriends.freshnessLabel(data.ts)
       : { text: 'last seen', cls: 'ff-fresh-grey' };
+    const offline = data.online === false;
+    const offlinePrefix = offline ? 'offline · ' : '';
     let distLine = '';
     if (window._lastUserPos
         && typeof data.lat === 'number' && typeof data.lng === 'number') {
@@ -2240,7 +2246,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     }
 
     const safeName = String(name).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
-    const safeText = String(fresh.text + distLine).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const safeText = String(offlinePrefix + fresh.text + distLine).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
     sheet.innerHTML = `
       <div class="friend-sheet-init" style="background:${color}">${initial}</div>
       <div class="friend-sheet-meta">
