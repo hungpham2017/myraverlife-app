@@ -60,6 +60,7 @@
   if (state.currentGroup === undefined) state.currentGroup = null;
   if (!state.groupMembers || typeof state.groupMembers !== 'object') state.groupMembers = {};
   if (!state.pins || typeof state.pins !== 'object') state.pins = {};
+  if (typeof state._myPinActionTs !== 'number') state._myPinActionTs = 0;
   if (state.following) delete state.following;
   saveState();
 
@@ -264,7 +265,7 @@
             }
           };
           window.fb.onValue(hostRef, validateOnce);
-          setTimeout(() => { if (!resolved) { try { window.fb.off(hostRef, 'value', validateOnce); } catch (e) {} } }, 3000);
+          setTimeout(() => { if (!resolved) { try { window.fb.off(hostRef, 'value', validateOnce); } catch (e) {} } }, 6000);
         }
       }
     });
@@ -293,8 +294,9 @@
   const memberPresenceSubs = {};  // qrid → unsubscribe fn (presence)
   // Tracks when I last wrote/deleted my own pin locally. Used to ignore
   // older /meetings snapshots that would otherwise stomp my optimistic
-  // update with stale server data during the brief sync window.
-  let _myPinActionTs = 0;
+  // update with stale server data during the brief sync window. Persisted
+  // to localStorage so it survives tab kill / reload.
+  let _myPinActionTs = state._myPinActionTs || 0;
   // Track which group's host we've confirmed exists. Module-level so it
   // survives subscribeCurrentGroup re-calls in the same session — without
   // this, a re-subscribe after the host left can write us back into a
@@ -482,8 +484,9 @@
     const data = { lat, lng, message: cleanMsg, ts: Date.now(), by: state.myName || '?' };
 
     // 1. Optimistic local — UI updates instantly. Tracks ts so older
-    // server snapshots can't stomp this.
+    // server snapshots can't stomp this. Persist ts to survive reload.
     _myPinActionTs = data.ts;
+    state._myPinActionTs = _myPinActionTs;
     state.pins[state.myQRid] = data;
     saveState();
     maybeRerender();
@@ -501,8 +504,9 @@
     if (!state.currentGroup) { console.warn('[pin] cannot remove: no current group'); return; }
 
     // 1. Optimistic local — pin disappears from UI instantly. Stamp the
-    // action so older snapshots can't restore the deleted pin.
+    // action so older snapshots can't restore the deleted pin. Persist ts.
     _myPinActionTs = Date.now();
+    state._myPinActionTs = _myPinActionTs;
     delete state.pins[state.myQRid];
     saveState();
     maybeRerender();
@@ -592,7 +596,7 @@
           resolved = true;
           try { window.fb.off(hostRef, 'value', handler); } catch (e) {}
           resolve(false);
-        }, 3000);
+        }, 6000);  // generous on weak festival signal
       });
       if (!hostExists) {
         await ffAlert(`Group not found.<br>The code might be wrong or the host has ended the group.`);
