@@ -16,7 +16,7 @@
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v214';
+const SHELL_VERSION  = 'myraverlife-shell-v215';
 const IMAGES_VERSION = 'myraverlife-images-v1';
 
 const APP_SHELL = [
@@ -38,6 +38,7 @@ const APP_SHELL = [
   './assets/schedule-all.png',
   './assets/avatars-sprite.jpg',
   './assets/avatars-coords.json',
+  './assets/map2026.png',
 ];
 
 self.addEventListener('install', (event) => {

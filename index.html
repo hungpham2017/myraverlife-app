@@ -1767,7 +1767,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v214</p>
+  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · v215</p>
 </footer>
 
 <nav class="tabs">
@@ -2113,19 +2113,19 @@ window.dispatchEvent(new Event('firebase-ready'));
   //   • mapPct values: re-eyeball where each anchor lands on the new
   //     image and update.
   const SPEEDWAY_ANCHORS = [
-    { name: 'Downtown EDC', mapPct: { left: 36.46, top: 54.37 }, gps: { lat: 36.272914,          lng: -115.011007          } },
-    { name: 'Gate C/D',     mapPct: { left:  9.30, top: 53.64 }, gps: { lat: 36.27498535179921,  lng: -115.01313780128011  } },
-    { name: 'Oval Top',     mapPct: { left: 41.84, top:  9.46 }, gps: { lat: 36.27481793053691,  lng: -115.00627038603729  } },
-    { name: 'Oval Bottom',  mapPct: { left: 42.07, top: 96.56 }, gps: { lat: 36.269574134943305, lng: -115.01424058659038  } },
-    { name: 'Oval East',    mapPct: { left: 73.07, top: 54.26 }, gps: { lat: 36.27065185384524,  lng: -115.00866203499909  } },
+    { name: 'Downtown EDC', mapPct: { left: 35.85, top: 54.97 }, gps: { lat: 36.272914,          lng: -115.011007          } },
+    { name: 'Gate C/D',     mapPct: { left:  8.34, top: 54.02 }, gps: { lat: 36.27498535179921,  lng: -115.01313780128011  } },
+    { name: 'Oval Top',     mapPct: { left: 40.89, top:  9.21 }, gps: { lat: 36.27481793053691,  lng: -115.00627038603729  } },
+    { name: 'Oval Bottom',  mapPct: { left: 41.04, top: 97.73 }, gps: { lat: 36.269574134943305, lng: -115.01424058659038  } },
+    { name: 'Oval East',    mapPct: { left: 72.80, top: 54.01 }, gps: { lat: 36.27065185384524,  lng: -115.00866203499909  } },
   ];
 
   // Festival map's pixel dimensions. Only used by the 2-anchor similarity
   // fallback to convert mapPct → isotropic pixels (so rotation is
   // well-defined). The ≥3-anchor affine path doesn't need them — it works
   // on (lat, lng) and (left%, top%) directly.
-  const MAP_IMG_W = 1080;
-  const MAP_IMG_H = 1350;
+  const MAP_IMG_W = 1196;
+  const MAP_IMG_H = 1500;
 
   // Convert real-world GPS to local meters (east, north) relative to a ref.
   function gpsToLocalMeters(lat, lng, refLat, refLng) {
@@ -2385,7 +2385,7 @@ window.dispatchEvent(new Event('firebase-ready'));
         <div class="map-status" id="mapStatus" aria-live="polite"></div>
       </div>
       <p class="map-note">
-        Loaded live from <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a> · currently the 2025 layout · auto-updates once Insomniac publishes the 2026 map.
+        2026 festival map · bundled with the app for full offline reliability. Source: <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a>
       </p>
     `;
 
@@ -3616,10 +3616,9 @@ window.dispatchEvent(new Event('firebase-ready'));
     });
   }
 
-  // Cross-origin festival map URL (only image we still hot-link from
-  // CloudFront — avatars are now bundled in assets/avatars-sprite.jpg
-  // via APP_SHELL for atomic 100% offline reliability).
-  const FESTIVAL_MAP_URL = 'https://d3vhc53cl8e8km.cloudfront.net/hello-staging/wp-content/uploads/sites/21/2025/05/13125821/edclv_2025_de_festival_map_1080x1350_r02_v01.png';
+  // Local festival map (2026). Bundled via APP_SHELL for atomic offline
+  // reliability — no more cross-origin CloudFront dependency.
+  const FESTIVAL_MAP_URL = './assets/map2026.png';
 
   // Pre-fetch the festival map via Cache API so the Map tab works offline
   // even if the user never opened it while online. The map is the only
