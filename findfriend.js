@@ -188,10 +188,15 @@
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const path = 'loc/' + state.myQRid;
+        // Defensive cap: if pos.timestamp is suspiciously stale (>5 min old),
+        // fall back to Date.now(). Protects against DevTools sensor overrides
+        // returning ancient timestamps and other browser quirks.
+        const fixAge = Date.now() - (pos.timestamp || 0);
+        const ts = (fixAge > 5 * 60 * 1000) ? Date.now() : (pos.timestamp || Date.now());
         window.fb.set(window.fb.ref(fbDb, path), {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-          ts: pos.timestamp || Date.now(),
+          ts,
         }).then(() => {
           console.log('[fb] published my location to /' + path);
         }).catch((e) => {
@@ -1028,12 +1033,22 @@
     /* ── v210: In-group state ── */
     .ff-group-header {
       display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      padding: 8px 0 4px;
       margin-bottom: 8px;
+      justify-content: flex-end;
     }
+    .ff-row-chev {
+      color: var(--muted);
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1;
+      margin-left: 6px;
+      flex-shrink: 0;
+      align-self: center;
+      opacity: 0.6;
+    }
+    .ff-friend-row:hover .ff-row-chev,
+    .ff-pin-row:hover .ff-row-chev { opacity: 1; color: var(--text); }
     .ff-group-title { flex: 1; min-width: 0; }
     .ff-group-count {
       font-size: 14px; font-weight: 700; color: var(--text);
@@ -1414,12 +1429,13 @@
       const tagsHtml = tag ? `<span class="ff-tag">(${tag})</span>` : '';
       const subText = m.isSelf ? '' : (offlinePrefix + fresh.text + distLine);
       return `
-        <div class="ff-friend-row${offline ? ' ff-offline' : ''}${m.isSelf ? ' ff-friend-self' : ''}">
+        <div class="ff-friend-row${offline ? ' ff-offline' : ''}${m.isSelf ? ' ff-friend-self' : ''}" data-memqrid="${escapeHTML(m.qrid)}">
           <div class="ff-friend-dot" style="background:${colorForInitial(m.initial)}">${escapeHTML(m.initial)}</div>
           <div class="ff-friend-meta">
             <div class="ff-friend-name">${escapeHTML(m.name)} ${tagsHtml}</div>
             ${subText ? `<div class="ff-friend-sub">${escapeHTML(subText)}</div>` : ''}
           </div>
+          <span class="ff-row-chev">›</span>
         </div>
       `;
     }).join('');
@@ -1446,6 +1462,7 @@
                 <div class="ff-friend-name">${escapeHTML(m.name)}${p.isMine ? ' <span class="ff-tag">(you)</span>' : ''}</div>
                 <div class="ff-pin-msg">${escapeHTML(p.message)}</div>
               </div>
+              <span class="ff-row-chev">›</span>
             </div>
           `;
         }).join('');
@@ -1458,12 +1475,7 @@
 
     mainEl.innerHTML = `
       <div class="ff-page">
-        <div class="ff-group-header">
-          <div class="ff-group-title">
-            <button class="ff-mapbtn" id="ff-show-map">View map</button>
-          </div>
-          ${isHost ? `<button class="ff-invite-btn" id="ff-invite" aria-label="Invite people">+ Invite</button>` : ''}
-        </div>
+        ${isHost ? `<div class="ff-group-header"><button class="ff-invite-btn" id="ff-invite" aria-label="Invite people">+ Invite</button></div>` : ''}
         ${pinsHTML}
         <div class="ff-following">
           <div class="ff-pins-title">👯 Crew<span class="ff-pins-count">${totalMembers}</span></div>
@@ -1488,6 +1500,12 @@
     if (emptyPins) emptyPins.onclick = goToMap;
     // Tapping a pin row jumps to Map and highlights — for now just go to map.
     mainEl.querySelectorAll('.ff-pin-row').forEach(row => {
+      row.onclick = goToMap;
+    });
+    // Same for member rows — tapping any crew member jumps to Map (so you
+    // can see where they are). Self row also goes — shows user's own pin.
+    mainEl.querySelectorAll('.ff-friend-row').forEach(row => {
+      row.style.cursor = 'pointer';
       row.onclick = goToMap;
     });
     mainEl.querySelector('#ff-leave').onclick = () => leaveOrEndGroup(mainEl);
