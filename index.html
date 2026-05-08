@@ -771,6 +771,57 @@ window.dispatchEvent(new Event('firebase-ready'));
     transform-origin: 50% 50%;
   }
 
+  /* DEBUG tile-mode toggle — tiny button at top-left below compass.
+     Off (default) = single 20 MP JPEG (current behavior, what users see).
+     On = 2x2 tile grid, each tile decoded at full 5 MP on iOS Safari. */
+  .map-tiles-toggle {
+    position: absolute;
+    top: 56px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(14, 16, 24, 0.55);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    z-index: 4;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .map-tiles-toggle.on {
+    color: #76e0c0;
+    border-color: rgba(118, 224, 192, 0.5);
+  }
+  .map-tiles-toggle svg { display: block; }
+
+  /* Tile mode: 4 quadrant images, absolute positioned. Container uses
+     aspect-ratio so layout matches the 4000x5000 source proportions. */
+  .map-zoom-target.tiled {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    position: relative;
+  }
+  /* Each tile slightly larger than 50% and anchored to its corner, so
+     adjacent tiles overlap by 1px at the seam. The overlapping pixels
+     are identical → no visible gap from sub-pixel rounding. The 1px
+     stretch (~0.3%) is imperceptible. */
+  .map-tile {
+    position: absolute;
+    width: calc(50% + 1px);
+    height: calc(50% + 1px);
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+  .map-tile.tl { top: 0;       left: 0; }
+  .map-tile.tr { top: 0;       right: 0; }
+  .map-tile.bl { bottom: 0;    left: 0; }
+  .map-tile.br { bottom: 0;    right: 0; }
+
   /* v210: legend at top of map — mini shapes match the real dot/pin look.
      Shifted off-center to the right to avoid the festival artwork's
      centered title text. Clears the zoom buttons (right:8 + ~32px wide). */
@@ -3506,10 +3557,25 @@ window.dispatchEvent(new Event('firebase-ready'));
     const wrap = document.createElement('div');
     wrap.className = 'map-wrap';
 
+    // DEBUG flag: render the map as 2x2 tiles instead of one big JPEG.
+    // Each tile (~5 MP) decodes at full resolution on iOS Safari instead
+    // of being subsampled (the cap kicks in for the 20 MP single image).
+    // Toggle via the tiny button below the compass — production users
+    // never see a difference unless they tap it.
+    const useTiles = (() => { try { return localStorage.getItem('mapTiled') === '1'; } catch (e) { return false; } })();
+    // Lossless WebP tiles — pixel-identical to source crops (no JPEG
+     // re-compression artifacts, which were causing the slight quality
+     // drop on desktop). ~10 MB total, sticky-cached after first install.
+    const mapImageHTML = useTiles
+      ? `<img class="map-tile tl" src="./assets/map2026-tl.webp" alt="" draggable="false" decoding="async" fetchpriority="high" />
+         <img class="map-tile tr" src="./assets/map2026-tr.webp" alt="" draggable="false" decoding="async" fetchpriority="high" />
+         <img class="map-tile bl" src="./assets/map2026-bl.webp" alt="" draggable="false" decoding="async" />
+         <img class="map-tile br" src="./assets/map2026-br.webp" alt="" draggable="false" decoding="async" />`
+      : `<img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />`;
     wrap.innerHTML = `
       <div class="map-img-container" id="mapContainer">
-        <div class="map-zoom-target" id="mapZoomTarget">
-          <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
+        <div class="map-zoom-target ${useTiles ? 'tiled' : ''}" id="mapZoomTarget">
+          ${mapImageHTML}
           <div class="user-pin" id="userPin" style="display:none">
             <span class="user-pin-cone" id="userPinCone"></span>
             <span class="user-pin-pulse"></span>
@@ -3538,6 +3604,14 @@ window.dispatchEvent(new Event('firebase-ready'));
             <circle cx="0" cy="0" r="1.4" fill="#0e1018"/>
           </svg>
         </div>
+        <!-- DEBUG: tile-mode toggle. Tiny button below compass; tap
+             toggles between single 20 MP JPEG (default) and 2x2 tiles
+             (each ~5 MP, decoded at full res on iOS Safari). Persists
+             to localStorage. Production users won't notice unless
+             they tap it. Remove once tile mode is confirmed best. -->
+        <button class="map-tiles-toggle ${useTiles ? 'on' : ''}" id="mapTilesToggle" type="button" aria-label="Toggle tile rendering" title="Toggle tile rendering">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        </button>
         <div class="map-legend">
           <span class="legend-shape legend-dot"></span>friend
           <span class="legend-sep">·</span>
@@ -3573,6 +3647,18 @@ window.dispatchEvent(new Event('firebase-ready'));
     main.appendChild(wrap);
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
     setupMapSearch(wrap);
+    // DEBUG: tile-mode toggle. Tap → flip the localStorage flag and
+    // re-render the map. Production users won't see a difference unless
+    // they tap the tiny button under the compass.
+    const tilesToggle = wrap.querySelector('#mapTilesToggle');
+    if (tilesToggle) {
+      tilesToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cur = (() => { try { return localStorage.getItem('mapTiled') === '1'; } catch (_) { return false; } })();
+        try { localStorage.setItem('mapTiled', cur ? '0' : '1'); } catch (_) {}
+        renderMap();
+      });
+    }
 
     // Self dot uses your QRid-hashed color (same color friends see for you).
     const userPinEl = wrap.querySelector('#userPin');
