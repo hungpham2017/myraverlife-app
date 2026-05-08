@@ -2,6 +2,7 @@
 .claude/
 docs/
 data-source/
+_backups/
 assets/_gen_times.py
 assets/_make_icon.py
 assets/_import_official_settimes.py
