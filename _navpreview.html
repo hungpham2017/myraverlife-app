@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>myraverlife · bottom-nav icon preview (DEV ONLY)</title>
+<style>
+  :root {
+    --bg: #0e1018;
+    --surface: #181b25;
+    --text: #f5f3ee;
+    --muted: #8a8ca8;
+    --accent: #ff2e8a;
+    --border: #2b2e3c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, system-ui, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  p.sub { color: var(--muted); font-size: 13px; line-height: 1.45; margin: 0 0 24px; max-width: 640px; }
+  .style-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px 0;
+    margin-bottom: 20px;
+    max-width: 560px;
+  }
+  .style-block h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: 0.01em;
+  }
+  .style-block .desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+
+  /* ── Bottom nav (mimics the real one) ─────────────────────────────── */
+  nav.tabs {
+    display: flex;
+    gap: 2px;
+    background: rgba(14, 16, 24, 0.78);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0 0 14px 14px;
+    margin: 0 -16px;
+    padding: 8px 6px;
+  }
+  .tab {
+    flex: 1;
+    background: none; border: none;
+    color: var(--muted);
+    padding: 7px 4px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 12px;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .tab.active {
+    color: var(--text);
+    background: rgba(255, 46, 138, 0.12);
+  }
+  .tab svg { display: block; }
+
+  /* ── Style 1: Feather / Lucide outlined ───────────────────────────── */
+  .style-1 .tab svg { stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .style-1 .tab.active svg { stroke: var(--accent); }
+
+  /* ── Style 2: Material filled ─────────────────────────────────────── */
+  .style-2 .tab svg { fill: currentColor; stroke: none; }
+  .style-2 .tab.active svg { fill: var(--accent); }
+
+  /* ── Style 3: Phosphor duotone (two-tone) ─────────────────────────── */
+  .style-3 .tab svg .duo-bg { fill: currentColor; opacity: 0.22; }
+  .style-3 .tab svg .duo-fg { stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .style-3 .tab.active svg .duo-bg { fill: var(--accent); opacity: 0.30; }
+  .style-3 .tab.active svg .duo-fg { stroke: var(--accent); }
+
+  /* ── Style 4: Outlined + accent dot under each ────────────────────── */
+  .style-4 .tab svg { stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .style-4 .tab.active svg { stroke: var(--accent); }
+  .style-4 .tab .dot { width: 4px; height: 4px; border-radius: 50%; background: transparent; margin-top: 2px; }
+  .style-4 .tab.active .dot { background: var(--accent); }
+  .style-4 .tab.active { background: transparent; }
+  .style-4 .tab.active { color: var(--accent); }
+
+  /* ── Style 5: Geometric / minimal (small bold strokes) ────────────── */
+  .style-5 .tab svg { stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .style-5 .tab.active svg { stroke: var(--accent); }
+  .style-5 .tab svg circle.dot, .style-5 .tab svg rect.dot { fill: currentColor; stroke: none; }
+  .style-5 .tab.active svg circle.dot, .style-5 .tab.active svg rect.dot { fill: var(--accent); }
+
+  .legend {
+    color: var(--muted);
+    font-size: 11.5px;
+    margin: 28px 0 0;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Bottom-nav icon styles</h1>
+<p class="sub">Five candidates. Same 5 tabs, same dark/pink aesthetic, only the icon language differs. The Lineup tab is shown as <em>active</em> in each so you can see the active vs inactive treatment.</p>
+
+<!-- ───────── Style 1: Feather / Lucide outlined ───────── -->
+<div class="style-block">
+  <h2>1 · Outlined line (Feather / Lucide)</h2>
+  <p class="desc">Thin 1.6px stroke, no fill. Light, breathable. The Spotify / Notion / GitHub Mobile look. Most modern and elegant.</p>
+  <nav class="tabs style-1">
+    <button class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <span>Lineup</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Crew</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Map</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Help</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ───────── Style 2: Material filled ───────── -->
+<div class="style-block">
+  <h2>2 · Filled (Material Filled)</h2>
+  <p class="desc">Solid shapes, single color. Heavier, more "app-like". Google's Material default.</p>
+  <nav class="tabs style-2">
+    <button class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3v9.55A4 4 0 1 0 14 16V8h4V3z"/></svg>
+      <span>Lineup</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M19 4h-2V2h-2v2H9V2H7v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14zm0-12H5V6h14z"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      <span>Crew</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 5.4 7 11.5 7.3 11.7a1 1 0 0 0 1.4 0C13 21.5 20 15.4 20 10a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+      <span>Map</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 17.5a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 12 19.5zm1.5-7.13c-.93.5-1.5 1.05-1.5 1.88a1 1 0 0 1-2 0c0-1.74 1.13-2.69 2.13-3.25.94-.5 1.37-.86 1.37-1.5a1.5 1.5 0 0 0-3 0 1 1 0 0 1-2 0 3.5 3.5 0 0 1 7 0c0 1.7-1.18 2.31-2 2.87z"/></svg>
+      <span>Help</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ───────── Style 3: Phosphor duotone ───────── -->
+<div class="style-block">
+  <h2>3 · Duotone (Phosphor)</h2>
+  <p class="desc">Soft fill behind a line stroke. Subtle, layered, gentle. Nice for an aesthetic-led app.</p>
+  <nav class="tabs style-3">
+    <button class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <circle class="duo-bg" cx="6" cy="18" r="3"/>
+        <circle class="duo-bg" cx="18" cy="16" r="3"/>
+        <path class="duo-fg" d="M9 18V5l12-2v13"/>
+        <circle class="duo-fg" cx="6" cy="18" r="3"/>
+        <circle class="duo-fg" cx="18" cy="16" r="3"/>
+      </svg>
+      <span>Lineup</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <rect class="duo-bg" x="3" y="4" width="18" height="18" rx="2"/>
+        <rect class="duo-fg" x="3" y="4" width="18" height="18" rx="2"/>
+        <line class="duo-fg" x1="16" y1="2" x2="16" y2="6"/>
+        <line class="duo-fg" x1="8" y1="2" x2="8" y2="6"/>
+        <line class="duo-fg" x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span>Schedule</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <circle class="duo-bg" cx="9" cy="7" r="4"/>
+        <path class="duo-fg" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle class="duo-fg" cx="9" cy="7" r="4"/>
+        <path class="duo-fg" d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path class="duo-fg" d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Crew</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <path class="duo-bg" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <path class="duo-fg" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle class="duo-fg" cx="12" cy="10" r="3"/>
+      </svg>
+      <span>Map</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <circle class="duo-bg" cx="12" cy="12" r="10"/>
+        <circle class="duo-fg" cx="12" cy="12" r="10"/>
+        <path class="duo-fg" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line class="duo-fg" x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>Help</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ───────── Style 4: Line + accent dot under active ───────── -->
+<div class="style-block">
+  <h2>4 · Line + accent dot under active</h2>
+  <p class="desc">Same outline as #1, but the active state shows a small pink dot underneath instead of a tinted background. Very minimal, very modern (Apple-Music-like).</p>
+  <nav class="tabs style-4">
+    <button class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <span>Lineup</span>
+      <span class="dot"></span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Schedule</span>
+      <span class="dot"></span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Crew</span>
+      <span class="dot"></span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Map</span>
+      <span class="dot"></span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Help</span>
+      <span class="dot"></span>
+    </button>
+  </nav>
+</div>
+
+<!-- ───────── Style 5: Bold geometric ───────── -->
+<div class="style-block">
+  <h2>5 · Bold geometric (heavier stroke)</h2>
+  <p class="desc">2.2px stroke, simplified glyphs. Reads bigger, almost like an icon poster. Confident; less delicate than #1.</p>
+  <nav class="tabs style-5">
+    <button class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M10 18V5l9-2v13"/><circle class="dot" cx="6.5" cy="18" r="2.4"/><circle class="dot" cx="15.5" cy="16" r="2.4"/></svg>
+      <span>Lineup</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="3"/><line x1="4" y1="11" x2="20" y2="11"/><circle class="dot" cx="8" cy="3" r="1"/><circle class="dot" cx="16" cy="3" r="1"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="16" cy="9" r="2.6"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 14a5 5 0 0 1 5 6"/></svg>
+      <span>Crew</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle class="dot" cx="12" cy="10" r="2.2"/></svg>
+      <span>Map</span>
+    </button>
+    <button class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 4 2c-.7.7-1.5 1.2-1.5 2"/><circle class="dot" cx="12" cy="17" r="1.1"/></svg>
+      <span>Help</span>
+    </button>
+  </nav>
+</div>
+
+<p class="legend">
+  Open <code>_navpreview.html</code> directly. Tap any tab in any row to swap the <em>active</em> state across that nav so you can compare every icon in active and inactive states. Once you decide, tell Claude which style number you want.
+</p>
+
+<script>
+  // Within each nav, only one tab is "active". Tap to swap it.
+  document.querySelectorAll('nav.tabs').forEach((nav) => {
+    nav.addEventListener('click', (e) => {
+      const tab = e.target.closest('.tab');
+      if (!tab || !nav.contains(tab)) return;
+      nav.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

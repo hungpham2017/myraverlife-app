@@ -290,22 +290,33 @@ window.dispatchEvent(new Event('firebase-ready'));
     flex: 1;
     background: none; border: none;
     color: var(--muted);
-    padding: 9px 4px;
-    font-size: 12.5px;
+    padding: 6px 4px;
+    font-size: 10.5px;
     letter-spacing: 0.3px;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
-    border-radius: 999px;
+    border-radius: 12px;
     transition: color 180ms ease, background 180ms ease;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
     white-space: nowrap;
   }
   .tab.active {
     color: var(--text);
     background: rgba(255, 46, 138, 0.12);
   }
-  .tab .ico { display: none; }
+  /* Duotone tab icons (Phosphor style) — soft fill + line stroke,
+     gives visual depth that pairs with the dark + pink-purple palette.
+     Active tab uses the brand accent for both fill and stroke so the
+     icon gets a subtle "inner glow" feel. */
+  .tab .tab-ico { display: block; }
+  .tab .tab-ico .duo-bg { fill: currentColor; opacity: 0.22; }
+  .tab .tab-ico .duo-fg { stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .tab.active .tab-ico .duo-bg { fill: var(--accent); opacity: 0.30; }
+  .tab.active .tab-ico .duo-fg { stroke: var(--accent); }
 
   /* stages view */
   .stage-card {
@@ -2317,11 +2328,26 @@ window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="lineup">Lineup</button>
-  <button class="tab" data-tab="plan">Schedule</button>
-  <button class="tab" data-tab="friends">Crew</button>
-  <button class="tab" data-tab="map">Map</button>
-  <button class="tab" data-tab="help">Help</button>
+  <button class="tab active" data-tab="lineup">
+    <svg class="tab-ico" width="22" height="22" viewBox="0 0 24 24"><circle class="duo-bg" cx="6" cy="18" r="3"/><circle class="duo-bg" cx="18" cy="16" r="3"/><path class="duo-fg" d="M9 18V5l12-2v13"/><circle class="duo-fg" cx="6" cy="18" r="3"/><circle class="duo-fg" cx="18" cy="16" r="3"/></svg>
+    <span>Lineup</span>
+  </button>
+  <button class="tab" data-tab="plan">
+    <svg class="tab-ico" width="22" height="22" viewBox="0 0 24 24"><rect class="duo-bg" x="3" y="4" width="18" height="18" rx="2"/><rect class="duo-fg" x="3" y="4" width="18" height="18" rx="2"/><line class="duo-fg" x1="16" y1="2" x2="16" y2="6"/><line class="duo-fg" x1="8" y1="2" x2="8" y2="6"/><line class="duo-fg" x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Schedule</span>
+  </button>
+  <button class="tab" data-tab="friends">
+    <svg class="tab-ico" width="22" height="22" viewBox="0 0 24 24"><circle class="duo-bg" cx="9" cy="7" r="4"/><path class="duo-fg" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle class="duo-fg" cx="9" cy="7" r="4"/><path class="duo-fg" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path class="duo-fg" d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Crew</span>
+  </button>
+  <button class="tab" data-tab="map">
+    <svg class="tab-ico" width="22" height="22" viewBox="0 0 24 24"><path class="duo-bg" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><path class="duo-fg" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle class="duo-fg" cx="12" cy="10" r="3"/></svg>
+    <span>Map</span>
+  </button>
+  <button class="tab" data-tab="help">
+    <svg class="tab-ico" width="22" height="22" viewBox="0 0 24 24"><circle class="duo-bg" cx="12" cy="12" r="10"/><circle class="duo-fg" cx="12" cy="12" r="10"/><path class="duo-fg" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line class="duo-fg" x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span>Help</span>
+  </button>
 </nav>
 
 <script>
