@@ -1522,6 +1522,140 @@ window.dispatchEvent(new Event('firebase-ready'));
     opacity: 0.85;
   }
   .help-fineprint b { color: var(--text); opacity: 0.9; }
+  /* Help: "see everyone who helped" link. Pulls bold + brand-pink so it
+     reads as tappable but doesn't feel like a button. */
+  .help-thanks-more {
+    color: var(--accent, #ff2e8a);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.12s;
+  }
+  .help-thanks-more:hover { color: var(--text); }
+
+  /* Thanks modal: opened from Help, slides up over the current screen.
+     Each row is a tappable link to the contributor's IG profile. */
+  .thanks-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0;
+    animation: thanksBackdropIn 0.18s ease;
+  }
+  .thanks-backdrop[hidden] { display: none; }
+  @keyframes thanksBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .thanks-modal {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 22px 20px max(22px, env(safe-area-inset-bottom, 22px));
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    animation: thanksModalIn 0.22s cubic-bezier(0.2, 0.8, 0.4, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  @keyframes thanksModalIn {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0);    }
+  }
+
+  .thanks-modal-x {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s, color 0.12s;
+  }
+  .thanks-modal-x:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+  .thanks-modal-x:active { transform: scale(0.92); }
+
+  .thanks-modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    margin: 0 0 6px;
+    padding-right: 36px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2, #b078ff));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .thanks-modal-lead {
+    font-size: 12.5px;
+    color: var(--text);
+    opacity: 0.78;
+    line-height: 1.55;
+    margin: 0 0 14px;
+    padding-right: 36px;
+  }
+
+  .thanks-roster {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .thanks-person {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.12s;
+  }
+  .thanks-person:hover { background: rgba(255,255,255,0.04); }
+  .thanks-person:active { background: rgba(255,255,255,0.08); transform: scale(0.99); }
+  .thanks-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.45), 0 2px 8px -2px rgba(0,0,0,0.35);
+    flex-shrink: 0;
+  }
+  .thanks-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .thanks-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .thanks-handle {
+    font-size: 11.5px;
+    color: var(--accent-2, #b078ff);
+    font-family: ui-monospace, Menlo, monospace;
+    letter-spacing: 0.1px;
+  }
+  .thanks-modal-footer {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin: 14px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    line-height: 1.5;
+  }
   .help-list {
     list-style: none;
     padding: 0;
@@ -1840,7 +1974,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   <div class="byline">
     made with PLUR by <a class="ig-text" href="https://www.instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>  ·  say hi at EDC ✌
   </div>
-  <p class="copyright-bottom">Unofficial fan-made schedule. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · <span id="appVersion"></span></p>
+  <p class="copyright-bottom">Unofficial fan-made app. Not affiliated with Insomniac or EDC. All trademarks belong to their owners. © 2026 Hung Pham · <span id="appVersion"></span></p>
   <script>
     // Reads from version.js (loaded earlier in head). One source of truth
     // shared with sw.js so bumping version updates both.
@@ -1849,6 +1983,61 @@ window.dispatchEvent(new Event('firebase-ready'));
     }
   </script>
 </footer>
+
+<!-- Thanks modal: opened from the Help "see everyone who helped" link.
+     Slides up from bottom. X to close. Tapping a row opens that
+     contributor's IG profile in a new tab (PWA stays put). -->
+<div class="thanks-backdrop" id="thanksBackdrop" hidden>
+  <div class="thanks-modal" role="dialog" aria-labelledby="thanksTitle">
+    <button class="thanks-modal-x" type="button" aria-label="Close" onclick="closeThanksModal()">×</button>
+    <h2 class="thanks-modal-title" id="thanksTitle">thanks ❤️</h2>
+    <p class="thanks-modal-lead">
+      Built with fellow ravers. Your ideas shaped this.
+    </p>
+    <div class="thanks-roster">
+      <a class="thanks-person" href="https://instagram.com/xtheglover" target="_blank" rel="noopener">
+        <div class="thanks-avatar" style="background:linear-gradient(135deg,#76e0c0,#3aaa8c)">X</div>
+        <div class="thanks-text">
+          <div class="thanks-name">X the Glover</div>
+          <div class="thanks-handle">@xtheglover</div>
+        </div>
+      </a>
+      <a class="thanks-person" href="https://instagram.com/monigurruchaga" target="_blank" rel="noopener">
+        <div class="thanks-avatar" style="background:linear-gradient(135deg,#ff7eb5,#c84e85)">M</div>
+        <div class="thanks-text">
+          <div class="thanks-name">Monique G.</div>
+          <div class="thanks-handle">@monigurruchaga</div>
+        </div>
+      </a>
+      <a class="thanks-person" href="https://instagram.com/itachiunchia24509" target="_blank" rel="noopener">
+        <div class="thanks-avatar" style="background:linear-gradient(135deg,#ffc857,#c89530)">I</div>
+        <div class="thanks-text">
+          <div class="thanks-name">Itachi</div>
+          <div class="thanks-handle">@itachiunchia24509</div>
+        </div>
+      </a>
+    </div>
+    <p class="thanks-modal-footer">Helped but not here yet? Ping me. ❤️</p>
+  </div>
+</div>
+<script>
+  function openThanksModal() {
+    const b = document.getElementById('thanksBackdrop');
+    if (b) b.removeAttribute('hidden');
+  }
+  function closeThanksModal() {
+    const b = document.getElementById('thanksBackdrop');
+    if (b) b.setAttribute('hidden', '');
+  }
+  // Tap outside the modal card → close. Esc → close.
+  document.addEventListener('click', (e) => {
+    const b = document.getElementById('thanksBackdrop');
+    if (b && !b.hasAttribute('hidden') && e.target === b) closeThanksModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeThanksModal();
+  });
+</script>
 
 <nav class="tabs">
   <button class="tab active" data-tab="lineup">Lineup</button>
@@ -2147,7 +2336,7 @@ window.dispatchEvent(new Event('firebase-ready'));
 
         <h2>thanks</h2>
         <p class="help-fineprint">
-          Built with fellow ravers. The <b>Crew</b> feature, the <b>group pin</b>, the <b>compass</b>, and so many small touches came from your ideas and feedback. I wish I could list you all by name. ❤️
+          Built with fellow ravers. Your ideas shaped this. <a href="#" onclick="openThanksModal();return false;" class="help-thanks-more">See full list →</a> ❤️
         </p>
 
         <h2>fine print</h2>
