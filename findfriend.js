@@ -190,6 +190,8 @@
         fbAuthed = true;
         firebaseStatus = 'ok';
         console.log('[fb] auth OK, uid=' + cred.user.uid);
+        // Drain any queued picks operations now that auth is ready.
+        _drainAuthCallbacks();
         startPublishLoop();  // F.4 + F.10: publish now + every 30s
         attachPublishTriggers();  // F.10: republish on online + visibility
         subscribeCurrentGroup();  // v210: subscribe to current group's circle
@@ -302,6 +304,7 @@
               tearDownAllMemberSubs();
               try { window.fb.remove(window.fb.ref(fbDb, 'circles/' + oldHost + '/' + state.myQRid)); } catch (e) {}
               try { window.fb.remove(window.fb.ref(fbDb, 'meetings/' + oldHost + '/' + state.myQRid)); } catch (e) {}
+              try { window.fb.remove(window.fb.ref(fbDb, 'picks/' + oldHost + '/' + state.myQRid)); } catch (e) {}
               ffAlert(`Group not found.<br>The code didn't match any active group.`);
               maybeRerender();
             }
@@ -570,15 +573,22 @@
     maybeRerender();
     window.dispatchEvent(new CustomEvent('myraver-pins-update'));
 
-    // 2. Cloud sync (Firebase queues + retries on reconnect if offline).
-    if (!fbAuthed || !fbApp || !window.fb) return true;  // local saved, cloud will retry
-    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid);
-    window.fb.set(ref, data).catch(e => console.warn('[pin] drop cloud sync failed:', e));
+    // 2. Cloud sync — defer until auth lands if it hasn't yet, so pins
+    //    dropped within the first ~1-3s of opening the app still sync.
+    //    Group snapshot guards against the user changing groups before
+    //    the queued write fires.
+    const groupAtDrop = state.currentGroup;
+    whenAuthed(() => {
+      if (!fbApp || !window.fb) return;
+      if (state.currentGroup !== groupAtDrop) return;
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      const path = 'meetings/' + groupAtDrop + '/' + state.myQRid;
+      window.fb.set(window.fb.ref(fbDb, path), data)
+        .catch(e => console.warn('[pin] sync FAILED:', e && e.code, e && e.message));
+    });
     return true;
   }
   async function removeMyPin() {
-    console.log('[pin] removeMyPin called. currentGroup=', state.currentGroup, ' myQRid=', state.myQRid);
     if (!state.currentGroup) { console.warn('[pin] cannot remove: no current group'); return; }
 
     // 1. Optimistic local — pin disappears from UI instantly. Stamp the
@@ -590,13 +600,16 @@
     maybeRerender();
     window.dispatchEvent(new CustomEvent('myraver-pins-update'));
 
-    // 2. Cloud sync (queues in memory if offline, retries on reconnect).
-    if (!fbAuthed || !fbApp || !window.fb) return;
-    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-    const path = 'meetings/' + state.currentGroup + '/' + state.myQRid;
-    window.fb.remove(window.fb.ref(fbDb, path))
-      .then(() => console.log('[pin] removed /' + path))
-      .catch(e => console.warn('[pin] remove cloud sync failed:', e));
+    // 2. Cloud sync — defer until auth lands if it hasn't yet.
+    const groupAtRemove = state.currentGroup;
+    whenAuthed(() => {
+      if (!fbApp || !window.fb) return;
+      if (state.currentGroup !== groupAtRemove) return;
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      const path = 'meetings/' + groupAtRemove + '/' + state.myQRid;
+      window.fb.remove(window.fb.ref(fbDb, path))
+        .catch(e => console.warn('[pin] remove cloud sync failed:', e));
+    });
   }
   async function updateMyPinPosition(lat, lng) {
     const cur = getMyPin();
@@ -654,14 +667,19 @@
     maybeRerender();
     window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
 
-    if (!fbAuthed || !fbApp || !window.fb) return true;
-    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/_group');
-    // Server-side last-write-wins by ts: abort if server already has newer.
-    window.fb.runTransaction(ref, (current) => {
-      if (current && current.ts && current.ts >= ts) return;  // abort
-      return data;
-    }).catch(e => console.warn('[grouppin] write failed:', e));
+    // Cloud sync — defer until auth lands if it hasn't yet.
+    const groupAtDrop = state.currentGroup;
+    whenAuthed(() => {
+      if (!fbApp || !window.fb) return;
+      if (state.currentGroup !== groupAtDrop) return;
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      const path = 'meetings/' + groupAtDrop + '/_group';
+      // Server-side last-write-wins by ts: abort if server already has newer.
+      window.fb.runTransaction(window.fb.ref(fbDb, path), (current) => {
+        if (current && current.ts && current.ts >= ts) return;  // abort
+        return data;
+      }).catch(e => console.warn('[grouppin] write failed:', e && e.code, e && e.message));
+    });
     return true;
   }
 
@@ -690,13 +708,18 @@
     maybeRerender();
     window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
 
-    if (!fbAuthed || !fbApp || !window.fb) return true;
-    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/_group');
-    window.fb.runTransaction(ref, (current) => {
-      if (current && current.ts && current.ts > ts) return;  // abort: server has newer
-      return null;  // remove
-    }).catch(e => console.warn('[grouppin] clear failed:', e));
+    // Cloud sync — defer until auth lands if it hasn't yet.
+    const groupAtClear = state.currentGroup;
+    whenAuthed(() => {
+      if (!fbApp || !window.fb) return;
+      if (state.currentGroup !== groupAtClear) return;
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      const path = 'meetings/' + groupAtClear + '/_group';
+      window.fb.runTransaction(window.fb.ref(fbDb, path), (current) => {
+        if (current && current.ts && current.ts > ts) return;  // abort: server has newer
+        return null;  // remove
+      }).catch(e => console.warn('[grouppin] clear failed:', e && e.code, e && e.message));
+    });
     return true;
   }
 
@@ -713,6 +736,7 @@
       if (fbDb && fbAuthed && window.fb) {
         try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'picks/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'presence/' + state.myQRid)); } catch (e) {}
       }
@@ -726,6 +750,7 @@
       if (fbDb && fbAuthed && window.fb) {
         try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'picks/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
         // The next line regenerates myQRid, so loc/<old> and presence/<old>
         // would otherwise be left orphaned in the cloud. Clean them too.
         try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + state.myQRid)); } catch (e) {}
@@ -851,6 +876,7 @@
       if (fbDb && fbAuthed && window.fb) {
         try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'picks/' + state.myQRid)); } catch (e) {}
       }
     } else if (state.currentGroup) {
       const ok = await ffConfirm(
@@ -861,6 +887,7 @@
       if (fbDb && fbAuthed && window.fb) {
         try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'picks/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
       }
     }
 
@@ -871,6 +898,10 @@
     saveState();
     subscribeCurrentGroup();
     if (fbAuthed) publishMyLocation();
+    // Tell index.html to push existing picks to the new group's path —
+    // otherwise your schedule stays empty for the new crew until you tap
+    // a heart (which would trigger the save() → pushPicks chain).
+    window.dispatchEvent(new CustomEvent('myraver-group-changed', { detail: { group: targetQrid } }));
     render(mainEl);
   }
 
@@ -935,7 +966,7 @@
   const style = document.createElement('style');
   style.textContent = `
     .ff-page {
-      padding: 12px 12px 90px;
+      padding: 12px 0 90px;
       max-width: 480px;
       margin: 0 auto;
     }
@@ -1282,18 +1313,44 @@
       margin-bottom: 8px;
       justify-content: flex-end;
     }
+    /* Right-side action affordance — duotone map-pin icon. Visually
+       paired with .ff-row-sched (calendar icon) so both row actions
+       (tap row body → Map · tap calendar → Schedule sheet) are clearly
+       icon-based. Same styling family as the bottom-nav icons. */
     .ff-row-chev {
       color: var(--muted);
-      font-size: 22px;
-      font-weight: 300;
-      line-height: 1;
-      margin-left: 6px;
+      margin-left: 4px;
       flex-shrink: 0;
       align-self: center;
-      opacity: 0.6;
+      opacity: 0.65;
+      display: inline-flex;
+      align-items: center;
     }
+    .ff-row-chev svg { display: block; }
     .ff-friend-row:hover .ff-row-chev,
     .ff-pin-row:hover .ff-row-chev { opacity: 1; color: var(--text); }
+    /* Schedule shortcut button — duotone calendar icon, jumps straight
+       to the user's flat schedule list (skipping the Map detour). */
+    .ff-row-sched {
+      background: transparent;
+      border: 0;
+      padding: 6px;
+      margin: 0;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      font-family: inherit;
+      transition: color 140ms ease, background 140ms ease, transform 80ms ease;
+    }
+    .ff-row-sched:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .ff-row-sched:active { transform: scale(0.92); }
+    .ff-row-sched svg { display: block; }
+    /* No "view your own schedule" shortcut on the self row — Schedule tab
+       is already your editable home for that. */
+    .ff-friend-self .ff-row-sched { display: none; }
     .ff-group-title { flex: 1; min-width: 0; }
     .ff-group-count {
       font-size: 14px; font-weight: 700; color: var(--text);
@@ -1680,7 +1737,10 @@
             <div class="ff-friend-name">${escapeHTML(m.name)} ${tagsHtml}</div>
             ${subText ? `<div class="ff-friend-sub">${escapeHTML(subText)}</div>` : ''}
           </div>
-          <span class="ff-row-chev">›</span>
+          <button class="ff-row-sched" type="button" aria-label="See ${escapeHTML(m.name)}'s night">
+            <svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" fill="currentColor" opacity="0.18"/><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+          <span class="ff-row-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
         </div>
       `;
     }).join('');
@@ -1707,7 +1767,7 @@
                 <div class="ff-friend-name">${escapeHTML(m.name)}${p.isMine ? ' <span class="ff-tag">(you)</span>' : ''}</div>
                 <div class="ff-pin-msg">${escapeHTML(p.message)}</div>
               </div>
-              <span class="ff-row-chev">›</span>
+              <span class="ff-row-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
             </div>
           `;
         }).join('');
@@ -1736,7 +1796,7 @@
               <div class="ff-friend-name">${msgText}</div>
               <div class="ff-friend-sub">${byLine}</div>
             </div>
-            <span class="ff-row-chev">›</span>
+            <span class="ff-row-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
           </div>
         </div>
       `;
@@ -1767,8 +1827,15 @@
       if (inv) inv.onclick = () => onShowInvite();
     }
     const mapLink = mainEl.querySelector('#ff-show-map');
-    const goToMap = (e) => {
-      if (e) e.preventDefault();
+    // Tab switch + optional fly-to. If lat/lng are passed, dispatches
+    // myraver-fly-to so index.html can zoom + ping at that GPS spot
+    // (same effect as POI search). When position is unknown, just
+    // switches tab — no broken zoom.
+    const goToMap = (e, lat, lng) => {
+      if (e && e.preventDefault) e.preventDefault();
+      if (typeof lat === 'number' && typeof lng === 'number' && isFinite(lat) && isFinite(lng)) {
+        window.dispatchEvent(new CustomEvent('myraver-fly-to', { detail: { lat, lng } }));
+      }
       const mapTab = document.querySelector('button[data-tab="map"]');
       if (mapTab) mapTab.click();
     };
@@ -1777,15 +1844,48 @@
     if (emptyPins) emptyPins.onclick = goToMap;
     const emptyGroupPin = mainEl.querySelector('#ff-grouppin-empty');
     if (emptyGroupPin) emptyGroupPin.onclick = goToMap;
-    // Tapping a pin row jumps to Map and highlights — for now just go to map.
+    // Tapping a pin row → Map + fly to the pin's lat/lng (solo pin or
+    // group pin distinguished by data-grouppin attr).
     mainEl.querySelectorAll('.ff-pin-row').forEach(row => {
-      row.onclick = goToMap;
+      row.onclick = (e) => {
+        const grouppin = row.getAttribute('data-grouppin');
+        const pinqrid = row.getAttribute('data-pinqrid');
+        let lat, lng;
+        if (grouppin && state.groupPin) {
+          lat = state.groupPin.lat;
+          lng = state.groupPin.lng;
+        } else if (pinqrid && state.pins[pinqrid]) {
+          lat = state.pins[pinqrid].lat;
+          lng = state.pins[pinqrid].lng;
+        }
+        goToMap(e, lat, lng);
+      };
     });
-    // Same for member rows — tapping any crew member jumps to Map (so you
-    // can see where they are). Self row also goes — shows user's own pin.
+    // Member rows — tap row body → Map + fly to that crew member's last
+    // known GPS. Self uses window._lastUserPos. Schedule-icon button is a
+    // separate target (stopPropagation) for the Schedule sheet.
     mainEl.querySelectorAll('.ff-friend-row').forEach(row => {
       row.style.cursor = 'pointer';
-      row.onclick = goToMap;
+      row.onclick = (e) => {
+        const qrid = row.getAttribute('data-memqrid');
+        let lat, lng;
+        if (qrid === state.myQRid) {
+          const pos = window._lastUserPos;
+          if (pos) { lat = pos.lat; lng = pos.lng; }
+        } else if (qrid && friendData[qrid] && typeof friendData[qrid].lat === 'number') {
+          lat = friendData[qrid].lat;
+          lng = friendData[qrid].lng;
+        }
+        goToMap(e, lat, lng);
+      };
+      const sched = row.querySelector('.ff-row-sched');
+      if (sched) {
+        sched.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const qrid = row.getAttribute('data-memqrid');
+          if (qrid) window.dispatchEvent(new CustomEvent('myraver-view-schedule', { detail: { qrid } }));
+        });
+      }
     });
     mainEl.querySelector('#ff-leave').onclick = () => leaveOrEndGroup(mainEl);
 
@@ -1906,6 +2006,142 @@
     }
   }
 
+  // ── Schedule sync (low-priority, debounced, offline-aware) ───────────
+  // Pushes the user's full picks (state.picks) to RTDB at
+  //   picks/<currentGroup>/<myQRid>
+  // so crew members can read each other's schedules. Three safeguards
+  // (per project memory) keep this from competing with the much-higher-
+  // priority location sync:
+  //   1. Debounce 1000 ms — rapid heart-taps coalesce into one write.
+  //   2. Fire-and-forget — no await, no retry. Next change re-writes
+  //      the whole state (idempotent).
+  //   3. Skip when navigator.onLine === false — don't queue to Firebase
+  //      offline buffer; resume on the next pick change while online.
+  // Pending callbacks queued before auth completes — drained once
+  // fbAuthed flips true. Lets pushPicks / subscribeFriendPicks be
+  // called early in app boot (e.g., user taps a heart immediately on
+  // load) and still execute as soon as auth lands.
+  const _pendingAuthCallbacks = [];
+  function whenAuthed(fn) {
+    if (fbAuthed) { try { fn(); } catch (e) {} return; }
+    _pendingAuthCallbacks.push(fn);
+  }
+  function _drainAuthCallbacks() {
+    const cbs = _pendingAuthCallbacks.slice();
+    _pendingAuthCallbacks.length = 0;
+    cbs.forEach((c) => { try { c(); } catch (e) {} });
+  }
+
+  let _picksWriteTimer = null;
+  function pushPicks(picksByNight) {
+    if (_picksWriteTimer) { clearTimeout(_picksWriteTimer); _picksWriteTimer = null; }
+    if (!state.currentGroup) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    _picksWriteTimer = setTimeout(() => {
+      _picksWriteTimer = null;
+      // Defer until auth lands if it hasn't yet (queued + drained on auth).
+      whenAuthed(() => doWritePicks(picksByNight));
+    }, 2000);
+  }
+
+  // Actual write — separate from the debounced entry point so it can be
+  // run synchronously once auth completes.
+  let _lastPushedKey = null;
+  function doWritePicks(picksByNight) {
+    if (!fbApp || !window.fb) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if (!state.currentGroup) return;
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    // Flatten { 1:[...], 2:[...], 3:[...] } → { pickId: { fields } }.
+    // Keep only the wire-essential fields. Image is intentionally
+    // omitted — each phone resolves images locally from ARTISTS by
+    // artist name (saves bandwidth, ~150 bytes/pick).
+    const flat = {};
+    [1, 2, 3].forEach((d) => {
+      const arr = (picksByNight && picksByNight[d]) || [];
+      arr.forEach((p) => {
+        if (!p || !p.id) return;
+        flat[p.id] = {
+          artist: String(p.artist || ''),
+          stage:  String(p.stage  || ''),
+          day:    typeof p.day === 'number' ? p.day : d,
+          start:  String(p.start || ''),
+          end:    String(p.end   || ''),
+        };
+      });
+    });
+    // Diff guard: skip the write entirely if nothing changed since the
+    // last successful push. State + group + qrid baked into the key so
+    // we re-push when context changes (group switch, auth restart).
+    const key = state.currentGroup + '|' + state.myQRid + '|' + JSON.stringify(flat);
+    if (key === _lastPushedKey) return;  // diff guard: nothing changed
+    const path = 'picks/' + state.currentGroup + '/' + state.myQRid;
+    const ref = window.fb.ref(fbDb, path);
+    const count = Object.keys(flat).length;
+    window.fb.set(ref, flat)
+      .then(() => { _lastPushedKey = key; })
+      .catch((e) => { _lastPushedKey = null; console.warn('[picks] sync FAILED (' + count + ' picks):', e && e.code, e && e.message); });
+  }
+
+  // Local cache for friend picks — persists across reloads so Fisher
+  // can still see John's schedule offline, after a brief disconnect,
+  // or even after the group dissolves (last-known snapshot). Keyed by
+  // group + qrid so multiple groups don't collide.
+  const _PICKS_CACHE_KEY = 'myraverlife_friendpicks_v1';
+  function _readFriendPicksCache() {
+    try { return JSON.parse(localStorage.getItem(_PICKS_CACHE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function _writeFriendPicksCache(cache) {
+    try { localStorage.setItem(_PICKS_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+  }
+  function _cacheKey(group, qrid) { return group + '|' + qrid; }
+
+  // Subscribe to a crew member's picks. Returns an unsubscribe fn.
+  // Fires the callback with a flat { pickId: pickObj } map. First fires
+  // synchronously with the locally cached snapshot (if any) so the
+  // sheet opens instantly with last-known data; then onValue updates
+  // with fresh data as it arrives from the cloud.
+  const _picksSubs = {};
+  function subscribeFriendPicks(qrid, callback) {
+    const cb = typeof callback === 'function' ? callback : (() => {});
+    const group = state.currentGroup;
+    // Always serve the cached snapshot first (works offline, instant).
+    const cache = _readFriendPicksCache();
+    const cached = cache[_cacheKey(group || '', qrid)];
+    if (cached) { try { cb(cached); } catch (e) {} }
+    if (!group) return () => {};
+    let cancelled = false;
+    let activeUnsub = null;
+    whenAuthed(() => {
+      if (cancelled) return;
+      if (!fbApp || !window.fb) return;
+      if (!state.currentGroup) return;
+      if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+      if (_picksSubs[qrid]) { try { _picksSubs[qrid](); } catch (e) {} }
+      const path = 'picks/' + state.currentGroup + '/' + qrid;
+      const ref = window.fb.ref(fbDb, path);
+      const unsub = window.fb.onValue(ref, (snap) => {
+        const v = snap.val() || {};
+        // Persist to localStorage so future reloads / offline / group-
+        // dissolve still show this snapshot.
+        const fresh = _readFriendPicksCache();
+        fresh[_cacheKey(state.currentGroup, qrid)] = v;
+        _writeFriendPicksCache(fresh);
+        try { cb(v); } catch (e) {}
+      }, (err) => {
+        console.warn('[picks] read FAILED on ' + path + ':', err && err.code, err && err.message);
+      });
+      _picksSubs[qrid] = unsub;
+      activeUnsub = unsub;
+    });
+    return () => {
+      cancelled = true;
+      if (activeUnsub) { try { activeUnsub(); } catch (e) {} }
+      if (_picksSubs[qrid]) { try { _picksSubs[qrid](); } catch (e) {} delete _picksSubs[qrid]; }
+    };
+  }
+
   // ── Public API ────────────────────────────────────────────────────────
   window.findFriends = {
     render,
@@ -1959,5 +2195,8 @@
     alert: ffAlert,
     confirm: ffConfirm,
     prompt: ffPrompt,
+    // Schedule sync
+    pushPicks,
+    subscribeFriendPicks,
   };
 })();

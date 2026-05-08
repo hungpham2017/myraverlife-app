@@ -581,7 +581,10 @@ window.dispatchEvent(new Event('firebase-ready'));
     color: var(--text);
     z-index: 30;
     width: calc(100% - 24px);
-    max-width: 380px;
+    /* Capped at the .ff-page content-area width (480 max - 24 padding
+       = 456) so the popup edges line up exactly with pin/crew rows
+       on tablets/laptops. */
+    max-width: 456px;
     box-shadow: 0 6px 22px rgba(0,0,0,0.42);
     animation: friendSheetIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
   }
@@ -1123,7 +1126,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   .poi-popup-cta:active { transform: scale(0.97); }
 
   .lineup-view {
-    padding: 0 18px;
+    padding: 0;
     max-width: 480px;
     margin: 0 auto;
   }
@@ -1731,6 +1734,205 @@ window.dispatchEvent(new Event('firebase-ready'));
     -webkit-tap-highlight-color: transparent;
   }
   .timeline-block .b-del:hover { color: var(--text); }
+
+  /* Crew member's schedule sheet — same visual family as .friend-sheet
+     (centered card, max-width 380, bottom-anchored, all corners rounded,
+     dark glass + blur). NO darkened backdrop — matches friend-sheet's
+     "floating card" feel. The .sched-sheet-backdrop is just an
+     invisible click-catcher for tap-outside-to-close. */
+  .sched-sheet-backdrop {
+    position: fixed; inset: 0;
+    background: transparent;
+    z-index: 80;
+    pointer-events: auto;
+  }
+  .sched-sheet {
+    position: fixed;
+    left: 50%;
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    /* Now that .ff-page has no horizontal padding, the .ff-pins-section
+       card is constrained only by main's 16px each side and main's
+       max-width 480. Replicate that exact formula here so the popup
+       lines up with the card behind it. */
+    width: calc(100% - 32px);
+    max-width: 480px;
+    max-height: 50vh;
+    background: rgba(14, 16, 24, 0.94);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.42);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: schedSheetIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  @keyframes schedSheetIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  /* Header reuses .friend-sheet visual language: solid colored avatar
+     circle with the member's initial, name + sub. Same vertical rhythm
+     so a Crew member's pin sheet (Map) and schedule sheet (Crew tap)
+     feel like the same family. */
+  .sched-sheet-head {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .sched-sheet-init {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    color: white;
+    font-size: 15px; font-weight: 800;
+    letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .sched-sheet-meta {
+    flex: 1; min-width: 0;
+    overflow: hidden;
+  }
+  .sched-sheet-name {
+    font-size: 14.5px; font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sched-sheet-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .sched-sheet-x {
+    background: transparent; border: 0;
+    color: var(--muted);
+    font-size: 20px; line-height: 1;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit;
+  }
+  .sched-sheet-x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .sched-sheet-list {
+    margin: 0;
+    padding: 4px 14px 12px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .sched-sheet-empty {
+    padding: 28px 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .sched-sheet-dayhdr {
+    padding: 10px 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 4px;
+  }
+  .sched-sheet-dayhdr:first-child { border-top: 0; margin-top: 0; padding-top: 4px; }
+
+  /* Schedule "viewing" chips — switch between your editable timeline
+     and a crew member's read-only flat list. Hidden when not in a group. */
+  .plan-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 4px 12px;
+    scrollbar-width: none;
+  }
+  .plan-chips::-webkit-scrollbar { display: none; }
+  .plan-chip {
+    flex-shrink: 0;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .plan-chip .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px currentColor;
+  }
+  .plan-chip.active {
+    background: rgba(255, 46, 138, 0.16);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  /* Friend's flat list — read-only schedule view, sorted by time,
+     duplicate time stamps signal overlap. */
+  .plan-friend-list {
+    list-style: none;
+    margin: 0; padding: 0 4px;
+  }
+  .plan-friend-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .plan-friend-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    line-height: 1.3;
+  }
+  .plan-friend-row:last-child { border-bottom: 0; }
+  .plan-friend-row .time {
+    flex-shrink: 0;
+    color: var(--text);
+    opacity: 0.7;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 64px;
+  }
+  .plan-friend-row .artist {
+    flex: 1;
+    min-width: 0;
+    font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .plan-friend-row .stage {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .plan-friend-row .stage::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 5px currentColor;
+    flex-shrink: 0;
+  }
   .timeline-block .b-del:active { transform: scale(1.25); }
 
   /* Live "NOW" marker — solid accent-color hairline + matching pill,
@@ -2304,6 +2506,13 @@ window.dispatchEvent(new Event('firebase-ready'));
           <div class="thanks-handle">@itachiunchia24509</div>
         </div>
       </a>
+      <a class="thanks-person" href="https://instagram.com/arizemusic" target="_blank" rel="noopener">
+        <div class="thanks-avatar" style="background:linear-gradient(135deg,#a3aaff,#6873d9)">A</div>
+        <div class="thanks-text">
+          <div class="thanks-name">Arize</div>
+          <div class="thanks-handle">@arizemusic</div>
+        </div>
+      </a>
     </div>
     <p class="thanks-modal-footer">Helped but not here yet? Ping me. ❤️</p>
   </div>
@@ -2437,6 +2646,34 @@ window.dispatchEvent(new Event('firebase-ready'));
   }
   function save() {
     localStorage.setItem(KEY, JSON.stringify(state));
+    // Low-priority crew schedule sync. Debounced + offline-aware inside
+    // findfriend.js so it never competes with location pings. We
+    // pre-format picks here because picks store startMins/endMins
+    // (numbers), and the wire schema needs start/end strings —
+    // formatMins lives in this file, not findfriend.js.
+    if (window.findFriends && window.findFriends.pushPicks && window.findFriends.inGroup && window.findFriends.inGroup()) {
+      try { window.findFriends.pushPicks(picksForSync(state.picks)); } catch (e) {}
+    }
+  }
+  // Transforms local state.picks into the wire shape: each pick gets
+  // start/end strings derived from startMins/endMins via formatMins.
+  // Image is intentionally dropped (each phone resolves images locally
+  // by artist name from ARTISTS).
+  function picksForSync(picksByNight) {
+    const out = { 1: [], 2: [], 3: [] };
+    [1, 2, 3].forEach(d => {
+      (picksByNight[d] || []).forEach(p => {
+        if (!p || !p.id) return;
+        out[d].push({
+          id: p.id,
+          artist: p.artist,
+          stage: p.stage,
+          start: typeof p.startMins === 'number' ? formatMins(p.startMins) : '',
+          end:   typeof p.endMins   === 'number' ? formatMins(p.endMins)   : '',
+        });
+      });
+    });
+    return out;
   }
   function uid() { return Math.random().toString(36).slice(2, 9); }
   function stage(id) { return STAGES.find(s => s.id === id) || STAGES[0]; }
@@ -4176,24 +4413,267 @@ window.dispatchEvent(new Event('firebase-ready'));
     });
   }
 
+  // Schedule viewing mode: 'me' (editable timeline) or a crew member's
+  // QRid (read-only flat list). Volatile — not persisted across reloads.
+  let _scheduleViewing = 'me';
+  const _friendPicksCache = {};   // qrid -> { pickId: pickObj }
+  const _friendPicksUnsub = {};   // qrid -> unsubscribe fn
+
+  function setScheduleViewing(view, skipRender) {
+    if (_scheduleViewing === view) { if (!skipRender) renderPlan(); return; }
+    _scheduleViewing = view;
+    // When switching to a friend, subscribe to their picks (live updates).
+    if (view !== 'me' && window.findFriends && window.findFriends.subscribeFriendPicks) {
+      if (!_friendPicksUnsub[view]) {
+        _friendPicksUnsub[view] = window.findFriends.subscribeFriendPicks(view, (picks) => {
+          _friendPicksCache[view] = picks || {};
+          if (_scheduleViewing === view && state.tab === 'plan') renderPlan();
+        });
+      }
+    }
+    if (!skipRender) renderPlan();
+  }
+
+  // Slide-up sheet showing a crew member's flat schedule for the
+  // currently-selected night. Triggered from the Crew row's calendar
+  // icon. Closes back to wherever the user was — does NOT switch tabs.
+  function openCrewScheduleSheet(qrid) {
+    closeCrewScheduleSheet();
+    const ff = window.findFriends;
+    if (!ff || !qrid) return;
+    const me = ff.getMyQRid && ff.getMyQRid();
+    const isMe = (qrid === me);
+    const member = (ff.getFollowing() || []).find(m => m.qrid === qrid)
+      || { qrid, name: isMe ? 'You' : '?' };
+    const color = ff.colorForKey ? ff.colorForKey(qrid) : '#888';
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'sched-sheet-backdrop';
+    backdrop.id = 'crewSchedSheetBackdrop';
+    const initial = (member.name || '?').trim().charAt(0).toUpperCase() || '?';
+    backdrop.innerHTML = `
+      <div class="sched-sheet" role="dialog" aria-label="${escape(member.name)}'s schedule">
+        <div class="sched-sheet-head">
+          <div class="sched-sheet-init" style="background:${color}">${escape(initial)}</div>
+          <div class="sched-sheet-meta">
+            <div class="sched-sheet-name">${escape(member.name)}</div>
+            <div class="sched-sheet-sub">Schedule · Fri · Sat · Sun</div>
+          </div>
+          <button class="sched-sheet-x" id="crewSchedSheetX" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="sched-sheet-list" id="crewSchedSheetList"><div class="sched-sheet-empty">Loading…</div></div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+
+    const close = () => closeCrewScheduleSheet();
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+    backdrop.querySelector('#crewSchedSheetX').onclick = close;
+
+    function renderRows(picksMap) {
+      const list = backdrop.querySelector('#crewSchedSheetList');
+      if (!list) return;
+      // Show ALL three nights grouped by day, with a section header for
+      // each. Avoids the "empty because their picks are for a different
+      // night than I have selected" trap. Coerces day to a number so
+      // string-encoded day values still match.
+      const all = Object.values(picksMap || {})
+        .map(p => p && ({ ...p, day: Number(p.day) }))
+        .filter(p => p && (p.day === 1 || p.day === 2 || p.day === 3))
+        .map(p => ({ ...p, _mins: timeStrToMins(p.start), _endMins: timeStrToMins(p.end) }))
+        .filter(p => typeof p._mins === 'number')
+        .sort((a, b) => (a.day - b.day) || (a._mins - b._mins));
+
+      if (!all.length) {
+        list.innerHTML = `<div class="sched-sheet-empty">No picks yet.<br><span style="opacity:0.7">Their schedule syncs once they have signal.</span></div>`;
+        return;
+      }
+
+      const dayLabels = { 1: 'Friday', 2: 'Saturday', 3: 'Sunday' };
+      let html = '';
+      let lastDay = null;
+      let globalIdx = 0;
+      const indexByDay = {};
+      all.forEach((p) => {
+        if (p.day !== lastDay) {
+          lastDay = p.day;
+          html += `<div class="sched-sheet-dayhdr">${dayLabels[p.day] || ''}</div>`;
+        }
+        indexByDay[globalIdx] = p;
+        const s = stage(p.stage);
+        const stageName = s.displayName || s.id || p.stage;
+        const stageColor = s.color || 'var(--text)';
+        html += `<div class="plan-friend-row" data-idx="${globalIdx}"><span class="time">${escape(p.start || '')}</span><span class="artist">${escape(p.artist || '')}</span><span class="stage" style="color:${stageColor}">${escape(stageName)}</span></div>`;
+        globalIdx += 1;
+      });
+      list.innerHTML = html;
+
+      // Auto-scroll to the first pick that hasn't started yet on the
+      // current festival night (so the user lands on the relevant slot
+      // when peeking during the festival).
+      const ctx = (typeof currentFestivalContext === 'function') ? currentFestivalContext() : null;
+      if (ctx) {
+        const target = all.findIndex(p => p.day === ctx.dayId && (p._endMins || (p._mins + 60)) >= ctx.nowMins);
+        if (target >= 0) {
+          const row = list.querySelector(`.plan-friend-row[data-idx="${target}"]`);
+          if (row) requestAnimationFrame(() => row.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+        }
+      }
+    }
+
+    if (isMe) {
+      // Render your own picks directly from local state (always fresh).
+      const flat = {};
+      (state.picks[state.night] || []).forEach(p => {
+        if (!p || !p.id) return;
+        flat[p.id] = { artist: p.artist, stage: p.stage, day: p.day, start: p.start, end: p.end };
+      });
+      renderRows(flat);
+    } else {
+      // Show whatever's cached immediately, then subscribe for live updates.
+      if (_friendPicksCache[qrid]) renderRows(_friendPicksCache[qrid]);
+      if (ff.subscribeFriendPicks) {
+        if (_friendPicksUnsub[qrid]) { try { _friendPicksUnsub[qrid](); } catch (_) {} }
+        _friendPicksUnsub[qrid] = ff.subscribeFriendPicks(qrid, (picks) => {
+          _friendPicksCache[qrid] = picks || {};
+          renderRows(picks || {});
+        });
+      }
+    }
+  }
+
+  function closeCrewScheduleSheet() {
+    const bd = document.getElementById('crewSchedSheetBackdrop');
+    if (bd) bd.remove();
+  }
+
+  window.addEventListener('myraver-view-schedule', (e) => {
+    const qrid = e && e.detail && e.detail.qrid;
+    if (!qrid) return;
+    openCrewScheduleSheet(qrid);
+  });
+
+  // Tap a Crew row / Pin row / Group-pin row → switch to Map + fly to
+  // that GPS spot with the same 2.5× zoom + ring ping as POI search.
+  // Reuses mapZoom.zoomToImagePct + .poi-flash from the POI flow.
+  window.addEventListener('myraver-fly-to', (e) => {
+    const detail = e && e.detail;
+    if (!detail || typeof detail.lat !== 'number' || typeof detail.lng !== 'number') return;
+    const { lat, lng } = detail;
+    if (state.tab !== 'map') {
+      state.tab = 'map';
+      save();
+      render();
+    }
+    // Wait one tick so the map renders before we fly to the spot.
+    setTimeout(() => {
+      const pct = (typeof gpsToMapPercent === 'function') ? gpsToMapPercent(lat, lng) : null;
+      if (!pct) return;
+      // Skip fly-to if the position is way off the map (testing from
+      // home, etc.) — just leave the map at default view.
+      if (pct.left < -10 || pct.left > 110 || pct.top < -10 || pct.top > 110) return;
+      if (mapZoom && mapZoom.zoomToImagePct) {
+        mapZoom.zoomToImagePct(pct.left, pct.top, 2.5);
+      }
+      const zoomTarget = document.querySelector('#mapZoomTarget');
+      if (zoomTarget) {
+        const flash = document.createElement('div');
+        flash.className = 'poi-flash';
+        flash.style.left = pct.left + '%';
+        flash.style.top  = pct.top  + '%';
+        zoomTarget.appendChild(flash);
+        setTimeout(() => flash.remove(), 2050);
+      }
+    }, 250);
+  });
+
+  // After joining a new group, push existing picks so the new crew
+  // sees them without waiting for a heart-tap.
+  window.addEventListener('myraver-group-changed', () => {
+    setTimeout(() => {
+      try {
+        if (window.findFriends && window.findFriends.pushPicks) {
+          window.findFriends.pushPicks(picksForSync(state.picks));
+        }
+      } catch (e) {}
+    }, 1500);
+  });
+
+  function renderPlanChips() {
+    const ff = window.findFriends;
+    if (!ff || !ff.inGroup || !ff.inGroup()) return null;
+    const wrap = document.createElement('div');
+    wrap.className = 'plan-chips';
+    const me = document.createElement('button');
+    me.type = 'button';
+    me.className = 'plan-chip' + (_scheduleViewing === 'me' ? ' active' : '');
+    me.textContent = 'Your night';
+    me.onclick = () => setScheduleViewing('me');
+    wrap.appendChild(me);
+    (ff.getFollowing() || []).forEach((m) => {
+      if (m.qrid === ff.getMyQRid()) return;
+      const c = document.createElement('button');
+      c.type = 'button';
+      c.className = 'plan-chip' + (_scheduleViewing === m.qrid ? ' active' : '');
+      const color = ff.colorForKey ? ff.colorForKey(m.qrid) : '#888';
+      c.innerHTML = `<span class="dot" style="background:${color};color:${color}"></span>${escape(m.name || '?')}`;
+      c.onclick = () => setScheduleViewing(m.qrid);
+      wrap.appendChild(c);
+    });
+    return wrap;
+  }
+
+  function renderFriendPicksList(qrid) {
+    const flat = _friendPicksCache[qrid] || {};
+    const list = Object.values(flat).filter(p => p && typeof p === 'object');
+    // Filter to selected day, sort by start time.
+    const dayPicks = list
+      .filter(p => Number(p.day) === state.night)
+      .map(p => ({ ...p, _mins: timeStrToMins(p.start) }))
+      .filter(p => typeof p._mins === 'number')
+      .sort((a, b) => a._mins - b._mins);
+
+    const wrap = document.createElement('div');
+    if (!dayPicks.length) {
+      wrap.className = 'plan-friend-empty';
+      wrap.textContent = 'Nothing on their night yet.';
+      return wrap;
+    }
+    wrap.className = 'plan-friend-list';
+    dayPicks.forEach(p => {
+      const s = stage(p.stage);
+      const stageName = s.displayName || s.id || p.stage;
+      const stageColor = s.color || 'var(--text)';
+      const row = document.createElement('div');
+      row.className = 'plan-friend-row';
+      row.innerHTML = `<span class="time">${escape(p.start || '')}</span><span class="artist">${escape(p.artist || '')}</span><span class="stage" style="color:${stageColor}">${escape(stageName)}</span>`;
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
   function renderPlan() {
     document.querySelectorAll('.night-btn').forEach(b => {
       b.classList.toggle('active', Number(b.dataset.night) === state.night);
     });
 
-    const picks = state.picks[state.night] || [];
     main.innerHTML = '';
-    main.appendChild(renderTimeline(picks));
+    const chips = renderPlanChips();
+    if (chips) main.appendChild(chips);
 
-    // Auto-scroll to the first pick so users immediately see WHEN their
-    // night starts, not always the empty 5pm hour. Pure DOM operation,
-    // fully offline. Block: 'center' shows the first pick in the middle
-    // of the viewport with context above (lead-up hour) and below.
-    if (picks.length > 0) {
-      requestAnimationFrame(() => {
-        const firstBlock = document.querySelector('.timeline-block');
-        if (firstBlock) firstBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
+    if (_scheduleViewing === 'me') {
+      const picks = state.picks[state.night] || [];
+      main.appendChild(renderTimeline(picks));
+      // Auto-scroll to the first pick (your editable timeline).
+      if (picks.length > 0) {
+        requestAnimationFrame(() => {
+          const firstBlock = document.querySelector('.timeline-block');
+          if (firstBlock) firstBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }
+    } else {
+      // Crew member view — read-only flat list.
+      main.appendChild(renderFriendPicksList(_scheduleViewing));
     }
   }
 
@@ -4750,6 +5230,19 @@ window.dispatchEvent(new Event('firebase-ready'));
     // avatars use sprite-backed background-image (100% offline reliable).
     await loadAvatarCoords();
     render();
+
+    // Initial schedule sync: if you're already in a group when the app
+    // starts, push your existing picks once (after a short delay so
+    // findfriend.js has time to authenticate). Without this, crew
+    // members see empty until you tap a heart and trigger save().
+    setTimeout(() => {
+      try {
+        if (window.findFriends && window.findFriends.inGroup &&
+            window.findFriends.inGroup() && window.findFriends.pushPicks) {
+          window.findFriends.pushPicks(picksForSync(state.picks));
+        }
+      } catch (e) { /* findfriend not ready yet — no-op */ }
+    }, 4000);
 
     // Pre-warm all artist images so the lineup is fully offline-ready.
     // Avatars go to IndexedDB (no quota padding, 100% reliable). Festival

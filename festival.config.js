@@ -54,15 +54,17 @@ window.FESTIVAL = {
     { id: 'quantumVALLEY',    displayName: 'quantum VALLEY',  tier: 'main', color: '#8b8dff', genre: 'Trance + progressive + melodic',              short: 'trance / prog / melodic' },
     { id: 'bassPOD',          displayName: 'bass POD',        tier: 'main', color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',          short: 'dubstep / d&b / riddim' },
     { id: 'wasteLAND',        displayName: 'waste LAND',      tier: 'main', color: '#ff5560', genre: 'Hardstyle / hardcore',                        short: 'hardstyle / hardcore' },
-    // Secondary / pop-up / art-car stages
-    { id: 'beatBoxCAR',       tier: 'secondary', color: '#ff9933', genre: 'BeatBox Art Car — roving bass / electro',     short: 'art car / bass' },
-    { id: 'casaBACARDI',      tier: 'secondary', color: '#ddb060', genre: 'Casa Bacardí — lounge / house',               short: 'lounge / house' },
-    { id: 'electrolitHOUSE',  tier: 'secondary', color: '#5fd4ce', genre: 'Electrolit Hydration House — chill / house',  short: 'chill / house' },
-    { id: 'forestHOUSE',      tier: 'secondary', color: '#6b8e6b', genre: 'Forest House — house / groove',               short: 'house / groove' },
-    { id: 'insomniacFRIDAYS', tier: 'secondary', color: '#b08cff', genre: 'Insomniac Fridays — house / techno',          short: 'house / techno' },
-    { id: 'picnicCAR',        tier: 'secondary', color: '#ffaa80', genre: 'Picnic Playtime Art Car — playful / mixed',   short: 'art car / mixed' },
-    { id: 'takisHANGAR',      tier: 'secondary', color: '#ff5722', genre: 'Takis Rave Hangar — bass / heavy',            short: 'bass / heavy' },
-    { id: 'yeeDC',            tier: 'secondary', color: '#f5c842', genre: 'YeeDC! — fun themed mixed',                   short: 'mixed / fun' },
+    // Secondary / pop-up / art-car stages. `displayName` follows the
+    // same pattern as the main stages — friendly readable form,
+    // matches what's printed on the festival map artwork.
+    { id: 'beatBoxCAR',       displayName: 'BeatBox Art Car',           tier: 'secondary', color: '#ff9933', genre: 'BeatBox Art Car — roving bass / electro',     short: 'art car / bass' },
+    { id: 'casaBACARDI',      displayName: 'Casa Bacardí',              tier: 'secondary', color: '#ddb060', genre: 'Casa Bacardí — lounge / house',               short: 'lounge / house' },
+    { id: 'electrolitHOUSE',  displayName: 'Electrolit Hydration House',tier: 'secondary', color: '#5fd4ce', genre: 'Electrolit Hydration House — chill / house',  short: 'chill / house' },
+    { id: 'forestHOUSE',      displayName: 'Forest House',              tier: 'secondary', color: '#6b8e6b', genre: 'Forest House — house / groove',               short: 'house / groove' },
+    { id: 'insomniacFRIDAYS', displayName: 'Insomniac Fridays',         tier: 'secondary', color: '#b08cff', genre: 'Insomniac Fridays — house / techno',          short: 'house / techno' },
+    { id: 'picnicCAR',        displayName: 'Picnic Playtime Art Car',   tier: 'secondary', color: '#ffaa80', genre: 'Picnic Playtime Art Car — playful / mixed',   short: 'art car / mixed' },
+    { id: 'takisHANGAR',      displayName: 'Takis Rave Hangar',         tier: 'secondary', color: '#ff5722', genre: 'Takis Rave Hangar — bass / heavy',            short: 'bass / heavy' },
+    { id: 'yeeDC',            displayName: 'YeeDC!',                    tier: 'secondary', color: '#f5c842', genre: 'YeeDC! — fun themed mixed',                   short: 'mixed / fun' },
   ],
 
   // ── Time buckets (slots) ─────────────────────────────────────────────
