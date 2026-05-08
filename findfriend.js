@@ -21,7 +21,7 @@
   // ── Local state ───────────────────────────────────────────────────────
   const STORAGE_KEY = 'myraverlife-friends-v1';
   const ID_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  const ID_LENGTH = 6;
+  const ID_LENGTH = 8;
   const ID_LENGTH_MIN = 6;
   const ID_LENGTH_MAX = 16;
 
@@ -61,6 +61,10 @@
   if (!state.groupMembers || typeof state.groupMembers !== 'object') state.groupMembers = {};
   if (!state.pins || typeof state.pins !== 'object') state.pins = {};
   if (typeof state._myPinActionTs !== 'number') state._myPinActionTs = 0;
+  // Group pin: a single shared marker any group member can edit.
+  if (state.groupPin === undefined) state.groupPin = null;
+  if (typeof state._groupPinActionTs !== 'number') state._groupPinActionTs = 0;
+  if (typeof state._groupPinSeenTs !== 'number') state._groupPinSeenTs = 0;
   if (state.following) delete state.following;
   saveState();
 
@@ -80,6 +84,12 @@
   let fbAuth = null;
   let fbAuthed = false;
   let firebaseStatus = 'idle'; // 'idle' | 'connecting' | 'ok' | 'bad'
+  // F.13: set when qridToUid bind fails because our qrid is owned by a
+  // different uid. Typically iOS Safari evicting anonymous auth state under
+  // storage pressure → new auth.uid, but qridToUid/<myQRid> still points
+  // to the old uid → all our writes get rejected. Surfaces as a banner in
+  // the idle UI so the user can recover via "Refresh my code".
+  let _authMismatch = false;
   // F.11: friendData cache hydrated from localStorage at boot — last-known
   // positions are visible IMMEDIATELY on refresh, even before Firebase
   // reconnects (festival weak-signal scenario).
@@ -149,9 +159,26 @@
     if (!fbApp || !window.fb) return;
     _authInFlight = true;
     if (!fbAuth) fbAuth = window.fb.getAuth(fbApp);
-    window.fb.signInAnonymously(fbAuth).then((cred) => {
+    window.fb.signInAnonymously(fbAuth).then(async (cred) => {
       _authInFlight = false;
       if (cred && cred.user) {
+        // F.13: bind qrid ↔ uid so RTDB security rules can authorize
+        // per-qrid paths. Best-effort. If qridToUid is already claimed by
+        // another uid (collision / reinstall race), writes under rules
+        // will be rejected; user can recover via "Refresh my code".
+        if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+        try {
+          await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), cred.user.uid);
+          _authMismatch = false;
+        } catch (e) {
+          console.warn('[fb] qridToUid bind failed:', e);
+          // PERMISSION_DENIED on this path = our qrid is owned by another
+          // uid (iOS auth eviction or rare collision). Surface a banner.
+          if (e && (e.code === 'PERMISSION_DENIED' || /permission_denied/i.test(String(e.message || '')))) {
+            _authMismatch = true;
+          }
+        }
+        try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + cred.user.uid), state.myQRid); } catch (e) { console.warn('[fb] uidToQrid bind failed:', e); }
         fbAuthed = true;
         firebaseStatus = 'ok';
         console.log('[fb] auth OK, uid=' + cred.user.uid);
@@ -197,6 +224,7 @@
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           ts,
+          group: state.currentGroup,  // F.13: read-rule check for friends
         }).then(() => {
           console.log('[fb] published my location to /' + path);
         }).catch((e) => {
@@ -259,6 +287,7 @@
               state.currentGroup = null;
               state.groupMembers = {};
               state.pins = {};
+              state.groupPin = null;
               saveState();
               if (currentGroupSub) { try { currentGroupSub(); } catch (e) {} currentGroupSub = null; }
               if (meetingsSub) { try { meetingsSub(); } catch (e) {} meetingsSub = null; }
@@ -284,9 +313,10 @@
     if (!state.currentGroup) return;  // idle: no presence
     if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
     const presRef = window.fb.ref(fbDb, 'presence/' + state.myQRid);
+    const group = state.currentGroup;  // F.13: snapshot for read-rule check
     window.fb.onDisconnect(presRef)
-      .set({ online: false, lastOffline: window.fb.serverTimestamp() })
-      .then(() => window.fb.set(presRef, { online: true }))
+      .set({ online: false, lastOffline: window.fb.serverTimestamp(), group })
+      .then(() => window.fb.set(presRef, { online: true, group }))
       .catch((e) => console.warn('[fb] presence setup failed:', e));
   }
   // v210: subscribe to current group's /circles/<host>. The host writes
@@ -302,6 +332,7 @@
   // update with stale server data during the brief sync window. Persisted
   // to localStorage so it survives tab kill / reload.
   let _myPinActionTs = state._myPinActionTs || 0;
+  let _groupPinActionTs = state._groupPinActionTs || 0;
   // Track which group's host we've confirmed exists. Module-level so it
   // survives subscribeCurrentGroup re-calls in the same session — without
   // this, a re-subscribe after the host left can write us back into a
@@ -358,6 +389,8 @@
         const oldHostName = (state.groupMembers[oldHost] && state.groupMembers[oldHost].name) || 'The host';
         state.currentGroup = null;
         state.groupMembers = {};
+        state.pins = {};
+        state.groupPin = null;
         _hostSeenForGroup = null;
         saveState();
         if (currentGroupSub) { try { currentGroupSub(); } catch (e) {} currentGroupSub = null; }
@@ -437,14 +470,29 @@
     console.log('[fb] subscribed to /circles/' + state.currentGroup);
 
     // Subscribe to all pins (meetings) under this group's host.
+    // The /_group child holds the shared group pin (any member can write);
+    // every other child is a per-user personal pin keyed by their qrid.
     const meetingsRef = window.fb.ref(fbDb, 'meetings/' + state.currentGroup);
     const meetingsHandler = (snap) => {
       const v = snap.val() || {};
       const newPins = {};
-      Object.keys(v).forEach(qrid => {
-        const e = v[qrid] || {};
+      let newGroupPin = null;
+      Object.keys(v).forEach(key => {
+        const e = v[key] || {};
+        if (key === '_group') {
+          if (typeof e.lat === 'number' && typeof e.lng === 'number') {
+            newGroupPin = {
+              lat: e.lat, lng: e.lng,
+              message: typeof e.message === 'string' ? e.message : '',
+              ts: e.ts || 0,
+              byQrid: e.byQrid || '',
+              byName: e.byName || '?',
+            };
+          }
+          return;
+        }
         if (typeof e.lat === 'number' && typeof e.lng === 'number' && typeof e.message === 'string') {
-          newPins[qrid] = { lat: e.lat, lng: e.lng, message: e.message, ts: e.ts || Date.now(), by: e.by || '' };
+          newPins[key] = { lat: e.lat, lng: e.lng, message: e.message, ts: e.ts || Date.now(), by: e.by || '' };
         }
       });
       // Race-protect my own entry: if I just dropped/removed locally and the
@@ -459,9 +507,26 @@
         }
       }
       state.pins = newPins;
+      // Race-protect the group pin: if our local action is newer than the
+      // server snapshot AND the snap shows OUR own write or none, keep
+      // local. As soon as the server reflects our write (or anyone else's
+      // newer write), drop the guard so subsequent updates from others
+      // aren't blocked by clock skew or a stale high-water mark.
+      const serverGpTs = newGroupPin ? (newGroupPin.ts || 0) : 0;
+      const serverIsMine = newGroupPin && newGroupPin.byQrid === state.myQRid;
+      if (_groupPinActionTs && _groupPinActionTs > serverGpTs && (!newGroupPin || serverIsMine)) {
+        // Snap is behind our optimistic local write. Keep ours; guard stays.
+      } else {
+        state.groupPin = newGroupPin;
+        // Server caught up (our write echoed or someone newer wrote).
+        // Lower the guard so future updates from other users are accepted.
+        _groupPinActionTs = 0;
+        state._groupPinActionTs = 0;
+      }
       saveState();
       maybeRerender();
       window.dispatchEvent(new CustomEvent('myraver-pins-update'));
+      window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
     };
     window.fb.onValue(meetingsRef, meetingsHandler);
     meetingsSub = () => window.fb.off(meetingsRef, 'value', meetingsHandler);
@@ -531,6 +596,102 @@
     return dropMyPin(cur.message, lat, lng);
   }
 
+  // ── Group pin actions ────────────────────────────────────────────────
+  // One shared pin per group at /meetings/<group>/_group. Any member can
+  // drop/move/edit/clear. Writes use runTransaction with a ts guard so
+  // stale offline replays cannot overwrite newer state on the server.
+  function getGroupPin() {
+    return state.groupPin || null;
+  }
+  // Has the group pin been updated by someone else since we last looked at it?
+  function isGroupPinFresh() {
+    const gp = state.groupPin;
+    if (!gp) return false;
+    if (gp.byQrid === state.myQRid) return false;
+    return (gp.ts || 0) > (state._groupPinSeenTs || 0);
+  }
+  // Mark the current group pin as seen — clears the freshness glow.
+  function ackGroupPin() {
+    if (!state.groupPin) return;
+    const ts = state.groupPin.ts || 0;
+    if (ts <= (state._groupPinSeenTs || 0)) return;
+    state._groupPinSeenTs = ts;
+    saveState();
+    window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
+  }
+
+  async function dropGroupPin(message, lat, lng) {
+    if (!state.currentGroup) return false;
+    if (lat == null || lng == null) {
+      const pos = window._lastUserPos;
+      if (!pos) {
+        await ffAlert(`Need your GPS to drop a pin here.<br>Tap Map and allow location, then try again.`);
+        return false;
+      }
+      lat = pos.lat; lng = pos.lng;
+    }
+    const cleanMsg = String(message || '').trim().slice(0, 100);
+    const ts = Date.now();
+    const data = {
+      lat, lng, message: cleanMsg, ts,
+      byQrid: state.myQRid,
+      byName: state.myName || '?',
+    };
+    // Optimistic local. Our own write so no freshness glow.
+    _groupPinActionTs = ts;
+    state._groupPinActionTs = ts;
+    state.groupPin = data;
+    state._groupPinSeenTs = ts;
+    saveState();
+    maybeRerender();
+    window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
+
+    if (!fbAuthed || !fbApp || !window.fb) return true;
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/_group');
+    // Server-side last-write-wins by ts: abort if server already has newer.
+    window.fb.runTransaction(ref, (current) => {
+      if (current && current.ts && current.ts >= ts) return;  // abort
+      return data;
+    }).catch(e => console.warn('[grouppin] write failed:', e));
+    return true;
+  }
+
+  async function moveGroupPin(lat, lng) {
+    const cur = state.groupPin;
+    if (!cur) return false;
+    if (lat == null || lng == null) {
+      const pos = window._lastUserPos;
+      if (!pos) {
+        await ffAlert(`Need your GPS to move the pin.<br>Tap Map and allow location, then try again.`);
+        return false;
+      }
+      lat = pos.lat; lng = pos.lng;
+    }
+    return dropGroupPin(cur.message, lat, lng);
+  }
+
+  async function clearGroupPin() {
+    if (!state.currentGroup) return false;
+    const ts = Date.now();
+    _groupPinActionTs = ts;
+    state._groupPinActionTs = ts;
+    state.groupPin = null;
+    state._groupPinSeenTs = ts;
+    saveState();
+    maybeRerender();
+    window.dispatchEvent(new CustomEvent('myraver-grouppin-update'));
+
+    if (!fbAuthed || !fbApp || !window.fb) return true;
+    if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
+    const ref = window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/_group');
+    window.fb.runTransaction(ref, (current) => {
+      if (current && current.ts && current.ts > ts) return;  // abort: server has newer
+      return null;  // remove
+    }).catch(e => console.warn('[grouppin] clear failed:', e));
+    return true;
+  }
+
   // ── State transitions ─────────────────────────────────────────────────
   // host new group: idle/host/member → host with fresh qrid + name.
   async function hostNewGroup(mainEl) {
@@ -557,6 +718,10 @@
       if (fbDb && fbAuthed && window.fb) {
         try { await window.fb.remove(window.fb.ref(fbDb, 'circles/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
         try { await window.fb.remove(window.fb.ref(fbDb, 'meetings/' + state.currentGroup + '/' + state.myQRid)); } catch (e) {}
+        // The next line regenerates myQRid, so loc/<old> and presence/<old>
+        // would otherwise be left orphaned in the cloud. Clean them too.
+        try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + state.myQRid)); } catch (e) {}
+        try { await window.fb.remove(window.fb.ref(fbDb, 'presence/' + state.myQRid)); } catch (e) {}
       }
     }
     const name = await ffPrompt(
@@ -565,14 +730,50 @@
     );
     if (!name) return;
     state.myName = name;
-    state.myQRid = genQRid();  // fresh identity for fresh group
+    // Reuse the stable myQRid as the group code. Color stays consistent;
+    // re-hosting reuses your existing QR. To get a fresh code on purpose,
+    // tap "Refresh my code" from the idle screen.
     state.currentGroup = state.myQRid;
     state.groupMembers = {};
     state.pins = {};
+    state.groupPin = null;
     saveState();
     subscribeCurrentGroup();
     if (fbAuthed) publishMyLocation();
     render(mainEl);
+  }
+
+  // Manual identity reset: regenerates myQRid. Only allowed when idle so
+  // there's no group/cloud state to migrate. Friends with the old code
+  // can no longer auto-rejoin; your color (which is keyed off myQRid)
+  // changes too. This is the deliberate "fresh start" affordance.
+  async function refreshMyQRid(mainEl) {
+    if (state.currentGroup) {
+      await ffAlert('Leave your current group first, then refresh.');
+      return;
+    }
+    const ok = await ffConfirm(
+      'Refresh your code?<br>You\'ll get a new QR. Friends with the old code won\'t auto-rejoin.',
+      { primaryLabel: 'Refresh', danger: true }
+    );
+    if (!ok) return;
+    // Best-effort cleanup of any orphaned cloud paths under the old QRid.
+    const oldQRid = state.myQRid;
+    if (fbDb && fbAuthed && window.fb) {
+      try { await window.fb.remove(window.fb.ref(fbDb, 'loc/' + oldQRid)); } catch (e) {}
+      try { await window.fb.remove(window.fb.ref(fbDb, 'presence/' + oldQRid)); } catch (e) {}
+      try { await window.fb.remove(window.fb.ref(fbDb, 'qridToUid/' + oldQRid)); } catch (e) {}
+    }
+    state.myQRid = genQRid();
+    saveState();
+    // F.13: claim the new qrid for our uid so writes keep working under rules.
+    // Fresh qrid + fresh claim resolves any auth-mismatch banner.
+    if (fbDb && fbAuthed && window.fb && fbAuth && fbAuth.currentUser) {
+      try { await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), fbAuth.currentUser.uid); } catch (e) {}
+      try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + fbAuth.currentUser.uid), state.myQRid); } catch (e) {}
+    }
+    _authMismatch = false;
+    if (mainEl) render(mainEl);
   }
 
   // join group: any → member of target.
@@ -609,15 +810,13 @@
       }
     }
 
-    if (!state.myName) {
-      const name = await ffPrompt(
-        'Choose your display name:',
-        { placeholder: 'Your name', primaryLabel: 'Continue', maxLength: 24 }
-      );
-      if (!name) return;
-      state.myName = name;
-      saveState();
-    }
+    const name = await ffPrompt(
+      'Choose your display name:',
+      { placeholder: 'Your name', primaryLabel: 'Join', defaultValue: state.myName || '', maxLength: 24 }
+    );
+    if (!name) return;
+    state.myName = name;
+    saveState();
 
     if (state.currentGroup === state.myQRid) {
       // Hosting: joining ends our group.
@@ -645,6 +844,7 @@
     state.currentGroup = targetQrid;
     state.groupMembers = {};
     state.pins = {};
+    state.groupPin = null;
     saveState();
     subscribeCurrentGroup();
     if (fbAuthed) publishMyLocation();
@@ -679,6 +879,7 @@
     state.currentGroup = null;
     state.groupMembers = {};
     state.pins = {};
+    state.groupPin = null;
     saveState();
     subscribeCurrentGroup();  // tears down all subs
     render(mainEl);
@@ -818,9 +1019,9 @@
     .ff-friend-row:last-child { border-bottom: 0; }
     .ff-friend-row.ff-offline { opacity: 0.55; }
     .ff-friend-dot {
-      width: 26px; height: 26px; border-radius: 50%;
+      width: 24px; height: 24px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+      color: white; font-size: 10px; font-weight: 700; flex-shrink: 0;
     }
     .ff-friend-meta { flex: 1; min-width: 0; }
     .ff-friend-name {
@@ -866,7 +1067,7 @@
     .ff-modal {
       background: var(--bg); border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 22px 44px 14px 18px;
+      padding: 22px 18px 14px 18px;
       width: 100%; max-width: 360px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       animation: ffModalIn 0.16s cubic-bezier(0.2, 0.8, 0.4, 1);
@@ -874,13 +1075,13 @@
     }
     .ff-modal-x {
       position: absolute;
-      top: 8px; right: 8px;
-      width: 30px; height: 30px;
+      top: 14px; right: 18px;
+      width: 24px; height: 24px;
       border-radius: 50%;
       border: none;
       background: rgba(255,255,255,0.06);
       color: var(--muted);
-      font-size: 18px; line-height: 1; font-weight: 400;
+      font-size: 16px; line-height: 1; font-weight: 400;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: background 0.12s ease, color 0.12s ease;
@@ -895,6 +1096,9 @@
     .ff-modal-msg {
       font-size: 14px; color: var(--text); line-height: 1.45;
       margin: 0 0 14px;
+      /* Leaves room for the absolute-positioned X above so text wraps
+         before reaching it. Input + actions get the full content width. */
+      padding-right: 32px;
     }
     .ff-modal-input {
       width: 100%;
@@ -1029,6 +1233,24 @@
       margin-top: 3px;
       line-height: 1.3;
     }
+    /* Tiny secondary action under the host/join pair: regenerates the
+       user's QRid (and therefore their color + group code). Quiet by
+       design — not a primary action. */
+    .ff-refresh-qrid {
+      display: block;
+      margin: 18px auto 0;
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+    }
+    .ff-refresh-qrid:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .ff-refresh-qrid:active { transform: scale(0.97); }
 
     /* ── v210: In-group state ── */
     .ff-group-header {
@@ -1165,9 +1387,14 @@
   document.head.appendChild(style);
 
   // ── Helpers ───────────────────────────────────────────────────────────
-  function colorForInitial(initial) {
+  // Stable HSL color from any string. Pass the QRid (device-unique) so
+  // each member gets their own color regardless of name; two members
+  // with the same name still get different colors. Renaming yourself
+  // doesn't change your color either.
+  function colorForKey(key) {
+    const s = String(key || '');
     let h = 0;
-    for (let i = 0; i < initial.length; i++) h = (h * 31 + initial.charCodeAt(i)) >>> 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return `hsl(${h % 360}, 72%, 58%)`;
   }
   function deriveInitial(name) {
@@ -1225,13 +1452,6 @@
         resolve(value);
       }
 
-      if (!opts.primaryOnly) {
-        const cancel = document.createElement('button');
-        cancel.className = 'ff-modal-btn';
-        cancel.textContent = opts.cancelLabel || 'Cancel';
-        cancel.onclick = () => close(null);
-        actions.appendChild(cancel);
-      }
       const ok = document.createElement('button');
       ok.className = 'ff-modal-btn ' + (opts.danger ? 'ff-modal-btn-danger' : 'ff-modal-btn-primary');
       ok.textContent = opts.primaryLabel || 'OK';
@@ -1361,8 +1581,14 @@
 
     // ── IDLE state: not in any group ──
     if (!state.currentGroup) {
+      // F.13: surface auth-mismatch (e.g. iOS Safari evicted our anon
+      // session). Refresh my code re-binds and clears the banner.
+      const authBanner = _authMismatch ? `
+        <div style="background:#3b1f1f;border:1px solid #7a3a3a;border-radius:10px;padding:10px 14px;margin:0 0 14px;color:#ffb4b4;font-size:13px;line-height:1.4;">⚠️ Your sync session reset. Tap "Refresh my code" below to fix sync.</div>
+      ` : '';
       mainEl.innerHTML = `
         <div class="ff-page ff-idle">
+          ${authBanner}
           <h2 class="ff-idle-title">Find your crew</h2>
           <p class="ff-idle-sub">Connect with friends at the festival.</p>
           <div class="ff-idle-actions">
@@ -1375,10 +1601,12 @@
               <span class="ff-bigbtn-sub">Scan a friend's QR to join their group</span>
             </button>
           </div>
+          <button class="ff-refresh-qrid" id="ff-refresh-qrid" type="button">🔄 Refresh my code</button>
         </div>
       `;
       mainEl.querySelector('#ff-host').onclick = () => hostNewGroup(mainEl);
       mainEl.querySelector('#ff-join').onclick = () => onScan(mainEl);
+      mainEl.querySelector('#ff-refresh-qrid').onclick = () => refreshMyQRid(mainEl);
       return;
     }
 
@@ -1430,7 +1658,7 @@
       const subText = m.isSelf ? '' : (offlinePrefix + fresh.text + distLine);
       return `
         <div class="ff-friend-row${offline ? ' ff-offline' : ''}${m.isSelf ? ' ff-friend-self' : ''}" data-memqrid="${escapeHTML(m.qrid)}">
-          <div class="ff-friend-dot" style="background:${colorForInitial(m.initial)}">${escapeHTML(m.initial)}</div>
+          <div class="ff-friend-dot" style="background:${colorForKey(m.qrid)}">${escapeHTML(m.initial)}</div>
           <div class="ff-friend-meta">
             <div class="ff-friend-name">${escapeHTML(m.name)} ${tagsHtml}</div>
             ${subText ? `<div class="ff-friend-sub">${escapeHTML(subText)}</div>` : ''}
@@ -1457,7 +1685,7 @@
             : (state.groupMembers[p.qrid] || { name: p.by || '?', initial: deriveInitial(p.by || '?') });
           return `
             <div class="ff-pin-row" data-pinqrid="${escapeHTML(p.qrid)}">
-              <div class="ff-friend-dot" style="background:${colorForInitial(m.initial)}">${escapeHTML(m.initial)}</div>
+              <div class="ff-friend-dot" style="background:${colorForKey(p.qrid)}">${escapeHTML(m.initial)}</div>
               <div class="ff-friend-meta">
                 <div class="ff-friend-name">${escapeHTML(m.name)}${p.isMine ? ' <span class="ff-tag">(you)</span>' : ''}</div>
                 <div class="ff-pin-msg">${escapeHTML(p.message)}</div>
@@ -1468,14 +1696,46 @@
         }).join('');
     const pinsHTML = `
       <div class="ff-pins-section">
-        <div class="ff-pins-title">📍 Pins${pinEntries.length > 0 ? `<span class="ff-pins-count">${pinEntries.length}</span>` : ''}</div>
+        <div class="ff-pins-title">📍 Solo pins${pinEntries.length > 0 ? `<span class="ff-pins-count">${pinEntries.length}</span>` : ''}</div>
         ${pinsBody}
       </div>
     `;
 
+    // Group pin section: one shared marker per group, anyone edits.
+    // Always one entry (the latest), or an empty hint.
+    const gp = state.groupPin;
+    let groupPinHTML = '';
+    if (gp) {
+      const ageMin = Math.max(0, Math.floor((Date.now() - (gp.ts || 0)) / 60000));
+      const ageText = ageMin < 1 ? 'just now' : (ageMin < 60 ? ageMin + ' min ago' : Math.floor(ageMin / 60) + ' hr ago');
+      const byLine = `by ${escapeHTML(gp.byName || '?')} · ${ageText}`;
+      const msgText = gp.message ? escapeHTML(gp.message) : '<span style="opacity:0.6">(no message)</span>';
+      groupPinHTML = `
+        <div class="ff-pins-section">
+          <div class="ff-pins-title">⭐ Group pin</div>
+          <div class="ff-pin-row ff-grouppin-row" data-grouppin="1">
+            <div class="ff-friend-dot" style="background:#ff3838;color:#fff">⭐</div>
+            <div class="ff-friend-meta">
+              <div class="ff-friend-name">${msgText}</div>
+              <div class="ff-friend-sub">${byLine}</div>
+            </div>
+            <span class="ff-row-chev">›</span>
+          </div>
+        </div>
+      `;
+    } else {
+      groupPinHTML = `
+        <div class="ff-pins-section">
+          <div class="ff-pins-title">⭐ Group pin</div>
+          <a class="ff-pins-empty" id="ff-grouppin-empty">No group pin yet. Drop one on the Map →</a>
+        </div>
+      `;
+    }
+
     mainEl.innerHTML = `
       <div class="ff-page">
         ${isHost ? `<div class="ff-group-header"><button class="ff-invite-btn" id="ff-invite" aria-label="Invite people">+ Invite</button></div>` : ''}
+        ${groupPinHTML}
         ${pinsHTML}
         <div class="ff-following">
           <div class="ff-pins-title">👯 Crew<span class="ff-pins-count">${totalMembers}</span></div>
@@ -1498,6 +1758,8 @@
     if (mapLink) mapLink.onclick = goToMap;
     const emptyPins = mainEl.querySelector('#ff-pins-empty');
     if (emptyPins) emptyPins.onclick = goToMap;
+    const emptyGroupPin = mainEl.querySelector('#ff-grouppin-empty');
+    if (emptyGroupPin) emptyGroupPin.onclick = goToMap;
     // Tapping a pin row jumps to Map and highlights — for now just go to map.
     mainEl.querySelectorAll('.ff-pin-row').forEach(row => {
       row.onclick = goToMap;
@@ -1654,7 +1916,7 @@
         const name = isMine ? (state.myName || '?') : (m ? m.name : (p.by || '?'));
         const initial = deriveInitial(name);
         return {
-          qrid, name, initial, color: colorForInitial(initial),
+          qrid, name, initial, color: colorForKey(qrid),
           lat: p.lat, lng: p.lng, message: p.message, ts: p.ts,
           isMine,
         };
@@ -1667,8 +1929,15 @@
     dropMyPin,
     removeMyPin,
     updateMyPinPosition,
+    // Group pin (one shared marker per group, anyone edits)
+    getGroupPin,
+    isGroupPinFresh,
+    ackGroupPin,
+    dropGroupPin,
+    moveGroupPin,
+    clearGroupPin,
     inGroup: () => !!state.currentGroup,
-    colorForInitial,
+    colorForKey,
     freshnessLabel,
     alert: ffAlert,
     confirm: ffConfirm,

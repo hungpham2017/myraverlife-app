@@ -4,20 +4,26 @@
 // airplane mode / on weak signal at the festival.
 //
 // Two caches:
-//   SHELL_VERSION = HTML/CSS/JS/config/JSON/sprites — bumped on every
-//     release. Includes assets/avatars-sprite.jpg (all DJ avatars in one
-//     file) for atomic 100% offline reliability.
-//   IMAGES_VERSION = the festival map (the only cross-origin CDN image we
-//     still hot-link). Sticky — only bumped to force a refresh.
+//   SHELL_VERSION  = HTML/CSS/JS/config/JSON/icons — small (~500 KB), bumped
+//     on every release. The version-bump cost is just this small set.
+//   STICKY_VERSION = heavy festival imagery (~10 MB). Survives shell bumps
+//     so a release doesn't re-download megabytes. Only bump STICKY_VERSION
+//     when one of these files actually changes.
 //
 // Resilience:
 //   - Install uses per-item add() with allSettled so one bad fetch doesn't
 //     break the whole install (resilient on weak signal).
+//   - Sticky cache fills in the activate phase's background, so install
+//     activation is fast (small SHELL) and pages get the new SW quickly.
 //   - Responses are validated before being cached so captive portals can't
 //     poison the cache with their HTML.
 
-const SHELL_VERSION  = 'myraverlife-shell-v215';
-const IMAGES_VERSION = 'myraverlife-images-v1';
+// IMPORTANT: keep this version literal in sync with version.js.
+// Browsers detect new SWs by sw.js byte changes, so the version MUST
+// be a literal in this file (not imported) — otherwise the browser
+// won't see the SW as "changed" and won't install the update.
+const SHELL_VERSION  = 'myraverlife-shell-v240';
+const STICKY_VERSION = 'myraverlife-sticky-v1';
 
 const APP_SHELL = [
   './',
@@ -25,6 +31,7 @@ const APP_SHELL = [
   './manifest.json',
   './festival.config.js',
   './findfriend.js',
+  './version.js',
   './vendor/qrcode.min.js',
   './vendor/qr-scanner.min.js',
   './vendor/qr-scanner-worker.min.js',
@@ -35,11 +42,17 @@ const APP_SHELL = [
   './assets/icon-192.png',
   './assets/icon-512.png',
   './assets/apple-touch-icon.png',
+  './assets/avatars-coords.json',
+];
+
+// Heavy assets cached separately so version bumps don't re-fetch them.
+const STICKY_ASSETS = [
   './assets/schedule-all.png',
   './assets/avatars-sprite.jpg',
-  './assets/avatars-coords.json',
   './assets/map2026.png',
 ];
+
+const STICKY_PATHS = new Set(STICKY_ASSETS.map((p) => p.replace(/^\./, '')));
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -61,15 +74,60 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
+  event.waitUntil((async () => {
+    // Failure-tolerant: if any step throws, we still try to claim clients
+    // so the new SW takes effect. Worst case the user re-fetches a heavy
+    // asset from network, which matches pre-migration behavior anyway.
+    try {
+      const keys = await caches.keys();
+      const stickyCache = await caches.open(STICKY_VERSION);
+
+      // Migrate heavy assets from any old shell cache into the sticky cache
+      // BEFORE deleting the old shell — otherwise upgrading users would
+      // re-download ~10 MB. Only fills slots not already in sticky; never
+      // overwrites. Each step is wrapped so one bad entry can't abort the
+      // whole migration (or activation).
+      const oldShells = keys.filter((k) =>
+        k.startsWith('myraverlife-shell-') && k !== SHELL_VERSION
+      );
+      for (const name of oldShells) {
+        let oldCache;
+        try { oldCache = await caches.open(name); } catch (e) { continue; }
+        for (const url of STICKY_ASSETS) {
+          try {
+            if (await stickyCache.match(url)) continue;
+            const hit = await oldCache.match(url);
+            if (hit) await stickyCache.put(url, hit.clone());
+          } catch (e) { /* skip this asset, fallback below will fetch */ }
+        }
+      }
+
+      // Drop old shell + sticky caches that don't match current versions.
+      await Promise.all(
         keys
-          .filter((k) => k.startsWith('myraverlife-shell-') && k !== SHELL_VERSION)
-          .map((k) => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
-  );
+          .filter((k) =>
+            (k.startsWith('myraverlife-shell-')  && k !== SHELL_VERSION) ||
+            (k.startsWith('myraverlife-sticky-') && k !== STICKY_VERSION)
+          )
+          .map((k) => caches.delete(k).catch(() => {}))
+      );
+
+      await self.clients.claim();
+
+      // Fill any sticky slots still missing (fresh install, or items not
+      // recovered above). Network fetch in background — claim already
+      // took effect so pages aren't blocked. Per-item match-check makes
+      // this a noop when sticky is already complete.
+      await Promise.allSettled(STICKY_ASSETS.map(async (url) => {
+        try {
+          if (await stickyCache.match(url)) return;
+          return await stickyCache.add(new Request(url, { cache: 'reload' }));
+        } catch (e) { /* offline or 404; runtime fetch handler will retry */ }
+      }));
+    } catch (e) {
+      try { await self.clients.claim(); } catch (e2) {}
+    }
+  })());
 });
 
 // Cacheable: a response that's safe to store. Rejects captive-portal pages,
@@ -120,15 +178,18 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    // Static assets (JS, CSS, JSON, images, fonts): cache-first.
+    // Static assets (JS, CSS, JSON, images, fonts): cache-first. New
+    // entries land in STICKY for the heavy festival imagery, SHELL for
+    // everything else — same routing as the install/activate phase.
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
         return fetch(event.request)
           .then((response) => {
             if (cacheable(response)) {
+              const cacheName = STICKY_PATHS.has(url.pathname) ? STICKY_VERSION : SHELL_VERSION;
               const clone = response.clone();
-              caches.open(SHELL_VERSION).then((c) => c.put(event.request, clone));
+              caches.open(cacheName).then((c) => c.put(event.request, clone));
             }
             return response;
           })
