@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>myraverlife · POI picker (DEV ONLY)</title>
+<style>
+  :root {
+    --bg: #1a1d24;
+    --panel: #242831;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --accent: #ff4fa3;
+    --border: #3a3f4b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, system-ui, sans-serif;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 16px;
+    min-height: 100vh;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    body { grid-template-columns: 1fr; }
+  }
+  h1 { font-size: 16px; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 12.5px; line-height: 1.45; margin: 0 0 12px; }
+  .note {
+    background: rgba(255,79,163,0.1);
+    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    margin: 0 0 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 4px;
+  }
+  .note b { color: var(--accent); }
+  /* ── Category picker modal ───────────────────────────────────────────── */
+  .cat-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 100;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 16px;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+  .cat-modal-backdrop.show { display: flex; }
+  .cat-modal {
+    background: var(--panel);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    width: 100%;
+    max-width: 360px;
+    max-height: 80vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+  .cat-modal-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .cat-modal-head .x {
+    margin-left: auto;
+    background: transparent; border: 0;
+    color: var(--muted);
+    font-size: 18px; line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .cat-modal-head .x:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .cat-modal-search {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-modal-search input {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  .cat-modal-search input:focus { outline: 0; border-color: var(--accent); }
+  .cat-modal-list {
+    list-style: none;
+    margin: 0; padding: 6px 0;
+    overflow-y: auto;
+  }
+  .cat-modal-list .empty {
+    padding: 14px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    cursor: default;
+  }
+  .cat-modal-list .empty:hover { background: transparent; }
+  .cat-modal-list li {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    user-select: none;
+  }
+  .cat-modal-list li:hover, .cat-modal-list li:focus {
+    background: rgba(255,79,163,0.18);
+    outline: 0;
+  }
+  .cat-modal-list .lab { flex: 1; }
+  .cat-modal-list .ct {
+    background: rgba(255,255,255,0.12);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .cat-modal-foot {
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    display: flex; gap: 6px;
+    background: rgba(0,0,0,0.18);
+  }
+  .cat-modal-foot input {
+    flex: 1;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 12.5px;
+  }
+  .cat-modal-foot input:focus { outline: 0; border-color: var(--accent); }
+  .cat-modal-foot button {
+    background: var(--accent);
+    color: white;
+    border: 0;
+    border-radius: 6px;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cat-modal-foot button:disabled { opacity: 0.4; cursor: default; }
+  /* ── Map ─────────────────────────────────────────────────────────────── */
+  .map-wrap {
+    position: relative;
+    background: var(--panel);
+    border-radius: 8px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .map-img { display: block; width: 100%; height: auto; cursor: crosshair; }
+  /* Labeled POI = red dot, sized to roughly match the legend icons on
+     the festival map artwork so the eye can pair them at a glance.
+     Drag to adjust position · hover/tap reveals an ✕ to remove. */
+  .marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: #ff2e2e;
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.55);
+    cursor: grab;
+    z-index: 5;
+    touch-action: none;
+  }
+  .marker:hover { transform: translate(-50%, -50%) scale(1.25); }
+  .marker.dragging {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.55), 0 6px 14px rgba(0,0,0,0.6);
+    z-index: 6;
+  }
+  .marker .x {
+    position: absolute;
+    top: -8px; right: -8px;
+    background: #1a1d24;
+    border: 1.5px solid white;
+    color: white;
+    border-radius: 50%;
+    width: 16px; height: 16px;
+    font-size: 10px;
+    line-height: 1;
+    display: none;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .marker:hover .x { display: flex; }
+  /* Pending marker: shown while the modal is open at the click site so the
+     user can see where their pin will land. */
+  .marker.pending {
+    background: rgba(255,79,163,0.85);
+    pointer-events: none;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 1.5px rgba(0,0,0,0.5), 0 0 0 0 rgba(255,79,163,0.6); }
+    50%      { box-shadow: 0 0 0 1.5px rgba(0,0,0,0.5), 0 0 0 8px rgba(255,79,163,0); }
+  }
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+  .panel {
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+  }
+  .panel h2 { font-size: 13px; margin: 0; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .pois-list {
+    flex: 1;
+    overflow-y: auto;
+    margin: 0; padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    max-height: 360px;
+    min-height: 80px;
+  }
+  .pois-list li {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+  }
+  .pois-list li:last-child { border-bottom: 0; }
+  .pois-list .num { color: var(--muted); width: 24px; flex-shrink: 0; }
+  .pois-list .name { flex: 1; min-width: 0; word-break: break-word; }
+  .pois-list .pos { color: var(--muted); font-family: ui-monospace, monospace; font-size: 10.5px; flex-shrink: 0; }
+  .pois-list .del {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    cursor: pointer;
+  }
+  .pois-list .del:hover { color: var(--accent); border-color: var(--accent); }
+  .empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11.5px;
+    resize: vertical;
+  }
+  .row { display: flex; gap: 8px; }
+  .btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--accent);
+    color: white;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .count { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div>
+  <h1>POI picker</h1>
+  <p class="sub">DEV-only tool. Click the map where an icon sits · a category list pops up · tap to label. Hover a placed pin to see its ✕ delete button.</p>
+
+  <div class="map-wrap" id="mapWrap">
+    <img class="map-img" id="mapImg" src="./_backups/map2026-4000.jpg" alt="EDC LV map" draggable="false" />
+  </div>
+</div>
+
+<!-- Category-picker modal: shown after a map click, before placing a POI -->
+<div class="cat-modal-backdrop" id="catModalBg">
+  <div class="cat-modal" role="dialog" aria-label="Pick category">
+    <div class="cat-modal-head">
+      <span>What's at this spot?</span>
+      <button class="x" id="catModalX" type="button" aria-label="Cancel">✕</button>
+    </div>
+    <div class="cat-modal-search">
+      <input type="text" id="catSearchInput" placeholder="Search categories…" autocomplete="off" />
+    </div>
+    <ul class="cat-modal-list" id="catModalList"></ul>
+    <div class="cat-modal-foot">
+      <input type="text" id="catCustomInput" placeholder="Or type a custom label…" maxlength="60" />
+      <button type="button" id="catCustomAdd" disabled>Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>POIs added <span class="count" id="count">0</span></h2>
+  <ul class="pois-list" id="poiList"><li class="empty">No POIs yet — click an icon on the map and pick its category.</li></ul>
+
+  <h2>Output JSON</h2>
+  <textarea id="out" readonly></textarea>
+  <div class="row">
+    <button class="btn" id="copyBtn">Copy JSON</button>
+    <button class="btn secondary" id="clearBtn">Clear all</button>
+  </div>
+  <div class="count">Stored locally; reload preserves your work.</div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'pois_v1';
+  // Categories ordered to match the festival map's legend (top → bottom
+  // on the right side of the artwork). Same wording Insomniac uses.
+  const CATS = [
+    { id: 'art-installation',   label: 'Art Installation',    emoji: '🎨' },
+    { id: 'art-car',            label: 'Art Car',             emoji: '🚐' },
+    { id: 'rides',              label: 'Rides',               emoji: '🎡' },
+    { id: 'first-aid',          label: 'First Aid',           emoji: '🏥' },
+    { id: 'accessible-viewing', label: 'Accessible Viewing',  emoji: '♿' },
+    { id: 'restrooms',          label: 'Restrooms',           emoji: '🚻' },
+    { id: 'vip-restrooms',      label: 'VIP Restrooms',       emoji: '🚻' },
+    { id: 'water-stations',     label: 'Water Stations',      emoji: '💧' },
+    { id: 'merchandise',        label: 'Merchandise',         emoji: '🛒' },
+    { id: 'general-store',      label: 'General Store',       emoji: '🏬' },
+    { id: 'vip-barber',         label: 'VIP Barber',          emoji: '💈' },
+    { id: 'marquee-skydeck',    label: 'Marquee Skydeck',     emoji: '🏙️' },
+    { id: 'ground-control',     label: 'Ground Control Oasis',emoji: '🌴' },
+    { id: 'consciousness-group',label:'Consciousness Group',  emoji: '🧘' },
+    { id: 'vip',                label: 'VIP',                 emoji: '🎫' },
+    { id: 'vip-concierge',      label: 'VIP Concierge',       emoji: '🛎' },
+    { id: 'vip-viewing-deck',   label: 'VIP Viewing Deck',    emoji: '👀' },
+    { id: 'kandi-station',      label: 'Kandi Station',       emoji: '💍' },
+    { id: 'trinket-trade',      label: 'Trinket Trade',       emoji: '🎁' },
+    { id: 'vip-water-stations', label: 'VIP Water Stations',  emoji: '💧' },
+    { id: 'photo-op',           label: 'Photo Op',            emoji: '📷' },
+    { id: 'lockers',            label: 'Lockers',             emoji: '🔑' },
+    { id: 'info',               label: 'Info',                emoji: 'ℹ️' },
+    { id: 'charging-station',   label: 'Charging Station',    emoji: '🔌' },
+    { id: 'cash-exchange',      label: 'Cash Exchange',       emoji: '💲' },
+    { id: 'lost-found',         label: 'Lost & Found',        emoji: '🔎' },
+    { id: 'maverick-heli',      label: 'Maverick Helicopters',emoji: '🚁' },
+    { id: 'insomniac-passport', label: 'Insomniac Passport',  emoji: '📕' },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"pois":[]}');
+  if (!Array.isArray(state.pois)) state.pois = [];
+  // Position of the most recent map click — held while the picker is open
+  // so we can place the POI once the user picks a category.
+  let pendingClick = null;
+
+  // ── Category modal ───────────────────────────────────────────────────
+  // Click map → modal opens with all 28 categories. Tap one → POI placed
+  // at the click site. Cancel via ✕ or Esc or clicking outside.
+  const modalBg = $('catModalBg');
+  const modalList = $('catModalList');
+  const searchInput = $('catSearchInput');
+
+  // Build (or rebuild) the category list, optionally filtered by `q`.
+  // Always called on open; called again on every keystroke in the search
+  // box. Stores the filtered list on the function so Enter-in-search can
+  // commit the top match.
+  function renderModalList(q) {
+    const query = (q || '').trim().toLowerCase();
+    const matches = query
+      ? CATS.filter(c => c.label.toLowerCase().includes(query))
+      : CATS.slice();
+    renderModalList.matches = matches;
+    modalList.innerHTML = '';
+    if (!matches.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'No match · use the custom label below';
+      modalList.appendChild(li);
+      return;
+    }
+    matches.forEach(c => {
+      const count = state.pois.filter(p => p.cat === c.id).length;
+      const li = document.createElement('li');
+      li.tabIndex = 0;
+      li.innerHTML = `<span class="lab">${c.label}</span>${count ? `<span class="ct">${count}</span>` : ''}`;
+      li.addEventListener('click', () => commitPoi(c.id));
+      li.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); commitPoi(c.id); }
+      });
+      modalList.appendChild(li);
+    });
+  }
+
+  function openCatModal() {
+    searchInput.value = '';
+    renderModalList('');
+    modalBg.classList.add('show');
+    // Focus the search box so user can start typing immediately.
+    setTimeout(() => searchInput.focus(), 0);
+  }
+  function closeCatModal() {
+    modalBg.classList.remove('show');
+    pendingClick = null;
+    // Strip the pending pulse marker.
+    [...mapWrap.querySelectorAll('.marker.pending')].forEach(m => m.remove());
+    // Clear custom input so the next click opens fresh.
+    if (customInput) { customInput.value = ''; syncCustomBtn(); }
+  }
+  function commitPoi(catId, customName) {
+    if (!pendingClick) { closeCatModal(); return; }
+    const entry = { cat: catId, left: pendingClick.left, top: pendingClick.top };
+    if (customName) entry.name = customName;
+    state.pois.push(entry);
+    save();
+    closeCatModal();
+    render();
+  }
+  $('catModalX').addEventListener('click', closeCatModal);
+  modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeCatModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalBg.classList.contains('show')) closeCatModal(); });
+
+  // Search wiring: keystroke filters the list; Enter commits the top match.
+  searchInput.addEventListener('input', () => renderModalList(searchInput.value));
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const top = (renderModalList.matches || [])[0];
+      if (top) commitPoi(top.id);
+    } else if (e.key === 'ArrowDown') {
+      // Step into the list for arrow-key navigation.
+      const first = modalList.querySelector('li[tabindex]');
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Custom-label commit path: type any name + Add (or Enter) → POI saved
+  // with cat='custom' and that name as the visible label. Used for spots
+  // that don't fit any of the 28 preset categories.
+  const customInput = $('catCustomInput');
+  const customAdd   = $('catCustomAdd');
+  function syncCustomBtn() { customAdd.disabled = !customInput.value.trim(); }
+  function commitCustom() {
+    const name = customInput.value.trim();
+    if (!name) return;
+    customInput.value = '';
+    syncCustomBtn();
+    commitPoi('custom', name);
+  }
+  customInput.addEventListener('input', syncCustomBtn);
+  customInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commitCustom(); }
+  });
+  customAdd.addEventListener('click', commitCustom);
+
+  // ── Map click → capture position, open picker ────────────────────────
+  const mapWrap = $('mapWrap');
+  mapWrap.addEventListener('click', (e) => {
+    // If the click was on a placed marker (or its ✕), the marker handles it.
+    if (e.target.closest('.marker')) return;
+    if (modalBg.classList.contains('show')) return;
+    const img = $('mapImg');
+    const rect = img.getBoundingClientRect();
+    const left = ((e.clientX - rect.left) / rect.width) * 100;
+    const top  = ((e.clientY - rect.top)  / rect.height) * 100;
+    pendingClick = { left: +left.toFixed(2), top: +top.toFixed(2) };
+    // Drop a pulsing pending marker so the user can see where the pin
+    // will land while they pick a category.
+    const ph = document.createElement('div');
+    ph.className = 'marker pending';
+    ph.style.left = pendingClick.left + '%';
+    ph.style.top  = pendingClick.top  + '%';
+    ph.textContent = '•';
+    mapWrap.appendChild(ph);
+    openCatModal();
+  });
+
+  // ── Render markers + list + JSON ─────────────────────────────────────
+  function render() {
+    // remove existing committed markers (preserve any .pending marker)
+    [...mapWrap.querySelectorAll('.marker:not(.pending)')].forEach(m => m.remove());
+    // add fresh — labeled POIs render as small red dots so the eye can
+    // skim past spots already done. Hover/tap reveals an ✕ to remove.
+    state.pois.forEach((p, i) => {
+      const label = labelFor(p);
+      const el = document.createElement('div');
+      el.className = 'marker dot';
+      el.style.left = p.left + '%';
+      el.style.top  = p.top  + '%';
+      el.title = `${i+1} · ${label} — drag to adjust · ✕ to remove`;
+      el.innerHTML = `<button class="x" type="button" data-i="${i}" aria-label="Remove">✕</button>`;
+      el.querySelector('.x').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        state.pois.splice(i, 1);
+        save();
+        render();
+      });
+      attachDrag(el, i);
+      mapWrap.appendChild(el);
+    });
+    // list
+    const list = $('poiList');
+    if (!state.pois.length) {
+      list.innerHTML = '<li class="empty">No POIs yet — click an icon on the map and pick its category.</li>';
+    } else {
+      list.innerHTML = state.pois.map((p, i) => {
+        return `<li>
+          <span class="num">${i+1}</span>
+          <span class="name">${escapeHtml(labelFor(p))}</span>
+          <span class="pos">${p.left}, ${p.top}</span>
+          <button class="del" data-i="${i}">del</button>
+        </li>`;
+      }).join('');
+      list.querySelectorAll('.del').forEach(b => b.onclick = () => {
+        state.pois.splice(+b.dataset.i, 1);
+        save();
+        render();
+      });
+    }
+    $('count').textContent = state.pois.length ? `(${state.pois.length})` : '0';
+    // JSON output: matches the MAP_POIS shape used in index.html
+    const out = state.pois.map(p => {
+      const name = labelFor(p).replace(/'/g, "\\'");
+      return `    { type:'${p.cat}', name:'${name}', mapPct:{left:${p.left}, top:${p.top}} },`;
+    }).join('\n');
+    $('out').value = out;
+  }
+
+  // Resolve the display name for a POI: custom entries store their own
+  // `.name`, preset entries pull from CATS by id.
+  function labelFor(p) {
+    if (p.name) return p.name;
+    const cat = CATS.find(c => c.id === p.cat);
+    return cat ? cat.label : p.cat;
+  }
+
+  // Drag-to-adjust: pointer-down on a dot starts a drag, move updates the
+  // POI position live, up commits + saves. Click on the ✕ button is left
+  // alone (early return on .x) so delete still works. Tracks `moved` so a
+  // bare click doesn't trigger a save/render churn.
+  function attachDrag(el, idx) {
+    let drag = null;
+    el.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.x')) return;        // delete button — let it click
+      if (e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      const rect = $('mapImg').getBoundingClientRect();
+      drag = { rect, pointerId: e.pointerId, moved: false };
+      el.classList.add('dragging');
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.pointerId) return;
+      const left = ((e.clientX - drag.rect.left) / drag.rect.width)  * 100;
+      const top  = ((e.clientY - drag.rect.top)  / drag.rect.height) * 100;
+      const cl = Math.max(0, Math.min(100, left));
+      const ct = Math.max(0, Math.min(100, top));
+      el.style.left = cl + '%';
+      el.style.top  = ct + '%';
+      state.pois[idx].left = +cl.toFixed(2);
+      state.pois[idx].top  = +ct.toFixed(2);
+      drag.moved = true;
+    });
+    const finish = (e) => {
+      if (!drag || (e && e.pointerId !== drag.pointerId)) return;
+      const moved = drag.moved;
+      drag = null;
+      el.classList.remove('dragging');
+      try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+      if (moved) { save(); render(); }
+    };
+    el.addEventListener('pointerup', finish);
+    el.addEventListener('pointercancel', finish);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  $('copyBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText($('out').value); $('copyBtn').textContent = 'Copied!'; setTimeout(() => $('copyBtn').textContent = 'Copy JSON', 1200); }
+    catch (e) { $('out').select(); document.execCommand('copy'); }
+  };
+  $('clearBtn').onclick = () => {
+    if (!confirm('Clear all POIs?')) return;
+    state.pois = []; save(); render();
+  };
+
+  render();
+</script>
+</body>
+</html>

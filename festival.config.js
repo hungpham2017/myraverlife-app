@@ -42,16 +42,18 @@ window.FESTIVAL = {
   // `tier`: 'main' = the 9 big stages most people care about,
   //         'secondary' = art cars, sponsored areas, smaller pop-ups.
   stages: [
-    // Main 9
-    { id: 'kineticFIELD',     tier: 'main', color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners', short: 'mainstage / edm' },
-    { id: 'circuitGROUNDS',   tier: 'main', color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',       short: 'techno / house / bass' },
-    { id: 'cosmicMEADOW',     tier: 'main', color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',         short: 'bass / mixed / alt' },
-    { id: 'neonGARDEN',       tier: 'main', color: '#5cff3a', genre: 'Techno (some house early)',                   short: 'techno / house' },
-    { id: 'stereoBLOOM',      tier: 'main', color: '#ff95dd', genre: 'House + tech house, groove-leaning',          short: 'house / tech house' },
-    { id: 'bionicJUNGLE',     tier: 'main', color: '#a3e635', genre: 'House + techno + disco / funk',               short: 'house / techno / disco' },
-    { id: 'quantumVALLEY',    tier: 'main', color: '#8b8dff', genre: 'Trance + progressive + melodic',              short: 'trance / prog / melodic' },
-    { id: 'bassPOD',          tier: 'main', color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',          short: 'dubstep / d&b / riddim' },
-    { id: 'wasteLAND',        tier: 'main', color: '#ff5560', genre: 'Hardstyle / hardcore',                        short: 'hardstyle / hardcore' },
+    // Main 9. `id` stays the join key (used in artists.json, CSS vars,
+    // hash anchors). `displayName` is the user-facing two-word form
+    // ("kinetic FIELD") shown in lineup, search hints, popups.
+    { id: 'kineticFIELD',     displayName: 'kinetic FIELD',   tier: 'main', color: '#ff5aa0', genre: 'Mainstage — house, EDM, big-room headliners', short: 'mainstage / edm' },
+    { id: 'circuitGROUNDS',   displayName: 'circuit GROUNDS', tier: 'main', color: '#2cc8ff', genre: 'Techno + house · Fri d&b / bass burst',       short: 'techno / house / bass' },
+    { id: 'cosmicMEADOW',     displayName: 'cosmic MEADOW',   tier: 'main', color: '#d39bff', genre: 'Mixed: bass, alt, future, live sets',         short: 'bass / mixed / alt' },
+    { id: 'neonGARDEN',       displayName: 'neon GARDEN',     tier: 'main', color: '#5cff3a', genre: 'Techno (some house early)',                   short: 'techno / house' },
+    { id: 'stereoBLOOM',      displayName: 'stereo BLOOM',    tier: 'main', color: '#ff95dd', genre: 'House + tech house, groove-leaning',          short: 'house / tech house' },
+    { id: 'bionicJUNGLE',     displayName: 'bionic JUNGLE',   tier: 'main', color: '#a3e635', genre: 'House + techno + disco / funk',               short: 'house / techno / disco' },
+    { id: 'quantumVALLEY',    displayName: 'quantum VALLEY',  tier: 'main', color: '#8b8dff', genre: 'Trance + progressive + melodic',              short: 'trance / prog / melodic' },
+    { id: 'bassPOD',          displayName: 'bass POD',        tier: 'main', color: '#2dd4c0', genre: 'Dubstep / d&b / riddim — pure bass',          short: 'dubstep / d&b / riddim' },
+    { id: 'wasteLAND',        displayName: 'waste LAND',      tier: 'main', color: '#ff5560', genre: 'Hardstyle / hardcore',                        short: 'hardstyle / hardcore' },
     // Secondary / pop-up / art-car stages
     { id: 'beatBoxCAR',       tier: 'secondary', color: '#ff9933', genre: 'BeatBox Art Car — roving bass / electro',     short: 'art car / bass' },
     { id: 'casaBACARDI',      tier: 'secondary', color: '#ddb060', genre: 'Casa Bacardí — lounge / house',               short: 'lounge / house' },

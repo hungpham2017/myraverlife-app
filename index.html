@@ -323,7 +323,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   /* Map view — official illustrated map.png with invisible tap hotspots
      overlaid at each main stage. Hotspots only become visible on hover/tap. */
   .map-wrap {
-    padding: 4px 0 16px;
+    padding: 12px 0 16px;
     max-width: 480px;
     margin: 0 auto;
   }
@@ -334,6 +334,58 @@ window.dispatchEvent(new Event('firebase-ready'));
     margin: 10px 4px 0;
     text-align: center;
     opacity: 0.75;
+  }
+  /* Map search — reuses .search-bar pill style from Lineup so both
+     searches feel like the same component. The .map-search wrapper is
+     just a positioning context for the absolutely-positioned results
+     dropdown. Container width matches the map below for visual unity. */
+  .map-search {
+    position: relative;
+    margin: 0 0 22px;
+  }
+  .map-search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: rgba(14, 16, 24, 0.96);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 25;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .map-search-results[hidden] { display: none; }
+  .map-search-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+  }
+  .map-search-result:last-child { border-bottom: 0; }
+  .map-search-result:hover, .map-search-result:focus { background: rgba(255,79,163,0.12); outline: 0; }
+  .map-search-result .name {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .map-search-result .meta {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
+  }
+  .map-search-empty {
+    padding: 14px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
   }
   .map-note a {
     color: inherit;
@@ -877,6 +929,183 @@ window.dispatchEvent(new Event('firebase-ready'));
     will-change: transform;
   }
 
+  /* POI tap targets: invisible circles overlaid on existing artwork
+     labels. No visible marker by default — the user sees the label
+     drawn on the map and taps it. Sized for thumbs (~36px) but kept
+     inside the zoom-target so they pan/zoom with the map. */
+  .poi-target {
+    position: absolute;
+    width: 36px; height: 36px;
+    margin-left: -18px; margin-top: -18px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 4;
+    /* Counter-scale so tap target stays a constant ~36px on screen at
+       any zoom level — same trick used by .friend-pin / .meeting-pin. */
+    transform: scale(var(--pin-scale, 1));
+    transform-origin: 50% 50%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .poi-target:focus-visible {
+    outline: 2px solid var(--accent, #ff2e8a);
+    outline-offset: 2px;
+  }
+  /* Selected POI marker — quiet white ring around the tapped spot.
+     Open frame (no fill) so the underlying icon stays visible. No
+     constant pulse — just a subtle scale-in. The double shadow gives
+     contrast on both dark and light areas of the map artwork. */
+  .poi-marker {
+    position: absolute;
+    width: 22px; height: 22px;
+    margin-left: -11px; margin-top: -11px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.95);
+    box-shadow:
+      0 0 0 1.5px rgba(0,0,0,0.55),
+      0 0 6px rgba(0,0,0,0.35);
+    z-index: 5;
+    pointer-events: none;
+    transform: scale(var(--pin-scale, 1));
+    transform-origin: 50% 50%;
+    animation: poiMarkerIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  .poi-marker[hidden] { display: none; }
+  @keyframes poiMarkerIn {
+    from { transform: scale(calc(var(--pin-scale, 1) * 0.6)); opacity: 0; }
+    to   { transform: scale(var(--pin-scale, 1)); opacity: 1; }
+  }
+  /* Search-result ping — one-shot ring that expands + fades to guide
+     the eye to the POI when the map flies to it. Runs once, removes
+     itself when the animation finishes (no constant pulse). */
+  .poi-flash {
+    position: absolute;
+    width: 28px; height: 28px;
+    margin-left: -14px; margin-top: -14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.95);
+    box-shadow: 0 0 0 1.5px rgba(0,0,0,0.55);
+    pointer-events: none;
+    z-index: 6;
+    transform-origin: 50% 50%;
+    animation: poiFlash 1.2s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+  }
+  @keyframes poiFlash {
+    0%   { transform: scale(calc(var(--pin-scale, 1) * 0.4)); opacity: 0; }
+    18%  { transform: scale(var(--pin-scale, 1));             opacity: 1; }
+    100% { transform: scale(calc(var(--pin-scale, 1) * 2.6)); opacity: 0; }
+  }
+
+  /* POI popup: bottom-sheet anchored to the bottom of the map area.
+     Always shows in the same place regardless of which POI was tapped
+     or how the map is zoomed/panned. Same zoom-safe pattern as the
+     Insomniac app uses. */
+  /* POI popup — compact bottom-sheet card overlaying the map. Single
+     hero row (name + distance/walk inline) keeps it ~50px tall for
+     services, ~85px with the optional stage CTA. Auto-flips to the top
+     edge when the tapped POI is in the lower half of the map (.flip-top
+     class) so the popup doesn't cover the spot you just tapped. */
+  .poi-popup {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    background: rgba(14, 16, 24, 0.94);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    width: calc(100% - 24px);
+    max-width: 360px;
+    color: var(--text);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.42);
+    z-index: 30;
+    animation: poiPopupInBottom 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  .poi-popup.flip-top {
+    bottom: auto;
+    top: 12px;
+    animation: poiPopupInTop 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  .poi-popup[hidden] { display: none; }
+  @keyframes poiPopupInBottom {
+    from { opacity: 0; transform: translate(-50%, 8px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes poiPopupInTop {
+    from { opacity: 0; transform: translate(-50%, -8px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .poi-popup-handle {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.18);
+    pointer-events: none;
+  }
+  .poi-popup-x {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 22px; height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .poi-popup-x:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+  /* Hero row: name (left, brand color for stages) + distance/walk (right,
+     muted, tabular nums). Same row keeps the popup compact. */
+  .poi-popup-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-right: 28px;          /* leave room for the X */
+  }
+  .poi-popup-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .poi-popup-meta {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .poi-popup-cta {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--cta-color, var(--accent));
+    color: var(--cta-color, var(--accent));
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+  }
+  .poi-popup-cta:hover { filter: brightness(1.18); }
+  .poi-popup-cta:active { transform: scale(0.97); }
+
   .lineup-view {
     padding: 0 18px;
     max-width: 480px;
@@ -1247,35 +1476,49 @@ window.dispatchEvent(new Event('firebase-ready'));
     display: none;
   }
   .artist-results.show { display: block; }
+  /* Two-line lineup row: name on top, time+day (left) ↔ stage (right)
+     on the meta line below. Information hierarchy is delivered through
+     color+weight, not size — name & time are bright (primary), day is
+     muted uppercase (rhythmic punctuation), stage uses brand color. */
   .artist-result {
-    padding: 7px 12px;
+    padding: 10px 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
     border-bottom: 1px solid var(--border);
-    font-size: 13.5px;
-    line-height: 1.25;
   }
   .artist-result:last-child { border-bottom: none; }
   .artist-result:hover, .artist-result.active {
     background: var(--surface-2);
   }
   .artist-result .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     object-fit: cover;
     flex-shrink: 0;
     background: var(--surface-2);
     border: 1px solid var(--border);
   }
-  .artist-result .name {
+  .artist-result .meta {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .artist-result .name {
+    font-size: 14.5px;
     font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
     color: inherit;
     text-decoration: none;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .artist-result a.name:active { opacity: 0.7; }
   .artist-result .name mark {
@@ -1284,19 +1527,35 @@ window.dispatchEvent(new Event('firebase-ready'));
     padding: 0 2px;
     border-radius: 2px;
   }
-  .artist-result .stage-tag {
+  .artist-result .meta-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     font-size: 12px;
-    color: var(--text);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+  .artist-result .meta-line .meta-left {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
     white-space: nowrap;
-    opacity: 0.85;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Time stays subtle — same treatment as Schedule's `.b-time` (opacity
+     0.7, regular weight). Stage chip on the right (with brand color) is
+     the anchor of the meta line; time is supporting info. */
+  .artist-result .meta-line .time-part {
+    opacity: 0.7;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
   .artist-result .heart {
     background: none;
     border: none;
     color: var(--muted);
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
     cursor: pointer;
     padding: 6px 8px;
@@ -1305,6 +1564,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     transition: color 0.15s, transform 0.12s;
     font-family: inherit;
     flex-shrink: 0;
+    align-self: center;
     -webkit-tap-highlight-color: transparent;
   }
   .artist-result .heart:hover { color: var(--accent); }
@@ -1313,29 +1573,29 @@ window.dispatchEvent(new Event('firebase-ready'));
     color: var(--accent);
     text-shadow: 0 0 8px rgba(255, 46, 138, 0.5);
   }
-  .artist-result .stage-tag .day-part { opacity: 0.6; font-weight: 500; }
-  .artist-result .stage-tag .time-part { opacity: 0.85; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .artist-result .stage-tag .sep { opacity: 0.4; margin: 0 4px; }
-  /* Stage chip — read-only colored label (dot + name) on each artist row.
+  /* Stage chip — colored label (dot + name) on the right of the meta line.
      Secondary stages (art cars, pop-ups) get reduced opacity so the 9 main
      stages naturally read as the headliner venues at first glance. */
-  .artist-result .stage-tag .stage-part {
+  .artist-result .meta-line .stage-part {
     font-weight: 600;
+    letter-spacing: 0.01em;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
-  .artist-result .stage-tag .stage-part.stage-secondary {
-    opacity: 0.55;
+  .artist-result .meta-line .stage-part.stage-secondary {
+    opacity: 0.65;
     font-weight: 500;
   }
-  .artist-result .stage-tag .stage-part::before {
+  .artist-result .meta-line .stage-part::before {
     content: '';
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: currentColor;
-    box-shadow: 0 0 6px currentColor;
+    box-shadow: 0 0 5px currentColor;
     flex-shrink: 0;
   }
 
@@ -1406,26 +1666,33 @@ window.dispatchEvent(new Event('firebase-ready'));
     justify-content: center;
     gap: 4px;
   }
+  /* Schedule + Lineup share the same typography scale so a row in
+     Lineup and a block in Schedule feel like the same component:
+       artist name  → 14.5px / 500
+       stage label  → 12px   / 600 / brand color
+       time         → 12px   / 500 / opacity 0.7
+  */
   .timeline-block .b-artist {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14.5px;
+    font-weight: 500;
     overflow: hidden;
-    line-height: 1.15;
+    line-height: 1.2;
     white-space: nowrap;
     text-overflow: ellipsis;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.005em;
   }
   .timeline-block .b-stageline {
-    font-size: 12.5px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    letter-spacing: 0.1px;
+    letter-spacing: 0.01em;
   }
   .timeline-block .b-time {
-    font-size: 11.5px;
+    font-size: 12px;
+    font-weight: 500;
     opacity: 0.7;
     line-height: 1.2;
     white-space: nowrap;
@@ -2142,6 +2409,8 @@ window.dispatchEvent(new Event('firebase-ready'));
   }
   function uid() { return Math.random().toString(36).slice(2, 9); }
   function stage(id) { return STAGES.find(s => s.id === id) || STAGES[0]; }
+  // Two-word user-facing name; falls back to id for stages without one.
+  function stageDisplay(id) { const s = stage(id); return s.displayName || s.id; }
 
   // Time helpers — minutes counted from festival start (FESTIVAL.dayStartHour).
   const DAY_START_HOUR = window.FESTIVAL.dayStartHour;
@@ -2313,7 +2582,7 @@ window.dispatchEvent(new Event('firebase-ready'));
             In <b>Lineup</b>, tap <b>Now</b> to see who's on stage right now<br>
             Tap a DJ's ♥ to save them to your <b>Schedule</b><br>
             Tap their name to hear their music<br>
-            Search by name (<i>"John Summit"</i>) or stage (<i>"kineticFIELD"</i>) to find them fast
+            Search by name (<i>"John Summit"</i>) or stage (<i>"kinetic FIELD"</i>) to find them fast
           </p></div></li>
           <li><span class="help-ico">👯</span><div><b>Find your crew</b><p>
             In <b>Crew</b>, tap <b>Host</b> (share your QR) or <b>Join</b> (scan a friend's)<br>
@@ -2326,16 +2595,15 @@ window.dispatchEvent(new Event('firebase-ready'));
             <b>⭐ Group pin</b> · one shared marker, anyone in the group can move it<br>
             <b>Drag</b> any pin to move · <b>tap</b> a pin to read its message + who set it last · tap the same pill again to remove
           </p></div></li>
-          <li><span class="help-ico">📱</span><div><b>Use it offline at the Speedway</b><p>
-            Open on Wi-Fi once before the festival<br>
-            <b>Fully offline:</b> Schedule, Map, hearts<br>
-            <b>Needs signal:</b> live Crew + new pins · cached shows meanwhile · syncs the moment signal returns
+          <li><span class="help-ico">🗺️</span><div><b>Find any spot fast</b><p>
+            Tap any spot on the <b>Map</b> · see what it is and how far<br>
+            Or search <i>"water"</i>, <i>"vip"</i>, <i>"first aid"</i> · closest comes first
           </p></div></li>
         </ul>
 
         <h2>tips</h2>
         <ul class="help-list">
-          <li><span class="help-ico">🎪</span><div><b>The 9 main stages</b><p style="line-height:1.65"><b style="color:#ff5aa0">kineticFIELD</b>: mainstage. House, EDM, big-room headliners.<br><b style="color:#2cc8ff">circuitGROUNDS</b>: techno + house (Fri d&amp;b / bass burst).<br><b style="color:#d39bff">cosmicMEADOW</b>: bass, alt, future, live sets.<br><b style="color:#5cff3a">neonGARDEN</b>: techno (some house early).<br><b style="color:#ff95dd">stereoBLOOM</b>: house, tech house, groove.<br><b style="color:#a3e635">bionicJUNGLE</b>: house, techno, disco / funk.<br><b style="color:#8b8dff">quantumVALLEY</b>: trance, progressive, melodic.<br><b style="color:#2dd4c0">bassPOD</b>: dubstep, d&amp;b, riddim. Pure bass.<br><b style="color:#ff5560">wasteLAND</b>: hardstyle, hardcore.</p></div></li>
+          <li><span class="help-ico">🎪</span><div><b>The 9 main stages</b><p style="line-height:1.65"><b style="color:#ff5aa0">kinetic FIELD</b>: mainstage. House, EDM, big-room headliners.<br><b style="color:#2cc8ff">circuit GROUNDS</b>: techno + house (Fri d&amp;b / bass burst).<br><b style="color:#d39bff">cosmic MEADOW</b>: bass, alt, future, live sets.<br><b style="color:#5cff3a">neon GARDEN</b>: techno (some house early).<br><b style="color:#ff95dd">stereo BLOOM</b>: house, tech house, groove.<br><b style="color:#a3e635">bionic JUNGLE</b>: house, techno, disco / funk.<br><b style="color:#8b8dff">quantum VALLEY</b>: trance, progressive, melodic.<br><b style="color:#2dd4c0">bass POD</b>: dubstep, d&amp;b, riddim. Pure bass.<br><b style="color:#ff5560">waste LAND</b>: hardstyle, hardcore.</p></div></li>
           <li><span class="help-ico">🚐</span><div><b>Pop-ups + art cars</b><p>Smaller side venues scattered around, often with their own vibe. <b>BeatBox</b> + <b>PicnicPlaytime</b> are roving art cars (they move). <b>Casa Bacardí</b>, <b>Electrolit House</b>, <b>Forest House</b>, <b>Takis Hangar</b>, <b>YeeDC</b>, <b>Insomniac Fridays</b> are themed lounges/tents. Worth wandering into if you stumble on one.</p></div></li>
         </ul>
 
@@ -2576,6 +2844,178 @@ window.dispatchEvent(new Event('firebase-ready'));
   // Festival "center" for distance calc — Downtown EDC plaza (anchor 1).
   const FESTIVAL_CENTER_GPS = SPEEDWAY_ANCHORS[0].gps;
 
+  // POIs on the festival map. Positions hand-labeled via _pois.html
+  // (dev-only picker) and normalized from assets/_pois_raw_2026-05-08.js.
+  // Stages keep `color` + `tags` so the popup CTA renders the brand-
+  // color "View lineup →" button.
+  const MAP_POIS = [
+    // ── 9 main stages — brand color + lineup CTA ────────────────────
+    { type:'stage', name:'kinetic FIELD',   mapPct:{left:41.12, top:14.7},  color:'#ff5aa0', tags:['mainstage','house','EDM'] },
+    { type:'stage', name:'bionic JUNGLE',   mapPct:{left:13.68, top:36.15}, color:'#a3e635', tags:['house','techno','disco'] },
+    { type:'stage', name:'stereo BLOOM',    mapPct:{left:33.61, top:39.85}, color:'#ff95dd', tags:['house','tech house','groove'] },
+    { type:'stage', name:'quantum VALLEY',  mapPct:{left:58.82, top:36.71}, color:'#8b8dff', tags:['trance','progressive','melodic'] },
+    { type:'stage', name:'cosmic MEADOW',   mapPct:{left:16.8,  top:53.9},  color:'#d39bff', tags:['bass','alt','live sets'] },
+    { type:'stage', name:'neon GARDEN',     mapPct:{left:59.21, top:51.52}, color:'#5cff3a', tags:['techno','house'] },
+    { type:'stage', name:'waste LAND',      mapPct:{left:21.65, top:74.56}, color:'#ff5560', tags:['hardstyle','hardcore'] },
+    { type:'stage', name:'bass POD',        mapPct:{left:40.85, top:87.74}, color:'#2dd4c0', tags:['dubstep','d&b','riddim'] },
+    { type:'stage', name:'circuit GROUNDS', mapPct:{left:60.51, top:78.38}, color:'#2cc8ff', tags:['techno','house'] },
+
+    // ── Restrooms ───────────────────────────────────────────────────
+    { type:'restrooms', name:'Restrooms', mapPct:{left:24.09, top:16.01} },
+    { type:'restrooms', name:'Restrooms', mapPct:{left:13.32, top:27.09} },
+    { type:'restrooms', name:'Restrooms', mapPct:{left:20.38, top:88.4} },
+    { type:'restrooms', name:'Restrooms', mapPct:{left:70.01, top:65.86} },
+    { type:'vip-restrooms', name:'VIP Restrooms', mapPct:{left:60.14, top:18.03} },
+    { type:'vip-restrooms', name:'VIP Restrooms', mapPct:{left:22.92, top:89.99} },
+    { type:'vip-restrooms', name:'VIP Restrooms', mapPct:{left:68.48, top:74.99} },
+    { type:'vip-restrooms', name:'VIP Restrooms', mapPct:{left:70.11, top:38.03} },
+
+    // ── Water + first aid + ground control ──────────────────────────
+    { type:'water-stations', name:'Water Stations', mapPct:{left:63.95, top:22.02} },
+    { type:'water-stations', name:'Water Stations', mapPct:{left:19.66, top:47.45} },
+    { type:'water-stations', name:'Water Stations', mapPct:{left:22.64, top:60.93} },
+    { type:'vip-water-stations', name:'VIP Water Stations', mapPct:{left:53.77, top:14.95} },
+    { type:'vip-water-stations', name:'VIP Water Stations', mapPct:{left:27.26, top:92.09} },
+    { type:'vip-water-stations', name:'VIP Water Stations', mapPct:{left:26.45, top:76.22} },
+    { type:'vip-water-stations', name:'VIP Water Stations', mapPct:{left:60.42, top:71.3} },
+    { type:'vip-water-stations', name:'VIP Water Stations', mapPct:{left:68.93, top:42.38} },
+    { type:'first-aid', name:'First Aid', mapPct:{left:22.74, top:17.96} },
+    { type:'first-aid', name:'First Aid', mapPct:{left:68.57, top:27.09} },
+    { type:'first-aid', name:'First Aid', mapPct:{left:13.77, top:79.27} },
+    { type:'first-aid', name:'First Aid', mapPct:{left:52.54, top:78.11} },
+    { type:'ground-control', name:'Ground Control Oasis', mapPct:{left:20.92, top:19.41} },
+    { type:'ground-control', name:'Ground Control Oasis', mapPct:{left:12.41, top:76.01} },
+
+    // ── VIP services ────────────────────────────────────────────────
+    { type:'vip', name:'VIP', mapPct:{left:53.44, top:25.79} },
+    { type:'vip', name:'VIP', mapPct:{left:27.45, top:89.27} },
+    { type:'vip', name:'VIP', mapPct:{left:27.9,  top:74.7} },
+    { type:'vip', name:'VIP', mapPct:{left:62.77, top:69.63} },
+    { type:'vip', name:'VIP', mapPct:{left:61.59, top:40.79} },
+    { type:'vip', name:'VIP', mapPct:{left:67.75, top:34.56} },
+    { type:'vip', name:'VIP', mapPct:{left:17.12, top:45.28} },
+    { type:'vip', name:'VIP', mapPct:{left:31.48, top:37.78} },
+    { type:'vip', name:'VIP', mapPct:{left:66.38, top:44.56} },
+    { type:'vip-concierge', name:'VIP Concierge', mapPct:{left:56.34, top:14.93} },
+    { type:'vip-concierge', name:'VIP Concierge', mapPct:{left:68.12, top:69.12} },
+    { type:'vip-concierge', name:'VIP Concierge', mapPct:{left:67.48, top:38.47} },
+    { type:'vip-viewing-deck', name:'VIP Viewing Deck', mapPct:{left:49.78, top:19.77} },
+    { type:'vip-viewing-deck', name:'VIP Viewing Deck', mapPct:{left:65.76, top:69.05} },
+    { type:'vip-barber', name:'VIP Barber', mapPct:{left:66.58, top:71.95} },
+    { type:'marquee-skydeck', name:'Marquee Skydeck', mapPct:{left:37.32, top:20.86} },
+    { type:'marquee-skydeck', name:'Marquee Skydeck', mapPct:{left:56.7,  top:79.85} },
+    { type:'marquee-skydeck', name:'Marquee Skydeck', mapPct:{left:68.21, top:40.5} },
+
+    // ── Photo · Merch · Cash · Storage ──────────────────────────────
+    { type:'photo-op', name:'Photo Op', mapPct:{left:58.24, top:16.3} },
+    { type:'photo-op', name:'Photo Op', mapPct:{left:38.77, top:22.45} },
+    { type:'photo-op', name:'Photo Op', mapPct:{left:64.58, top:39.77} },
+    { type:'photo-op', name:'Photo Op', mapPct:{left:44.29, top:47.96} },
+    { type:'merchandise', name:'Merchandise', mapPct:{left:55.53, top:17.89} },
+    { type:'merchandise', name:'Merchandise', mapPct:{left:41.94, top:46.95} },
+    { type:'merchandise', name:'Merchandise', mapPct:{left:44.93, top:60.57} },
+    { type:'general-store', name:'General Store', mapPct:{left:42.39, top:62.38} },
+    { type:'cash-exchange', name:'Cash Exchange', mapPct:{left:33.06, top:64.05} },
+    { type:'lost-found', name:'Lost & Found', mapPct:{left:30.43, top:48.54} },
+    { type:'lockers', name:'Lockers', mapPct:{left:55.89, top:26.22} },
+    { type:'lockers', name:'Lockers', mapPct:{left:24.97, top:91.12} },
+    { type:'lockers', name:'Lockers', mapPct:{left:70.38, top:69.05} },
+    { type:'lockers', name:'Lockers', mapPct:{left:31.16, top:62.6} },
+
+    // ── Charging · Passport · Kandi · Trinket ───────────────────────
+    { type:'charging-station', name:'Charging Station', mapPct:{left:43.21, top:79.7} },
+    { type:'charging-station', name:'Charging Station', mapPct:{left:43.93, top:54.27} },
+    { type:'charging-station', name:'Charging Station', mapPct:{left:25.47, top:31.51} },
+    { type:'insomniac-passport', name:'Insomniac Passport', mapPct:{left:44.29, top:51.3} },
+    { type:'kandi-station', name:'Kandi Station', mapPct:{left:56.7,  top:19.77} },
+    { type:'kandi-station', name:'Kandi Station', mapPct:{left:62.5,  top:38.25} },
+    { type:'trinket-trade', name:'Trinket Trade', mapPct:{left:54.26, top:19.7} },
+
+    // ── Accessible viewing · Consciousness · Info · Heli ────────────
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:37.95, top:16.44} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:40.85, top:82.09} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:18.66, top:74.27} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:55.71, top:76.88} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:61.59, top:35.5} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:13.68, top:57.24} },
+    { type:'accessible-viewing', name:'Accessible Viewing', mapPct:{left:57.97, top:49.12} },
+    { type:'consciousness-group', name:'Consciousness Group', mapPct:{left:29.53, top:61.44} },
+    { type:'info', name:'Info', mapPct:{left:24.55, top:65.64} },
+    { type:'info', name:'Info', mapPct:{left:47.19, top:51.88} },
+    { type:'info', name:'Info', mapPct:{left:21.2,  top:45.28} },
+    { type:'maverick-heli', name:'Maverick Helicopters', mapPct:{left:51.36, top:76.01} },
+
+    // ── Gates ───────────────────────────────────────────────────────
+    { type:'gate', name:'Gate S',     mapPct:{left:71.2,  top:23.69} },
+    { type:'gate', name:'Gates C/D',  mapPct:{left:8.42,  top:53.83} },
+    { type:'gate', name:'Gate P',     mapPct:{left:12.23, top:84.85} },
+    { type:'gate', name:'ADA Access Center', mapPct:{left:64.13, top:19.77} },
+
+    // ── Lounges + sponsor venues + WiFi ─────────────────────────────
+    { type:'lounge', name:'Casa Bacardí',                  mapPct:{left:30.34, top:24.85} },
+    { type:'lounge', name:'Insomniac Radio',               mapPct:{left:15.85, top:23.9} },
+    { type:'lounge', name:'Insomniac Fridays',             mapPct:{left:34.33, top:33.47} },
+    { type:'lounge', name:'Bamboo Village',                mapPct:{left:15.26, top:65.07} },
+    { type:'lounge', name:'Forest House',                  mapPct:{left:69.29, top:59.7} },
+    { type:'lounge', name:'VOLTA Anastasia Beverly Hills', mapPct:{left:56.52, top:24.63} },
+    { type:'lounge', name:'PLUR',                          mapPct:{left:18.39, top:21.44} },
+    { type:'lounge', name:'Ubuntu',                        mapPct:{left:13.86, top:72.74} },
+    { type:'lounge', name:'Insomniac',                     mapPct:{left:49.64, top:49.27} },
+    { type:'lounge', name:'White Claw',                    mapPct:{left:42.66, top:70.28} },
+    { type:'lounge', name:'Four Loko',                     mapPct:{left:37.95, top:77.82} },
+    { type:'lounge', name:'Sierra Nevada',                 mapPct:{left:29.35, top:40.79} },
+    { type:'lounge', name:'Electrolit',                    mapPct:{left:38.13, top:64.12} },
+    { type:'lounge', name:'Lunchbox Packs',                mapPct:{left:43.57, top:64.41} },
+    { type:'lounge', name:'Takis',                         mapPct:{left:39.41, top:48.78} },
+    { type:'lounge', name:'Eargasm',                       mapPct:{left:38.61, top:41.84} },
+    { type:'lounge', name:'END Overdose',                  mapPct:{left:35.14, top:62.45} },
+    { type:'wifi',   name:'WiFi', mapPct:{left:26.18, top:29.56} },
+    { type:'wifi',   name:'WiFi', mapPct:{left:56.7,  top:55.35} },
+    { type:'wifi',   name:'WiFi', mapPct:{left:29.44, top:69.27} },
+
+    // ── Themed areas + landmarks ────────────────────────────────────
+    { type:'area', name:'VIP Century Wheel',     mapPct:{left:58.12, top:22.31} },
+    { type:'area', name:'Verizon Viewing Deck',  mapPct:{left:55.62, top:74.85} },
+    { type:'area', name:'Downtown EDC',          mapPct:{left:35.96, top:54.56} },
+    { type:'themed', name:'Diamond Wheel',       mapPct:{left:50.95, top:52.88} },
+    { type:'themed', name:'Daisy Fields',        mapPct:{left:28.53, top:27.6} },
+    { type:'themed', name:'Daisy Lane Performers', mapPct:{left:40.94, top:38.25} },
+    { type:'themed', name:'Flower Tunnel',       mapPct:{left:40.76, top:33.47} },
+    { type:'themed', name:'Flower Tunnel',       mapPct:{left:29.71, top:32.6} },
+    { type:'themed', name:'Rainbow Bazaar',      mapPct:{left:34.42, top:48.32} },
+    { type:'themed', name:'Pixel Forest',        mapPct:{left:57.65, top:59.53} },
+    { type:'themed', name:'Nomads Land',         mapPct:{left:31.34, top:80.14} },
+    { type:'themed', name:'Nomads Portal',       mapPct:{left:33.26, top:70.47} },
+    { type:'themed', name:'Salvage City',        mapPct:{left:20.92, top:85.64} },
+    { type:'themed', name:'Paradisium',          mapPct:{left:17.75, top:41.37} },
+    { type:'themed', name:'Beatbox Art Car',     mapPct:{left:31.97, top:43.32} },
+    { type:'themed', name:'Rave Wave',           mapPct:{left:36.5,  top:72.89} },
+    { type:'themed', name:'Musik Fest',          mapPct:{left:19.93, top:62.89} },
+    { type:'themed', name:'Avengers',            mapPct:{left:38.37, top:70.03} },
+    { type:'themed', name:'Geist',               mapPct:{left:57.66, top:64.53} },
+    { type:'themed', name:'Anima',               mapPct:{left:32.52, top:30.72} },
+    { type:'themed', name:'Ghost',               mapPct:{left:46.01, top:49.99} },
+    { type:'themed', name:'Glitched Bus',        mapPct:{left:61.93, top:55.43} },
+    { type:'themed', name:'Elder Mother',        mapPct:{left:64.49, top:58.54} },
+    { type:'themed', name:'RNBW Lost Angel',     mapPct:{left:37.5,  top:18.47} },
+    { type:'themed', name:'Unity',               mapPct:{left:61.68, top:63.4} },
+    { type:'themed', name:'Chasm',               mapPct:{left:25.96, top:79.22} },
+    { type:'themed', name:'Bloom & Bloom',       mapPct:{left:30.19, top:83.8} },
+
+    // ── Rides ───────────────────────────────────────────────────────
+    { type:'rides', name:'Zero Gravity',  mapPct:{left:33.7,  top:20.06} },
+    { type:'rides', name:'Vertigo',       mapPct:{left:12.68, top:43.25} },
+    { type:'rides', name:'Wave Swinger',  mapPct:{left:45.83, top:41.15} },
+    { type:'rides', name:'Star Fighter',  mapPct:{left:49.28, top:36.66} },
+    { type:'rides', name:'Crazy Dumbo',   mapPct:{left:24.46, top:49.27} },
+    { type:'rides', name:'Supershot',     mapPct:{left:19.75, top:72.24} },
+    { type:'rides', name:'Zipper',        mapPct:{left:26.59, top:85.94} },
+    { type:'rides', name:'Dreamland Ride',mapPct:{left:36.59, top:50.93} },
+    { type:'rides', name:'Arcade',        mapPct:{left:67.38, top:53.08} },
+    { type:'rides', name:'I/O Disco',     mapPct:{left:69.47, top:56.33} },
+    { type:'rides', name:'Blackout',      mapPct:{left:66.58, top:66.88} },
+  ];
+
   // (Map rotation is now derived from the calibration anchors, not
   // hardcoded — see _xform.headingToScreenAngle below.)
 
@@ -2595,6 +3035,26 @@ window.dispatchEvent(new Event('firebase-ready'));
     if (mi < 10)   return mi.toFixed(1) + ' mi';
     if (mi < 100)  return Math.round(mi) + ' mi';
     return Math.round(mi / 10) * 10 + ' mi';
+  }
+
+  // Conservative festival walk estimate from a straight-line GPS dist.
+  // Errs on the side of "longer than reality" so the user doesn't miss
+  // their set. Three adjustments:
+  //   1. Path-detour factor 1.5× — fences, gates, and winding paths
+  //      add real distance; bumped from the urban 1.3 to be safer.
+  //   2. Crowd-aware pace by time of day (slower than urban norm):
+  //        peak (8 pm – 2 am):    25 m/min (~0.42 m/s) — packed crowds
+  //        off-peak (else):       45 m/min (~0.75 m/s) — light crowds
+  //   3. Round UP via Math.ceil — always quote the safer number.
+  // Display with a `~` prefix so the user reads it as an estimate.
+  function walkEstimate(haversineM) {
+    if (!isFinite(haversineM) || haversineM < 0) return { meters: 0, mins: 1 };
+    const meters = haversineM * 1.5;
+    const h = (typeof appNow === 'function' ? appNow() : new Date()).getHours();
+    const isPeak = (h >= 20 || h < 2);
+    const paceMpm = isPeak ? 25 : 45;
+    const mins = Math.max(1, Math.ceil(meters / paceMpm));
+    return { meters, mins };
   }
 
   // GPS → map-percent. Dispatches to whichever transform the
@@ -2631,12 +3091,161 @@ window.dispatchEvent(new Event('firebase-ready'));
     return { lat, lng };
   }
 
+  // ── Map search ────────────────────────────────────────────────────────
+  // Type to filter MAP_POIS by name or type · sorted by distance from
+  // user when GPS known. Tap a result → fly the map to it + open popup.
+  // Vocabulary aliases (TYPE_ALIASES) mean searching common synonyms
+  // ("toilet" → restrooms, "plug" → charging, "medic" → first aid)
+  // hits the right places without users having to know our term.
+  const TYPE_ALIASES = {
+    // ── Restrooms / sanitation ────────────────────────────────────────
+    'restrooms':          ['toilet', 'bathroom', 'wc', 'loo', 'washroom', 'porta', 'john'],
+    'vip-restrooms':      ['toilet', 'bathroom', 'wc', 'washroom'],
+    // ── Charging ──────────────────────────────────────────────────────
+    'charging-station':   ['outlet', 'plug', 'electric', 'power', 'phone', 'charger', 'battery', 'dead phone'],
+    // ── Water ─────────────────────────────────────────────────────────
+    'water-stations':     ['drink', 'refill', 'hydration', 'hydrate', 'h2o', 'fountain'],
+    'vip-water-stations': ['drink', 'refill', 'hydrate', 'h2o'],
+    // ── First aid / medical (high priority — many ways to ask) ────────
+    'first-aid':          ['medic', 'medical', 'help', 'emergency', 'nurse', 'doctor', 'injury',
+                           'hurt', 'sick', 'ambulance', 'aid', '911', 'er',
+                           'pain', 'fever', 'dizzy', 'faint', 'bandage', 'bandaid', 'cut', 'bleeding'],
+    // ── Money / shopping ──────────────────────────────────────────────
+    'cash-exchange':      ['atm', 'money', 'bank', 'cash', 'withdraw'],
+    'merchandise':        ['merch', 'shop', 'store', 'tee', 'shirt', 'hat', 'swag', 'clothing'],
+    'general-store':      ['store', 'shop', 'snacks', 'convenience'],
+    // ── Wellness / support ────────────────────────────────────────────
+    'lost-found':         ['lost', 'missing', 'found'],
+    'consciousness-group':['wellness', 'support', 'mental', 'anxiety', 'panic', 'sober', 'comedown'],
+    'ground-control':     ['oasis', 'chill', 'rest', 'relax', 'quiet'],
+    // ── Other services ────────────────────────────────────────────────
+    'maverick-heli':      ['helicopter', 'chopper', 'heli', 'tour', 'scenic'],
+    'photo-op':           ['picture', 'selfie', 'photo', 'photo booth', 'ig', 'instagram'],
+    'kandi-station':      ['kandi', 'beads', 'bracelet', 'plur'],
+    'trinket-trade':      ['trade', 'swap', 'trinket'],
+    'lockers':            ['storage', 'locker', 'bags', 'valuables'],
+    'info':               ['help', 'desk', 'information', 'ask', 'question'],
+    // ── VIP-specific ──────────────────────────────────────────────────
+    'vip-barber':         ['barber', 'haircut', 'hair'],
+    'vip-viewing-deck':   ['deck', 'view', 'viewing'],
+    'marquee-skydeck':    ['skydeck', 'deck', 'view', 'rooftop'],
+    // ── Discovery (browse-style searches) ─────────────────────────────
+    'rides':              ['ride', 'fun', 'carnival', 'swing', 'attraction'],
+    'themed':             ['art', 'installation', 'sculpture', 'decor'],
+    'lounge':             ['bar', 'drinks', 'tent', 'hangout'],
+    'gate':               ['entry', 'exit', 'entrance', 'in', 'out'],
+    'wifi':               ['internet', 'signal', 'connection'],
+    'stage':              ['music', 'dj', 'show', 'set'],
+  };
+  function setupMapSearch(wrap) {
+    const input   = wrap.querySelector('#mapSearchInput');
+    const clear   = wrap.querySelector('#mapSearchClear');
+    const results = wrap.querySelector('#mapSearchResults');
+    if (!input || !results) return;
+
+    function renderMatches() {
+      const q = input.value.trim().toLowerCase();
+      clear.classList.toggle('show', q.length > 0);
+      if (!q) { results.setAttribute('hidden', ''); return; }
+
+      const u = window._lastUserPos;
+      const matches = [];
+      MAP_POIS.forEach((poi, idx) => {
+        // Match against name, type, AND vocabulary aliases so common
+        // synonyms ("toilet" → restrooms) hit the right POIs.
+        const aliases = (TYPE_ALIASES[poi.type] || []).join(' ');
+        const haystack = ((poi.name || '') + ' ' + (poi.type || '') + ' ' + aliases).toLowerCase();
+        if (!haystack.includes(q)) return;
+        let meters = Infinity;
+        if (u && poi.mapPct) {
+          const gps = mapPercentToGps(poi.mapPct.left, poi.mapPct.top);
+          if (gps) meters = haversineMeters(u.lat, u.lng, gps.lat, gps.lng);
+        }
+        matches.push({ poi, idx, meters });
+      });
+      // Closest first when GPS known; otherwise stable order.
+      if (u) matches.sort((a, b) => a.meters - b.meters);
+
+      if (!matches.length) {
+        results.innerHTML = '<div class="map-search-empty">No matches</div>';
+        results.removeAttribute('hidden');
+        return;
+      }
+
+      results.innerHTML = matches.slice(0, 30).map(m => {
+        let metaText = '';
+        if (isFinite(m.meters)) {
+          metaText = `~${walkEstimate(m.meters).mins} min`;
+        }
+        return `<div class="map-search-result" tabindex="0" data-idx="${m.idx}"><span class="name">${escape(m.poi.name)}</span>${metaText ? `<span class="meta">${metaText}</span>` : ''}</div>`;
+      }).join('');
+      results.querySelectorAll('.map-search-result').forEach(el => {
+        el.onclick = (e) => { e.stopPropagation(); selectMapResult(Number(el.dataset.idx)); };
+      });
+      results.removeAttribute('hidden');
+    }
+
+    function selectMapResult(poiIdx) {
+      const poi = MAP_POIS[poiIdx];
+      if (!poi || !poi.mapPct) return;
+      // Hide results, blur the input. Leave the input value as the
+      // chosen name so the user has visual confirmation of what they
+      // searched for.
+      results.setAttribute('hidden', '');
+      input.value = poi.name;
+      clear.classList.add('show');
+      input.blur();
+      // Fly the map to the POI, then open its popup. Small delay lets
+      // the zoom animation start before the popup slides up.
+      if (mapZoom.zoomToImagePct) {
+        mapZoom.zoomToImagePct(poi.mapPct.left, poi.mapPct.top, 2.5);
+      }
+      // Brief ping at the POI to guide the eye. Runs once, then the
+      // element removes itself — no constant pulse left behind.
+      const zoomTarget = wrap.querySelector('#mapZoomTarget');
+      if (zoomTarget) {
+        const flash = document.createElement('div');
+        flash.className = 'poi-flash';
+        flash.style.left = poi.mapPct.left + '%';
+        flash.style.top  = poi.mapPct.top  + '%';
+        zoomTarget.appendChild(flash);
+        setTimeout(() => flash.remove(), 1250);
+      }
+      setTimeout(() => openPOIPopup(poiIdx), 250);
+    }
+
+    input.addEventListener('input', renderMatches);
+    input.addEventListener('focus', renderMatches);
+    clear.addEventListener('click', () => {
+      input.value = '';
+      clear.classList.remove('show');
+      results.setAttribute('hidden', '');
+      input.focus();
+    });
+    // Close results on tap outside the search box.
+    document.addEventListener('click', (e) => {
+      if (!wrap.querySelector('.map-search').contains(e.target)) {
+        results.setAttribute('hidden', '');
+      }
+    });
+  }
+
   function renderMap() {
     main.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'map-wrap';
 
     wrap.innerHTML = `
+      <div class="map-search">
+        <div class="search-bar">
+          <input id="mapSearchInput" type="text" placeholder="search water, restroom, stages, art…" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" />
+          <span class="search-ico" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </span>
+          <button type="button" id="mapSearchClear" class="input-clear" aria-label="Clear">×</button>
+        </div>
+        <div class="map-search-results" id="mapSearchResults" hidden></div>
+      </div>
       <div class="map-img-container" id="mapContainer">
         <div class="map-zoom-target" id="mapZoomTarget">
           <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
@@ -2649,6 +3258,17 @@ window.dispatchEvent(new Event('firebase-ready'));
           <div id="friendPins"></div>
           <!-- v210: meeting pins (deliberate markers, stick + ball). -->
           <div id="meetingPins"></div>
+          <!-- POI tap targets (invisible) at each map label position. -->
+          <div id="poiTargets"></div>
+          <!-- Selected POI marker (drops on tap, lives inside zoom target
+               so it pans/zooms with the map). -->
+          <div class="poi-marker" id="poiMarker" hidden></div>
+        </div>
+        <!-- POI popup (bottom-anchored card, fixed position). -->
+        <div class="poi-popup" id="poiPopup" hidden>
+          <div class="poi-popup-handle"></div>
+          <button class="poi-popup-x" type="button" aria-label="Close" onclick="closePOIPopup()">×</button>
+          <div id="poiPopupBody"></div>
         </div>
         <div class="map-compass" aria-label="Compass">
           <svg class="map-compass-needle" id="mapCompassNeedle" viewBox="-15 -15 30 30">
@@ -2681,6 +3301,7 @@ window.dispatchEvent(new Event('firebase-ready'));
 
     main.appendChild(wrap);
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
+    setupMapSearch(wrap);
 
     // Self dot uses your QRid-hashed color (same color friends see for you).
     const userPinEl = wrap.querySelector('#userPin');
@@ -2702,6 +3323,9 @@ window.dispatchEvent(new Event('firebase-ready'));
     window.addEventListener('myraver-grouppin-update', renderMeetingPins);
     setupDropPinButton();
     setupGroupPinButton();
+
+    // POI callouts (stages / gates / lounges / areas).
+    renderPOITargets();
 
     // Auto-fetch GPS on Map tab open. Browser handles the permission
     // prompt for first-timers; silent error if denied.
@@ -2879,6 +3503,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     const gp = window.findFriends.getGroupPin && window.findFriends.getGroupPin();
     if (!gp) return;
     closeFriendSheet();
+    closePOIPopup();
     const wrap = document.querySelector('.map-img-container');
     if (!wrap) return;
     const safe = (s) => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
@@ -2906,6 +3531,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   // a single role (display).
   function showPinSheet(pin) {
     closeFriendSheet();
+    closePOIPopup();
     const wrap = document.querySelector('.map-img-container');
     if (!wrap) return;
     const sheet = document.createElement('div');
@@ -2929,6 +3555,109 @@ window.dispatchEvent(new Event('firebase-ready'));
       sheet._autoClose = setTimeout(closeFriendSheet, 5000);
     }
   }
+
+  // POI callouts: render invisible tap targets at each MAP_POIS position
+  // and show an anchored popup with arrow when tapped.
+  function renderPOITargets() {
+    const container = document.getElementById('poiTargets');
+    if (!container || !MAP_POIS) return;
+    container.innerHTML = '';
+    MAP_POIS.forEach((poi, idx) => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'poi-target';
+      el.style.left = poi.mapPct.left + '%';
+      el.style.top  = poi.mapPct.top  + '%';
+      el.setAttribute('aria-label', poi.name);
+      el.dataset.poiIdx = String(idx);
+      el.onclick = (e) => { e.stopPropagation(); openPOIPopup(idx); };
+      container.appendChild(el);
+    });
+  }
+
+  function openPOIPopup(idx) {
+    const popup = document.getElementById('poiPopup');
+    const body  = document.getElementById('poiPopupBody');
+    const marker = document.getElementById('poiMarker');
+    if (!popup || !body || !MAP_POIS[idx]) return;
+    const poi = MAP_POIS[idx];
+    // Single-popup invariant: opening this one closes any friend / pin
+    // / group-pin sheet, so the user never sees two overlapping at once.
+    closeFriendSheet();
+
+    // Build popup content. Compact: one hero row (name + distance/walk
+    // on the same line) plus an optional CTA below for stages. See
+    // walkMinutes() for the festival-realistic pace formula.
+    const safe = (s) => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const nameStyle = poi.color ? `style="color:${poi.color}"` : '';
+
+    let metaHTML = '';
+    const u = window._lastUserPos;
+    if (u && poi.mapPct) {
+      const poiGps = mapPercentToGps(poi.mapPct.left, poi.mapPct.top);
+      if (poiGps) {
+        const meters = haversineMeters(u.lat, u.lng, poiGps.lat, poiGps.lng);
+        metaHTML = `<div class="poi-popup-meta">~${walkEstimate(meters).mins} min walk</div>`;
+      }
+    }
+
+    let html = `<div class="poi-popup-hero"><div class="poi-popup-name" ${nameStyle}>${safe(poi.name)}</div>${metaHTML}</div>`;
+
+    if (poi.type === 'stage') {
+      const ctaColor = poi.color || 'var(--accent)';
+      html += `<button class="poi-popup-cta" style="--cta-color:${ctaColor}" type="button" onclick="filterLineupByStage('${safe(poi.name)}')">View lineup →</button>`;
+    }
+    body.innerHTML = html;
+
+    // Popup always anchors to the bottom edge — predictability beats
+    // cleverness (Apple/Google Maps pattern). No on-map marker — the
+    // popup name tells the user what they tapped; an extra marker ring
+    // just adds visual noise to an already-busy map artwork.
+    popup.classList.remove('flip-top');
+    popup.removeAttribute('hidden');
+    if (marker) marker.setAttribute('hidden', '');
+    // Auto-close after 6s, matching the friend / pin sheet pattern so
+    // the popup doesn't linger if the user navigates away mentally.
+    // Tapping the CTA or another POI clears + resets it via
+    // closePOIPopup (the new opener does both).
+    if (popup._autoClose) clearTimeout(popup._autoClose);
+    popup._autoClose = setTimeout(closePOIPopup, 6000);
+  }
+
+  function closePOIPopup() {
+    const popup = document.getElementById('poiPopup');
+    const marker = document.getElementById('poiMarker');
+    if (popup) {
+      if (popup._autoClose) { clearTimeout(popup._autoClose); popup._autoClose = null; }
+      popup.setAttribute('hidden', '');
+      popup.classList.remove('flip-top');
+    }
+    if (marker) marker.setAttribute('hidden', '');
+  }
+
+  // Filter Lineup tab by stage when "View lineup →" is tapped.
+  function filterLineupByStage(stage) {
+    closePOIPopup();
+    const tab = document.querySelector('button[data-tab="lineup"]');
+    if (tab) tab.click();
+    setTimeout(() => {
+      const input = document.getElementById('artistInput');
+      if (input) {
+        input.value = stage;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }, 50);
+  }
+
+  // Dismiss POI popup on outside-tap, on map zoom/pan, on Esc.
+  document.addEventListener('click', (e) => {
+    const popup = document.getElementById('poiPopup');
+    if (!popup || popup.hasAttribute('hidden')) return;
+    if (popup.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.poi-target')) return;
+    closePOIPopup();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePOIPopup(); });
 
   // v210: own pin drag handler. Distinguishes tap (open sheet) from drag
   // (move + save). Threshold = 6px of movement.
@@ -3043,6 +3772,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   // Auto-closes after 5s. Tapping outside the sheet closes it instantly.
   function showFriendSheet(friend, data, color) {
     closeFriendSheet();
+    closePOIPopup();
     const wrap = document.querySelector('.map-img-container');
     if (!wrap) return;
     const sheet = document.createElement('div');
@@ -3273,6 +4003,22 @@ window.dispatchEvent(new Event('firebase-ready'));
       apply();
     };
 
+    // Animated "fly to" — used by map search to jump to a POI. Zooms
+    // to `targetScale` (default 2.5) AND centers on the POI. Unlike
+    // panToImagePct this works regardless of current scale.
+    mapZoom.zoomToImagePct = (leftPct, topPct, targetScale) => {
+      const ts = Math.min(MAX, Math.max(MIN, targetScale || 2.5));
+      scale = ts;
+      const cw = container.clientWidth, ch = container.clientHeight;
+      const imgX = (leftPct / 100) * cw;
+      const imgY = (topPct  / 100) * ch;
+      tx = (cw / 2 - imgX) * scale;
+      ty = (ch / 2 - imgY) * scale;
+      target.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.4, 1)';
+      apply();
+      setTimeout(() => { target.style.transition = ''; }, 380);
+    };
+
     // Buttons
     container.querySelectorAll('.map-zoom-btn').forEach(btn => {
       btn.onclick = (e) => {
@@ -3300,13 +4046,13 @@ window.dispatchEvent(new Event('firebase-ready'));
     }
 
     container.addEventListener('touchstart', (e) => {
+      const t = e.target;
       if (e.touches.length === 2) {
         pinchStart = { dist: dist(e.touches), scale, mid: midpoint(e.touches), tx, ty };
         panStart = null;
       } else if (e.touches.length === 1 && scale > 1) {
         // Don't pan when the touch lands on a draggable pin — the pin
         // owns the gesture, otherwise pin and map move together (bug).
-        const t = e.target;
         if (t && t.closest && (t.closest('.meeting-pin') || t.closest('.map-zoom-btn'))) {
           panStart = null;
           return;
@@ -3549,7 +4295,7 @@ window.dispatchEvent(new Event('firebase-ready'));
         ${imgHTML}
         <div class="b-content">
           <div class="b-artist">${escape(pick.artist)}</div>
-          <div class="b-stageline" style="color:${s.color}">${escape(s.id)}</div>
+          <div class="b-stageline" style="color:${s.color}">${escape(s.displayName || s.id)}</div>
           <div class="b-time">${escape(timeText)}</div>
         </div>
         <button class="b-del" aria-label="Remove from schedule">♥</button>
@@ -3778,12 +4524,14 @@ window.dispatchEvent(new Event('firebase-ready'));
         a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
       );
     }
-    // Match artist name OR stage id.
+    // Match artist name OR stage (matches BOTH the internal id like
+    // `kineticFIELD` and the two-word displayName `kinetic FIELD`, so
+    // typing either form finds the artists at that stage).
     const filtered = q
-      ? all.filter(a =>
-          a.name.toLowerCase().includes(q) ||
-          a.stage.toLowerCase().includes(q)
-        )
+      ? all.filter(a => {
+          const stageStr = (a.stage + ' ' + stageDisplay(a.stage)).toLowerCase();
+          return a.name.toLowerCase().includes(q) || stageStr.includes(q);
+        })
       : all;
 
     artistResults.innerHTML = '';
@@ -3792,9 +4540,10 @@ window.dispatchEvent(new Event('firebase-ready'));
       e.className = 'artist-result-empty';
       if (q) {
         // Smart fallback: ignore day + Now filters, find ALL name/stage matches.
-        const allHits = ARTISTS.filter(a =>
-          a.name.toLowerCase().includes(q) || a.stage.toLowerCase().includes(q)
-        );
+        const allHits = ARTISTS.filter(a => {
+          const stageStr = (a.stage + ' ' + stageDisplay(a.stage)).toLowerCase();
+          return a.name.toLowerCase().includes(q) || stageStr.includes(q);
+        });
         const dayShort = { 1: 'Fri', 2: 'Sat', 3: 'Sun' };
         const dayName = { 1: 'Friday', 2: 'Saturday', 3: 'Sunday' };
         // Describe what the user IS filtering by, so the empty state explains
@@ -3861,7 +4610,6 @@ window.dispatchEvent(new Event('firebase-ready'));
         artistResults.appendChild(e);
       }
     } else {
-      const dayShort = { 1: 'Fri', 2: 'Sat', 3: 'Sun' };
       // For stage-grouped sort, insert a section header before each new stage.
       // Stage filter overrides (one stage already, no need for headers).
       const showStageHeaders = selectedSort === 'stage';
@@ -3870,15 +4618,16 @@ window.dispatchEvent(new Event('firebase-ready'));
         if (showStageHeaders && a.stage !== lastStage) {
           lastStage = a.stage;
           const sObj = stage(a.stage);
+          const sName = sObj.displayName || sObj.id;
           const header = document.createElement('button');
           header.type = 'button';
           header.className = 'lineup-stage-header';
-          header.setAttribute('aria-label', `Filter to ${sObj.id}`);
-          header.innerHTML = `<span class="lsh-dot" style="background:${sObj.color}"></span><span class="lsh-name" style="color:${sObj.color}">${sObj.id}</span><span class="lsh-tap">tap to filter →</span>`;
+          header.setAttribute('aria-label', `Filter to ${sName}`);
+          header.innerHTML = `<span class="lsh-dot" style="background:${sObj.color}"></span><span class="lsh-name" style="color:${sObj.color}">${sName}</span><span class="lsh-tap">tap to filter →</span>`;
           header.onclick = () => {
-            artistInput.value = sObj.id;
+            artistInput.value = sName;
             syncClearBtn();
-            renderArtistResults(sObj.id);
+            renderArtistResults(sName);
             artistInput.focus();
           };
           artistResults.appendChild(header);
@@ -3899,12 +4648,18 @@ window.dispatchEvent(new Event('firebase-ready'));
           : (a.image
               ? `<img class="avatar" src="${escape(a.image)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'" />`
               : `<span class="avatar"></span>`);
+        // Day filter is always active (selectedDay is always 1/2/3, never
+        // null), so the day pill would always be redundant with the day
+        // chips at the top — omit it.
         row.innerHTML = `
           ${avatarHTML}
-          <a class="name" href="${escape(spotifyUrl(a.name))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(a.name)} on Spotify">${highlight(a.name, query)}</a>
-          <span class="stage-tag">
-            ${startLabel ? `<span class="time-part">${startLabel}</span><span class="sep">·</span>` : ''}<span class="day-part">${dayShort[a.day] || ''}</span><span class="sep">·</span><span class="stage-part${s.tier === 'secondary' ? ' stage-secondary' : ''}" style="color:${s.color}">${s.id}</span>
-          </span>
+          <div class="meta">
+            <a class="name" href="${escape(spotifyUrl(a.name))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(a.name)} on Spotify">${highlight(a.name, query)}</a>
+            <div class="meta-line">
+              <span class="meta-left">${startLabel ? `<span class="time-part">${startLabel}</span>` : ''}</span>
+              <span class="stage-part${s.tier === 'secondary' ? ' stage-secondary' : ''}" style="color:${s.color}">${s.displayName || s.id}</span>
+            </div>
+          </div>
           <button class="heart ${existingPickId ? 'on' : ''}" aria-label="${existingPickId ? 'Remove from schedule' : 'Add to schedule'}">${existingPickId ? '♥' : '♡'}</button>
         `;
         row.querySelector('.heart').onclick = (e) => { e.stopPropagation(); toggleHeartArtist(a); };
