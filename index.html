@@ -341,11 +341,13 @@ window.dispatchEvent(new Event('firebase-ready'));
      dropdown. Container width matches the map below for visual unity. */
   .map-search {
     position: relative;
-    margin: 0 0 22px;
+    margin: 14px 0 0;
   }
+  /* Search is below the map; dropdown rises UP over the map bottom so
+     results stay visible without scrolling past the source line. */
   .map-search-results {
     position: absolute;
-    top: calc(100% + 4px);
+    bottom: calc(100% + 4px);
     left: 0; right: 0;
     background: rgba(14, 16, 24, 0.96);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
@@ -355,7 +357,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     max-height: 280px;
     overflow-y: auto;
     z-index: 25;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
   }
   .map-search-results[hidden] { display: none; }
   .map-search-result {
@@ -990,12 +992,15 @@ window.dispatchEvent(new Event('firebase-ready'));
     pointer-events: none;
     z-index: 6;
     transform-origin: 50% 50%;
-    animation: poiFlash 1.2s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+    animation: poiFlash 2s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
   }
   @keyframes poiFlash {
+    /* 0–15%: fade in to full size · 15–55%: hold at full opacity (eye
+       has time to land on the spot) · 55–100%: expand + fade out. */
     0%   { transform: scale(calc(var(--pin-scale, 1) * 0.4)); opacity: 0; }
-    18%  { transform: scale(var(--pin-scale, 1));             opacity: 1; }
-    100% { transform: scale(calc(var(--pin-scale, 1) * 2.6)); opacity: 0; }
+    15%  { transform: scale(var(--pin-scale, 1));             opacity: 1; }
+    55%  { transform: scale(calc(var(--pin-scale, 1) * 1.3)); opacity: 1; }
+    100% { transform: scale(calc(var(--pin-scale, 1) * 2.8)); opacity: 0; }
   }
 
   /* POI popup: bottom-sheet anchored to the bottom of the map area.
@@ -3164,7 +3169,10 @@ window.dispatchEvent(new Event('firebase-ready'));
         matches.push({ poi, idx, meters });
       });
       // Closest first when GPS known; otherwise stable order.
-      if (u) matches.sort((a, b) => a.meters - b.meters);
+      // Closest LAST when GPS known — dropdown rises UP from the search
+      // bar, so the closest result lands right next to the bar (the
+      // user's eye comes from the input upward into the list).
+      if (u) matches.sort((a, b) => b.meters - a.meters);
 
       if (!matches.length) {
         results.innerHTML = '<div class="map-search-empty">No matches</div>';
@@ -3209,7 +3217,7 @@ window.dispatchEvent(new Event('firebase-ready'));
         flash.style.left = poi.mapPct.left + '%';
         flash.style.top  = poi.mapPct.top  + '%';
         zoomTarget.appendChild(flash);
-        setTimeout(() => flash.remove(), 1250);
+        setTimeout(() => flash.remove(), 2050);
       }
       setTimeout(() => openPOIPopup(poiIdx), 250);
     }
@@ -3236,16 +3244,6 @@ window.dispatchEvent(new Event('firebase-ready'));
     wrap.className = 'map-wrap';
 
     wrap.innerHTML = `
-      <div class="map-search">
-        <div class="search-bar">
-          <input id="mapSearchInput" type="text" placeholder="search water, restroom, stages, art…" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" />
-          <span class="search-ico" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          </span>
-          <button type="button" id="mapSearchClear" class="input-clear" aria-label="Clear">×</button>
-        </div>
-        <div class="map-search-results" id="mapSearchResults" hidden></div>
-      </div>
       <div class="map-img-container" id="mapContainer">
         <div class="map-zoom-target" id="mapZoomTarget">
           <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
@@ -3293,6 +3291,16 @@ window.dispatchEvent(new Event('firebase-ready'));
           <button type="button" id="groupPinBtn" class="map-droppin-btn is-group">⭐ Group pin</button>
         </div>
         <div class="map-status" id="mapStatus" aria-live="polite"></div>
+      </div>
+      <div class="map-search">
+        <div class="search-bar">
+          <input id="mapSearchInput" type="text" placeholder="search water, restroom, stages, art…" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" />
+          <span class="search-ico" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </span>
+          <button type="button" id="mapSearchClear" class="input-clear" aria-label="Clear">×</button>
+        </div>
+        <div class="map-search-results" id="mapSearchResults" hidden></div>
       </div>
       <p class="map-note">
         2026 festival map · bundled with the app for full offline reliability. Source: <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a>
