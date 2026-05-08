@@ -22,7 +22,7 @@
 // Browsers detect new SWs by sw.js byte changes, so the version MUST
 // be a literal in this file (not imported) — otherwise the browser
 // won't see the SW as "changed" and won't install the update.
-const SHELL_VERSION  = 'myraverlife-shell-v322';
+const SHELL_VERSION  = 'myraverlife-shell-v323';
 const STICKY_VERSION = 'myraverlife-sticky-v6';
 
 const APP_SHELL = [
@@ -46,17 +46,10 @@ const APP_SHELL = [
 ];
 
 // Heavy assets cached separately so version bumps don't re-fetch them.
-// 4 map tiles (each ~5 MP, ~700 KB) live alongside the single map JPEG —
-// tile mode is gated by a localStorage debug flag right now, so both
-// representations are available for instant toggle.
 const STICKY_ASSETS = [
   './assets/schedule-all.png',
   './assets/avatars-sprite.jpg',
   './assets/map2026.jpg',
-  './assets/map2026-tl.webp',
-  './assets/map2026-tr.webp',
-  './assets/map2026-bl.webp',
-  './assets/map2026-br.webp',
 ];
 
 const STICKY_PATHS = new Set(STICKY_ASSETS.map((p) => p.replace(/^\./, '')));
