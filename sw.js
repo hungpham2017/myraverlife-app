@@ -22,7 +22,7 @@
 // Browsers detect new SWs by sw.js byte changes, so the version MUST
 // be a literal in this file (not imported) — otherwise the browser
 // won't see the SW as "changed" and won't install the update.
-const SHELL_VERSION  = 'myraverlife-shell-v240';
+const SHELL_VERSION  = 'myraverlife-shell-v241';
 const STICKY_VERSION = 'myraverlife-sticky-v1';
 
 const APP_SHELL = [

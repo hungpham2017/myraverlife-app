@@ -84,12 +84,6 @@
   let fbAuth = null;
   let fbAuthed = false;
   let firebaseStatus = 'idle'; // 'idle' | 'connecting' | 'ok' | 'bad'
-  // F.13: set when qridToUid bind fails because our qrid is owned by a
-  // different uid. Typically iOS Safari evicting anonymous auth state under
-  // storage pressure → new auth.uid, but qridToUid/<myQRid> still points
-  // to the old uid → all our writes get rejected. Surfaces as a banner in
-  // the idle UI so the user can recover via "Refresh my code".
-  let _authMismatch = false;
   // F.11: friendData cache hydrated from localStorage at boot — last-known
   // positions are visible IMMEDIATELY on refresh, even before Firebase
   // reconnects (festival weak-signal scenario).
@@ -163,22 +157,36 @@
       _authInFlight = false;
       if (cred && cred.user) {
         // F.13: bind qrid ↔ uid so RTDB security rules can authorize
-        // per-qrid paths. Best-effort. If qridToUid is already claimed by
-        // another uid (collision / reinstall race), writes under rules
-        // will be rejected; user can recover via "Refresh my code".
+        // per-qrid paths. Self-healing on idle users:
+        //   1. Auto-upgrade legacy <ID_LENGTH-char qrids (pre-v240) to a
+        //      fresh full-length code.
+        //   2. On PERMISSION_DENIED (stale binding from a prior anon
+        //      session, iOS auth eviction, etc.), regen and retry once.
+        // Only mutates qrid when idle — never mid-group, since that would
+        // silently break circle membership.
         if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
-        try {
-          await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), cred.user.uid);
-          _authMismatch = false;
-        } catch (e) {
-          console.warn('[fb] qridToUid bind failed:', e);
-          // PERMISSION_DENIED on this path = our qrid is owned by another
-          // uid (iOS auth eviction or rare collision). Surface a banner.
-          if (e && (e.code === 'PERMISSION_DENIED' || /permission_denied/i.test(String(e.message || '')))) {
-            _authMismatch = true;
+        const uid = cred.user.uid;
+        if (state.myQRid.length < ID_LENGTH && !state.currentGroup) {
+          state.myQRid = genQRid();
+          saveState();
+        }
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), uid);
+            break;
+          } catch (e) {
+            const denied = e && (e.code === 'PERMISSION_DENIED' || /permission_denied/i.test(String(e.message || '')));
+            if (denied && !state.currentGroup && attempt === 0) {
+              // Stale binding on idle user — regen and retry.
+              state.myQRid = genQRid();
+              saveState();
+            } else {
+              console.warn('[fb] qridToUid bind failed:', e);
+              break;
+            }
           }
         }
-        try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + cred.user.uid), state.myQRid); } catch (e) { console.warn('[fb] uidToQrid bind failed:', e); }
+        try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + uid), state.myQRid); } catch (e) { console.warn('[fb] uidToQrid bind failed:', e); }
         fbAuthed = true;
         firebaseStatus = 'ok';
         console.log('[fb] auth OK, uid=' + cred.user.uid);
@@ -767,12 +775,27 @@
     state.myQRid = genQRid();
     saveState();
     // F.13: claim the new qrid for our uid so writes keep working under rules.
-    // Fresh qrid + fresh claim resolves any auth-mismatch banner.
+    // Retry once with another regen if the first claim is denied (rare
+    // collision on the new qrid).
     if (fbDb && fbAuthed && window.fb && fbAuth && fbAuth.currentUser) {
-      try { await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), fbAuth.currentUser.uid); } catch (e) {}
-      try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + fbAuth.currentUser.uid), state.myQRid); } catch (e) {}
+      const uid = fbAuth.currentUser.uid;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await window.fb.set(window.fb.ref(fbDb, 'qridToUid/' + state.myQRid), uid);
+          break;
+        } catch (e) {
+          const denied = e && (e.code === 'PERMISSION_DENIED' || /permission_denied/i.test(String(e.message || '')));
+          if (denied && attempt === 0) {
+            state.myQRid = genQRid();
+            saveState();
+          } else {
+            console.warn('[fb] refresh qridToUid bind failed:', e);
+            break;
+          }
+        }
+      }
+      try { await window.fb.set(window.fb.ref(fbDb, 'uidToQrid/' + uid), state.myQRid); } catch (e) {}
     }
-    _authMismatch = false;
     if (mainEl) render(mainEl);
   }
 
@@ -1581,14 +1604,8 @@
 
     // ── IDLE state: not in any group ──
     if (!state.currentGroup) {
-      // F.13: surface auth-mismatch (e.g. iOS Safari evicted our anon
-      // session). Refresh my code re-binds and clears the banner.
-      const authBanner = _authMismatch ? `
-        <div style="background:#3b1f1f;border:1px solid #7a3a3a;border-radius:10px;padding:10px 14px;margin:0 0 14px;color:#ffb4b4;font-size:13px;line-height:1.4;">⚠️ Your sync session reset. Tap "Refresh my code" below to fix sync.</div>
-      ` : '';
       mainEl.innerHTML = `
         <div class="ff-page ff-idle">
-          ${authBanner}
           <h2 class="ff-idle-title">Find your crew</h2>
           <p class="ff-idle-sub">Connect with friends at the festival.</p>
           <div class="ff-idle-actions">
