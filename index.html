@@ -804,23 +804,33 @@ window.dispatchEvent(new Event('firebase-ready'));
     width: 100%;
     position: relative;
   }
-  /* Each tile slightly larger than 50% and anchored to its corner, so
-     adjacent tiles overlap by 1px at the seam. The overlapping pixels
-     are identical → no visible gap from sub-pixel rounding. The 1px
-     stretch (~0.3%) is imperceptible. */
+  /* Tiles have 4 px source overlap baked in: each tile is 2004x2504
+     covering 4 source px into the adjacent quadrant. For a SEAMLESS
+     join, every tile is positioned by where its source ORIGIN starts
+     in the full image, so identical source pixels render at identical
+     container positions:
+       width  = sourceTileWidth  / sourceTotalWidth  = 2004/4000 = 50.1%
+       height = sourceTileHeight / sourceTotalHeight = 2504/5000 = 50.08%
+       tr/br left = 1996/4000 = 49.9%
+       bl/br top  = 2496/5000 = 49.92%
+     Earlier corner-anchoring (right:0, bottom:0) was wrong: it kept
+     tile size right but mapped right-tile content to start at the
+     right corner, causing a content shift at the seam (tile-tl shows
+     src ≈1993 while tile-tr shows src ≈2007 in the same display
+     position). Anchoring with consistent left/top fixes the math. */
   .map-tile {
     position: absolute;
-    width: calc(50% + 1px);
-    height: calc(50% + 1px);
+    width: 50.1%;
+    height: 50.08%;
     display: block;
     user-select: none;
     -webkit-user-drag: none;
     pointer-events: none;
   }
   .map-tile.tl { top: 0;       left: 0; }
-  .map-tile.tr { top: 0;       right: 0; }
-  .map-tile.bl { bottom: 0;    left: 0; }
-  .map-tile.br { bottom: 0;    right: 0; }
+  .map-tile.tr { top: 0;       left: 49.9%; }
+  .map-tile.bl { top: 49.92%;  left: 0; }
+  .map-tile.br { top: 49.92%;  left: 49.9%; }
 
   /* v210: legend at top of map — mini shapes match the real dot/pin look.
      Shifted off-center to the right to avoid the festival artwork's
@@ -993,7 +1003,15 @@ window.dispatchEvent(new Event('firebase-ready'));
   .map-zoom-target {
     transform-origin: center center;
     transition: transform 0.05s linear;
-    will-change: transform;
+    /* Intentionally NO `will-change: transform`. On iOS Safari, the
+       will-change hint promotes this layer to a cached bitmap at base
+       resolution; subsequent transform: scale() then GPU-stretches that
+       low-res bitmap, throwing away the 4000-px JPG's detail and giving
+       a soft zoom on iPhone (Mac is fine due to HiDPI rasterization +
+       more re-paint headroom). Without will-change, Safari re-rasterizes
+       on transform changes and pulls fresh pixels from the source — the
+       resting zoomed state stays sharp. Pinch gesture may have slightly
+       more cost per frame but is acceptable for a single map page. */
   }
 
   /* POI tap targets: invisible circles overlaid on existing artwork
