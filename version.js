@@ -4,4 +4,4 @@
 //
 // `self` is the global in both window contexts and service workers,
 // so this file works for both via `<script src>` and `importScripts()`.
-self.APP_VERSION = 'v241';
+self.APP_VERSION = 'v242';
