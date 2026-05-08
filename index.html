@@ -381,6 +381,10 @@ window.dispatchEvent(new Event('firebase-ready'));
     width: 100%;
     height: auto;
     display: block;
+    /* No CSS filter / image-rendering hints. Filters trigger Safari's
+       compositor-layer pipeline which can render at lower quality;
+       leaving this clean gives the browser the fastest, highest-fidelity
+       path with default smooth interpolation — closest to native. */
   }
   /* Stage marker — clean colored dot, name lives only in the popover. */
   .map-hotspot {
@@ -2635,7 +2639,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     wrap.innerHTML = `
       <div class="map-img-container" id="mapContainer">
         <div class="map-zoom-target" id="mapZoomTarget">
-          <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" />
+          <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
           <div class="user-pin" id="userPin" style="display:none">
             <span class="user-pin-cone" id="userPinCone"></span>
             <span class="user-pin-pulse"></span>
