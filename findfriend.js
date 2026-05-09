@@ -2145,6 +2145,12 @@
   // ── Public API ────────────────────────────────────────────────────────
   window.findFriends = {
     render,
+    // Boot Firebase + auth + publish triggers without rendering UI.
+    // Called from index.html at app start so returning users (state
+    // restored from localStorage with currentGroup set) get sync wired
+    // up even if they never open the Friends tab on this session.
+    // All three internal calls are idempotent.
+    bootAuth() { tryInitFirebase(); tryAuth(); attachPublishTriggers(); },
     getMyQRid() { return state.myQRid; },
     // Returns current group members in the same shape index.html expects.
     getFollowing() {

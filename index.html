@@ -334,25 +334,46 @@ window.dispatchEvent(new Event('firebase-ready'));
   /* Map view — official illustrated map.png with invisible tap hotspots
      overlaid at each main stage. Hotspots only become visible on hover/tap. */
   .map-wrap {
-    padding: 12px 0 16px;
+    /* Bottom padding clears the fixed nav.tabs (~72px tall + safe-area)
+       so the search bar doesn't get covered when the page isn't tall
+       enough to scroll. */
+    padding: 12px 0 calc(72px + env(safe-area-inset-bottom));
     max-width: 480px;
     margin: 0 auto;
   }
   .map-note {
-    font-size: 11.5px;
+    font-size: 10.5px;
     color: var(--muted);
-    line-height: 1.45;
-    margin: 10px 4px 0;
+    line-height: 1.3;
+    margin: 0 4px 6px;
     text-align: center;
-    opacity: 0.75;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   /* Map search — reuses .search-bar pill style from Lineup so both
      searches feel like the same component. The .map-search wrapper is
      just a positioning context for the absolutely-positioned results
-     dropdown. Container width matches the map below for visual unity. */
+     dropdown.
+
+     iOS keyboard fix: when input gets focus, JS adds .kb-up to the
+     wrapper and reads window.visualViewport to set --kb-bottom. The
+     wrapper becomes position:fixed pinned to the visual viewport's
+     bottom edge — input stays just above the keyboard, results dropdown
+     rises into the visible space, no page-scroll auto-fired by Safari. */
   .map-search {
     position: relative;
     margin: 14px 0 0;
+    transition: none;
+  }
+  .map-search.kb-up {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: var(--kb-bottom, 0px);
+    margin: 0;
+    z-index: 60;
   }
   /* Search is below the map; dropdown rises UP over the map bottom so
      results stay visible without scrolling past the source line. */
@@ -1016,6 +1037,12 @@ window.dispatchEvent(new Event('firebase-ready'));
     transform-origin: 50% 50%;
     animation: poiFlash 2s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
   }
+  /* Fast variant for direct POI taps — user already saw where they
+     tapped, so the ring is just a quick confirmation, not a guided
+     hunt. Skips the long "hold" phase. */
+  .poi-flash.fast {
+    animation: poiFlashFast 0.6s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+  }
   @keyframes poiFlash {
     /* 0–15%: fade in to full size · 15–55%: hold at full opacity (eye
        has time to land on the spot) · 55–100%: expand + fade out. */
@@ -1023,6 +1050,11 @@ window.dispatchEvent(new Event('firebase-ready'));
     15%  { transform: scale(var(--pin-scale, 1));             opacity: 1; }
     55%  { transform: scale(calc(var(--pin-scale, 1) * 1.3)); opacity: 1; }
     100% { transform: scale(calc(var(--pin-scale, 1) * 2.8)); opacity: 0; }
+  }
+  @keyframes poiFlashFast {
+    0%   { transform: scale(calc(var(--pin-scale, 1) * 0.6)); opacity: 0; }
+    25%  { transform: scale(var(--pin-scale, 1));             opacity: 1; }
+    100% { transform: scale(calc(var(--pin-scale, 1) * 2.2)); opacity: 0; }
   }
 
   /* POI popup: bottom-sheet anchored to the bottom of the map area.
@@ -1116,6 +1148,13 @@ window.dispatchEvent(new Event('firebase-ready'));
     opacity: 0.7;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  .poi-popup-info {
+    margin-top: 6px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--muted);
+    padding-right: 28px;
   }
   .poi-popup-cta {
     display: inline-block;
@@ -3245,6 +3284,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     { type:'lounge', name:'Takis',                         mapPct:{left:39.41, top:48.78} },
     { type:'lounge', name:'Eargasm',                       mapPct:{left:38.61, top:41.84} },
     { type:'lounge', name:'END Overdose',                  mapPct:{left:35.14, top:62.45} },
+    { type:'lounge', name:'Beatbox Art Car',               mapPct:{left:31.97, top:43.32} },
     { type:'wifi',   name:'WiFi', mapPct:{left:26.18, top:29.56} },
     { type:'wifi',   name:'WiFi', mapPct:{left:56.7,  top:55.35} },
     { type:'wifi',   name:'WiFi', mapPct:{left:29.44, top:69.27} },
@@ -3414,10 +3454,43 @@ window.dispatchEvent(new Event('firebase-ready'));
     'stage':              ['music', 'dj', 'show', 'set'],
   };
   function setupMapSearch(wrap) {
-    const input   = wrap.querySelector('#mapSearchInput');
-    const clear   = wrap.querySelector('#mapSearchClear');
-    const results = wrap.querySelector('#mapSearchResults');
+    const searchEl = wrap.querySelector('.map-search');
+    const input    = wrap.querySelector('#mapSearchInput');
+    const clear    = wrap.querySelector('#mapSearchClear');
+    const results  = wrap.querySelector('#mapSearchResults');
     if (!input || !results) return;
+
+    // ── iOS keyboard pinning ──────────────────────────────────────────
+    // When the input is focused on iPhone, Safari raises the keyboard
+    // and (by default) auto-scrolls the page so the input stays in
+    // view — that's the "everything moves up" feel we're killing. We
+    // instead pin the search wrapper to the visual viewport's bottom
+    // edge ourselves, so the input is already above the keyboard and
+    // Safari has nothing to scroll. visualViewport reports the visible
+    // area excluding the keyboard; (window.innerHeight - vv.height) is
+    // the keyboard height. Falls back to no-op on browsers without it.
+    const vv = window.visualViewport;
+    function updateKbOffset() {
+      if (!vv) return;
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      searchEl.style.setProperty('--kb-bottom', kb + 'px');
+    }
+    function lockToViewport() {
+      searchEl.classList.add('kb-up');
+      updateKbOffset();
+      if (vv) {
+        vv.addEventListener('resize', updateKbOffset);
+        vv.addEventListener('scroll', updateKbOffset);
+      }
+    }
+    function unlockFromViewport() {
+      searchEl.classList.remove('kb-up');
+      searchEl.style.removeProperty('--kb-bottom');
+      if (vv) {
+        vv.removeEventListener('resize', updateKbOffset);
+        vv.removeEventListener('scroll', updateKbOffset);
+      }
+    }
 
     function renderMatches() {
       const q = input.value.trim().toLowerCase();
@@ -3467,20 +3540,18 @@ window.dispatchEvent(new Event('firebase-ready'));
     function selectMapResult(poiIdx) {
       const poi = MAP_POIS[poiIdx];
       if (!poi || !poi.mapPct) return;
-      // Hide results, blur the input. Leave the input value as the
-      // chosen name so the user has visual confirmation of what they
-      // searched for.
+      // Unlock the kb-up state IMMEDIATELY — without this, the 120ms
+      // blur-handler delay would keep the search bar position:fixed
+      // while the keyboard drops, briefly overlapping the bottom nav
+      // as it returns to view. Direct unlock = clean handoff.
+      unlockFromViewport();
       results.setAttribute('hidden', '');
       input.value = poi.name;
       clear.classList.add('show');
       input.blur();
-      // Fly the map to the POI, then open its popup. Small delay lets
-      // the zoom animation start before the popup slides up.
       if (mapZoom.zoomToImagePct) {
         mapZoom.zoomToImagePct(poi.mapPct.left, poi.mapPct.top, 2.5);
       }
-      // Brief ping at the POI to guide the eye. Runs once, then the
-      // element removes itself — no constant pulse left behind.
       const zoomTarget = wrap.querySelector('#mapZoomTarget');
       if (zoomTarget) {
         const flash = document.createElement('div');
@@ -3494,7 +3565,13 @@ window.dispatchEvent(new Event('firebase-ready'));
     }
 
     input.addEventListener('input', renderMatches);
-    input.addEventListener('focus', renderMatches);
+    input.addEventListener('focus', () => { lockToViewport(); renderMatches(); });
+    input.addEventListener('blur',  () => {
+      // Defer the unlock so a tap on a result fires before the layout
+      // jumps — otherwise the result element moves out from under the
+      // tap and the click never lands.
+      setTimeout(unlockFromViewport, 120);
+    });
     clear.addEventListener('click', () => {
       input.value = '';
       clear.classList.remove('show');
@@ -3503,7 +3580,8 @@ window.dispatchEvent(new Event('firebase-ready'));
     });
     // Close results on tap outside the search box.
     document.addEventListener('click', (e) => {
-      if (!wrap.querySelector('.map-search').contains(e.target)) {
+      const m = wrap.querySelector('.map-search');
+      if (m && !m.contains(e.target)) {
         results.setAttribute('hidden', '');
       }
     });
@@ -3515,6 +3593,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     wrap.className = 'map-wrap';
 
     wrap.innerHTML = `
+      <p class="map-note">2026 festival map · source: <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a></p>
       <div class="map-img-container" id="mapContainer">
         <div class="map-zoom-target" id="mapZoomTarget">
           <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
@@ -3573,9 +3652,6 @@ window.dispatchEvent(new Event('firebase-ready'));
         </div>
         <div class="map-search-results" id="mapSearchResults" hidden></div>
       </div>
-      <p class="map-note">
-        2026 festival map · bundled with the app for full offline reliability. Source: <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a>
-      </p>
     `;
 
     main.appendChild(wrap);
@@ -3849,9 +3925,81 @@ window.dispatchEvent(new Event('firebase-ready'));
       el.style.top  = poi.mapPct.top  + '%';
       el.setAttribute('aria-label', poi.name);
       el.dataset.poiIdx = String(idx);
-      el.onclick = (e) => { e.stopPropagation(); openPOIPopup(idx); };
+      el.onclick = (e) => {
+        e.stopPropagation();
+        // Quick ring at the tap point — same eye-guide effect as the
+        // search-result fly-to, but faster: the user already saw where
+        // they tapped, this is just a confirmation that the dot was hit.
+        // Hints to first-time users that map dots are interactive.
+        const zoomTarget = document.getElementById('mapZoomTarget');
+        const poi = MAP_POIS[idx];
+        if (zoomTarget && poi && poi.mapPct) {
+          const flash = document.createElement('div');
+          flash.className = 'poi-flash fast';
+          flash.style.left = poi.mapPct.left + '%';
+          flash.style.top  = poi.mapPct.top  + '%';
+          zoomTarget.appendChild(flash);
+          setTimeout(() => flash.remove(), 650);
+        }
+        openPOIPopup(idx);
+      };
       container.appendChild(el);
     });
+  }
+
+  // Type-level blurbs for utility/service POIs — gives every dot a
+   // helpful sentence in the popup without per-entry editing. Stages
+   // get their genre from FESTIVAL.stages instead. Named lounges get
+   // a per-entry `info` field on their MAP_POI when richer detail is
+   // wanted (handled separately).
+  const TYPE_INFO = {
+    'water-stations':      'Free water refills · bring your bottle',
+    'vip-water-stations':  'VIP water refills · shorter lines',
+    'restrooms':           'Porta-johns · busiest 11pm–2am',
+    'vip-restrooms':       'VIP toilets · much shorter lines',
+    'first-aid':           'Free medical care · no judgment, no questions',
+    'consciousness-group': 'Wellness + peer support · safe space to reset',
+    'ground-control':      'Chill zone · take a breather',
+    'charging-station':    'Free phone charging · bring your cable',
+    'cash-exchange':       'ATM · expect a fee',
+    'merchandise':         'Official EDC merch · tees, hats, swag',
+    'general-store':       'Snacks, drinks, festival basics',
+    'lockers':             'Storage rentals · all sizes',
+    'lost-found':          'Lost something? Check here',
+    'info':                'Festival info + questions',
+    'kandi-station':       'Make + trade kandi (PLUR)',
+    'trinket-trade':       'Swap trinkets with other ravers',
+    'photo-op':            'Selfie / photo backdrop',
+    'maverick-heli':       'Scenic helicopter tour over the festival',
+    'gate':                'Festival gate · re-entry allowed',
+    'wifi':                'Free WiFi hotspot',
+    'rides':               'Carnival rides · free with ticket',
+    'themed':              'Art installation',
+    'area':                'Themed area',
+    'vip-barber':          'VIP-only · haircut on site',
+    'vip-viewing-deck':    'VIP-only deck overlooking the stage',
+    'marquee-skydeck':     'Marquee guests · rooftop deck',
+    'accessible-viewing':  'ADA viewing platform',
+    'insomniac-passport':  'Insomniac Passport · stamp your festival journey',
+    'vip':                 'VIP-only area',
+    'vip-concierge':       'VIP concierge · need help, ask here',
+    'lounge':              'Themed lounge · bar + hangout',
+  };
+
+  // Quick lookup: stage displayName → genre, from festival.config.js.
+  // Built lazily once on first popup open (FESTIVAL is loaded before
+  // any popup can fire). Falls back to {} so missing config is safe.
+  let _stageGenreCache = null;
+  function stageGenreFor(name) {
+    if (!_stageGenreCache) {
+      _stageGenreCache = {};
+      try {
+        (window.FESTIVAL?.stages || []).forEach(s => {
+          if (s.displayName) _stageGenreCache[s.displayName] = s.genre || '';
+        });
+      } catch (_) { /* ignore */ }
+    }
+    return _stageGenreCache[name] || '';
   }
 
   function openPOIPopup(idx) {
@@ -3864,9 +4012,8 @@ window.dispatchEvent(new Event('firebase-ready'));
     // / group-pin sheet, so the user never sees two overlapping at once.
     closeFriendSheet();
 
-    // Build popup content. Compact: one hero row (name + distance/walk
-    // on the same line) plus an optional CTA below for stages. See
-    // walkMinutes() for the festival-realistic pace formula.
+    // Build popup content. Compact: hero row (name + walk) → optional
+    // info line (per-POI override > stage genre > type blurb) → CTA.
     const safe = (s) => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
     const nameStyle = poi.color ? `style="color:${poi.color}"` : '';
 
@@ -3880,7 +4027,16 @@ window.dispatchEvent(new Event('firebase-ready'));
       }
     }
 
-    let html = `<div class="poi-popup-hero"><div class="poi-popup-name" ${nameStyle}>${safe(poi.name)}</div>${metaHTML}</div>`;
+    // Pick the most specific info available: explicit info field wins,
+    // then stage genre for stages, then type-level blurb. Empty string
+    // means we render no info row at all.
+    const infoText =
+      (poi.info ? poi.info :
+       (poi.type === 'stage' ? stageGenreFor(poi.name) :
+        (TYPE_INFO[poi.type] || '')));
+    const infoHTML = infoText ? `<div class="poi-popup-info">${safe(infoText)}</div>` : '';
+
+    let html = `<div class="poi-popup-hero"><div class="poi-popup-name" ${nameStyle}>${safe(poi.name)}</div>${metaHTML}</div>${infoHTML}`;
 
     if (poi.type === 'stage') {
       const ctaColor = poi.color || 'var(--accent)';
@@ -5238,6 +5394,14 @@ window.dispatchEvent(new Event('firebase-ready'));
     // avatars use sprite-backed background-image (100% offline reliable).
     await loadAvatarCoords();
     render();
+
+    // Boot Firebase auth on app start regardless of which tab the user
+    // opens. Without this, returning users who reload and go straight to
+    // Map (state.currentGroup restored from localStorage) silently fail
+    // to sync — pins, location, picks all queue in whenAuthed forever.
+    if (window.findFriends && window.findFriends.bootAuth) {
+      window.findFriends.bootAuth();
+    }
 
     // Initial schedule sync: if you're already in a group when the app
     // starts, push your existing picks once (after a short delay so
