@@ -87,7 +87,7 @@ window.dispatchEvent(new Event('firebase-ready'));
   }
   h1 {
     margin: 0 0 4px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.02em;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
@@ -1722,6 +1722,22 @@ window.dispatchEvent(new Event('firebase-ready'));
     flex-shrink: 0;
     background: var(--bg);
   }
+  /* Anchor that wraps the timeline-block photo. Behaves like the
+     original element in flex layout (no extra margin/padding) and
+     gives a subtle tap feedback. */
+  .timeline-block .b-img-link {
+    display: inline-flex;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .timeline-block .b-img-link:active { opacity: 0.75; }
+  /* Same idea for lineup avatar. */
+  .artist-result .avatar-link {
+    display: inline-flex;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .artist-result .avatar-link:active { opacity: 0.75; }
   .timeline-block .b-content {
     flex: 1;
     min-width: 0;
@@ -1746,7 +1762,12 @@ window.dispatchEvent(new Event('firebase-ready'));
     white-space: nowrap;
     text-overflow: ellipsis;
     letter-spacing: -0.005em;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
   }
+  .timeline-block a.b-artist:active { opacity: 0.7; }
   .timeline-block .b-stageline {
     font-size: 12px;
     font-weight: 600;
@@ -2473,6 +2494,129 @@ window.dispatchEvent(new Event('firebase-ready'));
     color: white;
   }
   .hidden { display: none !important; }
+
+  /* Install hint card — small, cute, bottom-anchored. Two-tier dismiss:
+     × for session, "skip" pill for forever. Subtle pink accent so it
+     feels on-brand without screaming. */
+  .install-banner {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    width: calc(100% - 32px);
+    max-width: 360px;
+    background: rgba(14, 16, 24, 0.94);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+    z-index: 25;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.42);
+    animation: installBannerIn 0.18s cubic-bezier(0.2, 0.8, 0.4, 1);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .install-banner[hidden] { display: none; }
+  /* Polite fade-out when user dismisses — JS adds .closing for 150ms
+     before flipping the hidden attribute, so the card glides instead
+     of popping out instantly. */
+  .install-banner.closing {
+    opacity: 0;
+    transform: translate(-50%, 20%);
+  }
+  @keyframes installBannerIn {
+    from { transform: translate(-50%, 40%); opacity: 0; }
+    to   { transform: translate(-50%, 0);    opacity: 1; }
+  }
+  .install-banner-x {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 18px; line-height: 1;
+    cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .install-banner-x:hover  { color: #fff; background: rgba(255,255,255,0.06); }
+  .install-banner-x:active { transform: scale(0.92); }
+  .install-banner-title {
+    font-size: 14.5px; font-weight: 700;
+    margin-bottom: 6px;
+    padding-right: 32px;
+    letter-spacing: -0.01em;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .install-banner-instr {
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .install-banner-instr b {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+  }
+  .install-banner-thanks {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .install-banner-thanks a {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .install-banner-thanks a:hover { filter: brightness(1.2); }
+  .install-banner-foot {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .install-banner-help {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    border: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 0;
+    -webkit-tap-highlight-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .install-banner-help:hover  { filter: brightness(1.2); }
+  .install-banner-help:active { transform: scale(0.96); }
+  .install-banner-never {
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .install-banner-never:hover { color: rgba(255, 255, 255, 0.7); }
 </style>
 </head>
 <body>
@@ -2504,6 +2648,25 @@ window.dispatchEvent(new Event('firebase-ready'));
     <div class="time-buckets" id="timeBuckets"></div>
   </div>
   <div class="artist-results" id="artistResults"></div>
+</div>
+
+<!-- Install hint banner — first-visit nudge to save the app to home
+     screen for offline use at the festival. JS gates show on (1) not in
+     standalone mode, (2) "Don't show again" not previously tapped. -->
+<div class="install-banner" id="installBanner" hidden>
+  <button type="button" class="install-banner-x" id="installBannerX" aria-label="Close">×</button>
+  <div class="install-banner-title">Save me for full offline experience</div>
+  <div class="install-banner-instr">
+    <b>iPhone</b> · Tap the Share ↗ button, then tap "Add to Home Screen"<br>
+    <b>Android</b> · Tap the ⋮ menu, then tap "Install app"
+  </div>
+  <div class="install-banner-thanks">
+    💕 Just trying to make life easier for me + my fellow EDC goers. Q's or feedback? DM <a href="https://instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>
+  </div>
+  <div class="install-banner-foot">
+    <button type="button" class="install-banner-help" id="installBannerHelp">More tips ›</button>
+    <button type="button" class="install-banner-never" id="installBannerNever">Don't show again</button>
+  </div>
 </div>
 
 <footer class="app-footer">
@@ -2684,6 +2847,90 @@ window.dispatchEvent(new Event('firebase-ready'));
     return window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone === true; // iOS
   }
+
+  // Install hint banner — show on first visits in non-standalone mode.
+  // × hides for this session only (returns next visit); the "Don't show
+  // again" link persists via localStorage. We can't detect prior installs
+  // on iOS, so we just include a plain-text "already installed?" hint.
+  (function setupInstallBanner() {
+    if (isStandalone()) return;
+    let never = false;
+    try { never = localStorage.getItem('installHintNever') === '1'; } catch (_) {}
+    if (never) return;
+    const banner = document.getElementById('installBanner');
+    const xBtn   = document.getElementById('installBannerX');
+    const nvBtn  = document.getElementById('installBannerNever');
+    const hpBtn  = document.getElementById('installBannerHelp');
+    if (!banner || !xBtn || !nvBtn) return;
+
+    // Tiny per-device counters so the dev can sanity-check what users
+    // actually do with the banner. Read them via localStorage in
+    // devtools — no server, no tracking infra. Safe-fail on storage.
+    function bumpCount(key) {
+      try {
+        const n = Number(localStorage.getItem(key) || 0) + 1;
+        localStorage.setItem(key, String(n));
+      } catch (_) {}
+    }
+
+    // Show on FIRST user interaction (tap / scroll / keypress), or
+    // after a 4s fallback if they haven't moved. Avoids slapping the
+    // banner up while content is still rendering. Idempotent — only
+    // first trigger wins.
+    let shown = false;
+    function show() {
+      if (shown) return;
+      shown = true;
+      banner.removeAttribute('hidden');
+      bumpCount('installBannerShown');
+    }
+    const triggerShow = () => setTimeout(show, 600);
+    ['scroll', 'click', 'touchstart', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, triggerShow, { once: true, passive: true });
+    });
+    setTimeout(show, 4000);
+
+    // Polite dismiss — fade + slide for 150ms, THEN hide. Avoids the
+    // jarring instant pop. Optional onDone runs post-hide.
+    function dismiss(onDone) {
+      banner.classList.add('closing');
+      setTimeout(() => {
+        banner.classList.remove('closing');
+        banner.setAttribute('hidden', '');
+        if (onDone) onDone();
+      }, 150);
+    }
+    xBtn.addEventListener('click', () => {
+      bumpCount('installBannerXClicks');
+      dismiss();
+    });
+    nvBtn.addEventListener('click', () => {
+      bumpCount('installBannerNeverClicks');
+      dismiss(() => {
+        try { localStorage.setItem('installHintNever', '1'); } catch (_) {}
+      });
+    });
+    if (hpBtn) hpBtn.addEventListener('click', () => {
+      bumpCount('installBannerHelpClicks');
+      dismiss(() => {
+        const helpTab = document.querySelector('button[data-tab="help"]');
+        if (helpTab) helpTab.click();
+      });
+    });
+
+    // Hide while the on-screen keyboard is up (search focus, etc.) so
+    // it doesn't sit awkwardly behind the keyboard or stack with the
+    // search bar. visualViewport.height shrinks when the keyboard
+    // rises; >100px diff = keyboard up.
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        if (banner.hasAttribute('hidden')) return;
+        const kbUp = window.innerHeight - window.visualViewport.height > 100;
+        banner.style.opacity      = kbUp ? '0' : '';
+        banner.style.pointerEvents = kbUp ? 'none' : '';
+      });
+    }
+  })();
   function isMobile() {
     return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   }
@@ -4964,15 +5211,20 @@ window.dispatchEvent(new Event('firebase-ready'));
       // Same sprite as Lineup; display at 76px here. Falls back to direct
       // CloudFront URL if avatar isn't in the bundled sprite.
       const spriteStyle = avatarSpriteStyleFor(imageUrl, 76);
-      const imgHTML = spriteStyle
+      const imgInner = spriteStyle
         ? `<span class="b-img" style="${spriteStyle}"></span>`
         : (imageUrl
             ? `<img class="b-img" src="${escape(imageUrl)}" loading="lazy" alt="" onerror="this.style.display='none'" />`
             : '');
+      // Wrap the photo in the same Spotify link as the name so users can
+      // tap either one — bigger / more forgiving tap target.
+      const imgHTML = imgInner
+        ? `<a class="b-img-link" href="${escape(spotifyUrl(pick.artist))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(pick.artist)} on Spotify">${imgInner}</a>`
+        : '';
       block.innerHTML = `
         ${imgHTML}
         <div class="b-content">
-          <div class="b-artist">${escape(pick.artist)}</div>
+          <a class="b-artist" href="${escape(spotifyUrl(pick.artist))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(pick.artist)} on Spotify">${escape(pick.artist)}</a>
           <div class="b-stageline" style="color:${s.color}">${escape(s.displayName || s.id)}</div>
           <div class="b-time">${escape(timeText)}</div>
         </div>
@@ -5321,11 +5573,14 @@ window.dispatchEvent(new Event('firebase-ready'));
         // the build-time sprite). The sprite is 288×288 cells, downscaled
         // to 36px display via background-size.
         const spriteStyle = avatarSpriteStyleFor(a.image, 36);
-        const avatarHTML = spriteStyle
+        const avatarInner = spriteStyle
           ? `<span class="avatar" style="${spriteStyle}"></span>`
           : (a.image
               ? `<img class="avatar" src="${escape(a.image)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'" />`
               : `<span class="avatar"></span>`);
+        // Wrap the avatar in the same Spotify link as the name — bigger
+        // tap target, matches Schedule timeline-block behavior.
+        const avatarHTML = `<a class="avatar-link" href="${escape(spotifyUrl(a.name))}" target="_blank" rel="noopener" aria-label="Listen to ${escape(a.name)} on Spotify">${avatarInner}</a>`;
         // Day filter is always active (selectedDay is always 1/2/3, never
         // null), so the day pill would always be redundant with the day
         // chips at the top — omit it.
