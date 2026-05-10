@@ -1183,7 +1183,7 @@
       margin: 0 0 14px;
       outline: none;
     }
-    .ff-modal-input:focus { border-color: var(--accent); }
+    .ff-modal-input:focus { border-color: rgba(255,255,255,0.4); }
     .ff-modal-actions {
       display: flex; gap: 8px; justify-content: flex-end;
     }
@@ -1991,8 +1991,8 @@
       close();
       console.warn('[findfriend] Camera unavailable:', err);
       await ffAlert(
-        `Camera unavailable — likely permission denied or no camera. ` +
-        `You can paste the code instead.`
+        `Camera blocked. Tap ⋯ at the top right → Open in browser to scan. ` +
+        `Or paste the code instead.`
       );
       pasteFlow(mainEl);
     }
@@ -2001,7 +2001,7 @@
   async function pasteFlow(mainEl) {
     const raw = await ffPrompt(
       `Paste the group's code:`,
-      { placeholder: 'e.g., K3FQ72', primaryLabel: 'Continue' }
+      { placeholder: 'e.g., K3FQ-72AB', primaryLabel: 'Continue' }
     );
     if (!raw) return;
     const qrid = extractQrid(raw);

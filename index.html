@@ -4566,8 +4566,16 @@ window.dispatchEvent(new Event('firebase-ready'));
         startCompass();
       },
       (err) => {
-        setMapStatus(err.code === 1 ? 'permission denied' : 'no GPS fix');
-        setTimeout(() => setMapStatus(''), 2500);
+        if (err.code === 1) {
+          if (window.findFriends && window.findFriends.alert) {
+            window.findFriends.alert(
+              `Location blocked. Tap ⋯ at the top right → Open in browser for live GPS.`
+            );
+          }
+        } else {
+          setMapStatus('no GPS fix');
+          setTimeout(() => setMapStatus(''), 2500);
+        }
       },
       { enableHighAccuracy: true, timeout: 30000, maximumAge: 30000 }
     );
