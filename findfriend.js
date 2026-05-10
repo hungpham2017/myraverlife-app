@@ -279,6 +279,17 @@
       maybeRerender();
       if (connected) {
         writePresence();
+        // Re-attach group + member subscriptions on reconnect. After a
+        // weak-signal blip at the festival, Firebase's WebSocket
+        // reconnects but the original onValue snapshots can go stale
+        // silently — symptom is friend pins/picks stop updating until
+        // the user reloads. subscribeCurrentGroup() is idempotent: it
+        // tears down old subs and re-attaches fresh ones. Skipped when
+        // idle (no current group).
+        if (state.currentGroup) {
+          try { subscribeCurrentGroup(); }
+          catch (e) { console.warn('[fb] re-subscribe on reconnect failed:', e); }
+        }
         // Post-reconnect: if I'm a member and haven't confirmed the host
         // exists, validate now. Catches phantom groups that were joined
         // with bad codes while offline (where pre-validation was skipped).
@@ -674,10 +685,18 @@
       if (state.currentGroup !== groupAtDrop) return;
       if (!fbDb) fbDb = window.fb.getDatabase(fbApp);
       const path = 'meetings/' + groupAtDrop + '/_group';
-      // Server-side last-write-wins by ts: abort if server already has newer.
+      // Server-side last-write-wins by ts: abort if server has data
+      // newer than what we last observed via snapshot. The persisted ts
+      // is serverTimestamp() so two clients writing simultaneously get
+      // a globally-consistent ordering regardless of device clock skew.
+      // The abort threshold uses state.groupPin.ts (also server-time
+      // from the snapshot handler) so the comparison stays in the same
+      // time scale — protects against clock-skew false aborts that
+      // would otherwise drop a user's intended write.
+      const knownLatestTs = (state.groupPin && state.groupPin.ts) || 0;
       window.fb.runTransaction(window.fb.ref(fbDb, path), (current) => {
-        if (current && current.ts && current.ts >= ts) return;  // abort
-        return data;
+        if (current && current.ts && current.ts > knownLatestTs) return;  // server changed since I last saw
+        return Object.assign({}, data, { ts: window.fb.serverTimestamp() });
       }).catch(e => console.warn('[grouppin] write failed:', e && e.code, e && e.message));
     });
     return true;
