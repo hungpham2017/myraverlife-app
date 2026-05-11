@@ -86,10 +86,11 @@ window.dispatchEvent(new Event('firebase-ready'));
     z-index: 10;
   }
   h1 {
+    display: inline-block;
     margin: 0 0 4px;
     font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-weight: 800;
+    letter-spacing: 0.5px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
     -webkit-background-clip: text;
     background-clip: text;
@@ -508,6 +509,37 @@ window.dispatchEvent(new Event('firebase-ready'));
     color: var(--muted);
     font-size: 12.5px;
     font-style: italic;
+  }
+  /* First-visit coachmark on Map tab. Glass pill at top, auto-fades or
+     tap to dismiss, persisted via localStorage so it shows once. */
+  .map-coachmark {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 360px;
+    background: rgba(14, 16, 24, 0.94);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    z-index: 20;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    line-height: 1.45;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.42);
+    transition: opacity 0.3s ease;
+  }
+  .map-coachmark[hidden] { display: none; }
+  .map-coachmark b {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
   }
 
   /* GPS "you are here" pin — pulsing cyan dot with directional cone above.
@@ -2545,27 +2577,41 @@ window.dispatchEvent(new Event('firebase-ready'));
   .install-banner-x:hover  { color: #fff; background: rgba(255,255,255,0.06); }
   .install-banner-x:active { transform: scale(0.92); }
   .install-banner-title {
-    font-size: 14.5px; font-weight: 700;
-    margin-bottom: 6px;
-    padding-right: 32px;
-    letter-spacing: -0.01em;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.1px;
   }
   .install-banner-instr {
     font-size: 12px;
     line-height: 1.55;
     color: rgba(255, 255, 255, 0.72);
   }
-  .install-banner-instr b {
+  .install-banner-slogan {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: -0.01em;
+    padding-right: 32px;
+    margin-bottom: 4px;
+  }
+  .install-banner-slogan b {
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     font-weight: 700;
   }
+  .install-banner-instr b {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+  }
+  /* Platform detection: only show the user's OS install line.
+     data-platform unset (desktop / unknown) falls through to both. */
+  .install-banner[data-platform="ios"] .android-line { display: none; }
+  .install-banner[data-platform="android"] .ios-line { display: none; }
   .install-banner-thanks {
     margin-top: 10px;
     padding-top: 8px;
@@ -2655,10 +2701,11 @@ window.dispatchEvent(new Event('firebase-ready'));
      standalone mode, (2) "Don't show again" not previously tapped. -->
 <div class="install-banner" id="installBanner" hidden>
   <button type="button" class="install-banner-x" id="installBannerX" aria-label="Close">×</button>
-  <div class="install-banner-title">Save me for full offline experience</div>
+  <div class="install-banner-slogan"><b>Search</b> the map · <b>track</b> your crew · <b>plan</b> your sets</div>
+  <div class="install-banner-title">Save me for the best offline experience</div>
   <div class="install-banner-instr">
-    <b>iPhone</b> · Tap ⋯ → Tap 📤 Share → Tap ➕ Add to Home Screen<br>
-    <b>Android</b> · Tap ⋮ → Tap 📲 Install app
+    <div class="ios-line"><b>iPhone</b> · Tap ⋯ → Tap 📤 Share → Tap ➕ Add to Home Screen</div>
+    <div class="android-line"><b>Android</b> · Tap ⋮ → Tap 📲 Install app</div>
   </div>
   <div class="install-banner-thanks">
     💕 Just trying to make life easier for me + my fellow EDC goers. Q's or feedback? DM <a href="https://instagram.com/thequguy" target="_blank" rel="noopener">@thequguy</a>
@@ -2862,6 +2909,12 @@ window.dispatchEvent(new Event('firebase-ready'));
     const nvBtn  = document.getElementById('installBannerNever');
     const hpBtn  = document.getElementById('installBannerHelp');
     if (!banner || !xBtn || !nvBtn) return;
+
+    // Show only the user's OS install line. Desktop / unknown UAs fall
+    // through with no data-platform set, so CSS shows both as a safe fallback.
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) banner.dataset.platform = 'ios';
+    else if (/Android/.test(ua))     banner.dataset.platform = 'android';
 
     // Tiny per-device counters so the dev can sanity-check what users
     // actually do with the banner. Read them via localStorage in
@@ -3136,8 +3189,8 @@ window.dispatchEvent(new Event('firebase-ready'));
         <h2>how to use</h2>
         <ul class="help-list">
           <li><span class="help-ico">📲</span><div><b>Install the app</b><p>
-            <b>iPhone:</b> Safari → Share → Add to Home Screen<br>
-            <b>Android:</b> Chrome → menu → Install app<br>
+            <b>iPhone</b> · Tap ⋯ → Tap 📤 Share → Tap ➕ Add to Home Screen<br>
+            <b>Android</b> · Tap ⋮ → Tap 📲 Install app<br>
             Stays alive longer in your pocket → fewer "last seen 30 min ago"
           </p></div></li>
           <li><span class="help-ico">♥</span><div><b>Build your night</b><p>
@@ -3846,6 +3899,7 @@ window.dispatchEvent(new Event('firebase-ready'));
     wrap.innerHTML = `
       <p class="map-note">2026 festival map · source: <a href="https://lasvegas.electricdaisycarnival.com/experience/festival-map/" target="_blank" rel="noopener">edclasvegas.com</a></p>
       <div class="map-img-container" id="mapContainer">
+        <div class="map-coachmark" id="mapCoachmark" hidden>👆 <b>Tap</b> anywhere · <b>drag</b> pins · search "water" or "restroom"</div>
         <div class="map-zoom-target" id="mapZoomTarget">
           <img class="map-img" src="${FESTIVAL_MAP_URL}" alt="EDC Las Vegas festival map" draggable="false" decoding="async" fetchpriority="high" width="4000" height="5000" />
           <div class="user-pin" id="userPin" style="display:none">
@@ -3906,6 +3960,26 @@ window.dispatchEvent(new Event('firebase-ready'));
     `;
 
     main.appendChild(wrap);
+
+    // First-visit Map coachmark. Shows once per browser context.
+    // Dismisses on: tap the toast itself, OR any touch inside the map
+    // container (the user has started engaging, the lesson is over).
+    try {
+      if (localStorage.getItem('mapHintShown') !== '1') {
+        const hint = wrap.querySelector('#mapCoachmark');
+        const container = wrap.querySelector('#mapContainer');
+        if (hint) {
+          hint.hidden = false;
+          localStorage.setItem('mapHintShown', '1');
+          const dismiss = () => { hint.hidden = true; };
+          hint.addEventListener('click', dismiss, { once: true });
+          if (container) {
+            container.addEventListener('touchstart', dismiss, { once: true, passive: true });
+            container.addEventListener('click', dismiss, { once: true });
+          }
+        }
+      }
+    } catch (_) {}
     setupMapZoom(wrap.querySelector('#mapContainer'), wrap.querySelector('#mapZoomTarget'));
     setupMapSearch(wrap);
 
