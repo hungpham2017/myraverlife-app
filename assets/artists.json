@@ -91,8 +91,8 @@
     "name": "Ghengar",
     "day": 1,
     "stage": "bassPOD",
-    "start": "10:30pm",
-    "end": "11:30pm",
+    "start": "11:30pm",
+    "end": "12:30am",
     "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6470/63c309d0-2a00-11f1-a7e1-0a58a9feac02.jpg"
   },
   {
@@ -184,12 +184,12 @@
     "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8670/45a43d40-4452-11f1-8409-0a58a9feac02.jpg"
   },
   {
-    "name": "Deathpact ∞ Deathpact",
+    "name": "The Masquerade",
     "day": 1,
     "stage": "bassPOD",
-    "start": "11:30pm",
-    "end": "12:30am",
-    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/4939/9f7732f4-07e5-11f1-a94c-0a58a9feac02.jpg"
+    "start": "7:50pm",
+    "end": "8:40pm",
+    "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/8249/7a6786b4-bd10-11f0-bdf6-0a58a9feac02.jpg"
   },
   {
     "name": "JFUSE",
@@ -907,8 +907,8 @@
     "name": "HEYZ",
     "day": 1,
     "stage": "bassPOD",
-    "start": "7:50pm",
-    "end": "8:40pm",
+    "start": "8:40pm",
+    "end": "9:30pm",
     "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/5560/76481b86-07e6-11f1-b8a8-0a58a9feac02.jpg"
   },
   {
@@ -1027,8 +1027,8 @@
     "name": "MUZZ",
     "day": 1,
     "stage": "bassPOD",
-    "start": "8:40pm",
-    "end": "9:30pm",
+    "start": "9:30pm",
+    "end": "10:30pm",
     "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/3159/64d97be6-0837-11f1-ae4f-0a58a9feac02.jpg"
   },
   {
@@ -1099,8 +1099,8 @@
     "name": "GorillaT",
     "day": 1,
     "stage": "bassPOD",
-    "start": "9:30pm",
-    "end": "10:30pm",
+    "start": "10:30pm",
+    "end": "11:30pm",
     "image": "https://d3vhc53cl8e8km.cloudfront.net/artists/6065/548875ff-636d-11f0-843a-0ee6b8365494.jpg"
   },
   {
